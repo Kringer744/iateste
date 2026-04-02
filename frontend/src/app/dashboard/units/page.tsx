@@ -11,6 +11,45 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 
+// ─── Componentes auxiliares fora do componente principal ───────────────────────
+// IMPORTANTE: devem ficar FORA para evitar remount a cada keystroke
+const inputClass = "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#D4AF37]/40 focus:bg-slate-900/80 transition-all font-medium text-sm";
+const textareaClass = `${inputClass} resize-none leading-relaxed`;
+
+function Field({ label, icon: Icon, children }: { label: string; icon?: any; children: React.ReactNode }) {
+  return (
+    <div className="space-y-3">
+      <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+        {Icon && <Icon className="w-3.5 h-3.5 text-[#D4AF37]/50" />} {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function TabBtn({
+  id, label, icon: Icon, activeTab, setActiveTab
+}: {
+  id: string; label: string; icon: any;
+  activeTab: string; setActiveTab: (id: any) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => setActiveTab(id)}
+      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+        activeTab === id
+          ? "bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/25"
+          : "text-slate-500 hover:text-slate-300 hover:bg-white/5 border border-transparent"
+      }`}
+    >
+      <Icon className="w-4 h-4" />
+      {label}
+    </button>
+  );
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
 interface Unit {
   id: number;
   nome: string;
@@ -239,32 +278,6 @@ export default function UnitsPage() {
     }
   };
 
-  const TabBtn = ({ id, label, icon: Icon }: { id: TabType; label: string; icon: any }) => (
-    <button
-      type="button"
-      onClick={() => setActiveTab(id)}
-      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-        activeTab === id
-          ? "bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/25"
-          : "text-slate-500 hover:text-slate-300 hover:bg-white/5 border border-transparent"
-      }`}
-    >
-      <Icon className="w-4 h-4" />
-      {label}
-    </button>
-  );
-
-  const Field = ({ label, icon: Icon, children }: { label: string; icon?: any; children: React.ReactNode }) => (
-    <div className="space-y-3">
-      <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
-        {Icon && <Icon className="w-3.5 h-3.5 text-[#D4AF37]/50" />} {label}
-      </label>
-      {children}
-    </div>
-  );
-
-  const inputClass = "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#D4AF37]/40 focus:bg-slate-900/80 transition-all font-medium text-sm";
-  const textareaClass = `${inputClass} resize-none leading-relaxed`;
 
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
@@ -468,11 +481,11 @@ export default function UnitsPage() {
 
               {/* Tabs */}
               <div className="px-10 py-4 border-b border-white/5 bg-slate-900/10 flex gap-3 overflow-x-auto no-scrollbar flex-shrink-0">
-                <TabBtn id="identity" label="Identidade" icon={Building2} />
-                <TabBtn id="location" label="Localização" icon={MapPin} />
-                <TabBtn id="contact" label="Digital" icon={Globe} />
-                <TabBtn id="operation" label="Operação" icon={Clock} />
-                <TabBtn id="extra" label="Dados Ricos" icon={ListChecks} />
+                <TabBtn id="identity" label="Identidade" icon={Building2} activeTab={activeTab} setActiveTab={setActiveTab} />
+                <TabBtn id="location" label="Localização" icon={MapPin} activeTab={activeTab} setActiveTab={setActiveTab} />
+                <TabBtn id="contact" label="Digital" icon={Globe} activeTab={activeTab} setActiveTab={setActiveTab} />
+                <TabBtn id="operation" label="Operação" icon={Clock} activeTab={activeTab} setActiveTab={setActiveTab} />
+                <TabBtn id="extra" label="Dados Ricos" icon={ListChecks} activeTab={activeTab} setActiveTab={setActiveTab} />
               </div>
 
               {/* Modal Body */}
