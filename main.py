@@ -4579,12 +4579,12 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
         _cliente_enviou_audio = len(transcricoes) > 0 if transcricoes else False
         _uaz_integ = await carregar_integracao(empresa_id, 'uazapi') if empresa_id else None
         _has_whatsapp = bool(_uaz_integ)
-        # Detecta se cliente pediu áudio por texto
+        # Só envia áudio se cliente pedir explicitamente por texto
         _pediu_audio = False
         if textos:
             _txt_lower = " ".join(textos).lower()
-            _pediu_audio = any(p in _txt_lower for p in ["manda áudio", "manda audio", "fala por áudio", "fala por audio", "me fale por áudio", "me fale por audio", "responde em áudio", "responde em audio", "por áudio", "por audio", "em áudio", "em audio", "manda um áudio", "manda um audio"])
-        _enviar_audio = _tts_ativo and _has_whatsapp and (_cliente_enviou_audio or _pediu_audio)
+            _pediu_audio = any(p in _txt_lower for p in ["manda áudio", "manda audio", "fala por áudio", "fala por audio", "me fale por áudio", "me fale por audio", "responde em áudio", "responde em audio", "por áudio", "por audio", "em áudio", "em audio", "manda um áudio", "manda um audio", "envia áudio", "envia audio", "quero áudio", "quero audio", "prefiro áudio", "prefiro audio"])
+        _enviar_audio = _tts_ativo and _has_whatsapp and _pediu_audio
         logger.info(f"🔊 [TTS Check] conv={conversation_id} | audio_cliente={_cliente_enviou_audio} | tts_ativo={_tts_ativo} | voz={_tts_voz} | has_whatsapp={_has_whatsapp} | enviar_audio={_enviar_audio}")
 
         async def _enviar_tts_ptt(texto_para_tts: str) -> bool:
