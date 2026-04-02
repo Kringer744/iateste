@@ -28,4 +28,4 @@ EXPOSE 8000
 
 # Comando padrão (pode ser sobrescrito pelo Easypanel)
 # Usando sh -c para permitir expansão da variável de ambiente PORT
-CMD ["sh", "-c", "alembic upgrade head; uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "echo '=== Iniciando Concierge IA ===' && alembic upgrade head 2>&1 && echo '=== Migrations OK ===' && uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --log-level debug 2>&1 || (echo '=== ERRO FATAL ===' && cat /proc/1/fd/2 2>/dev/null; exit 1)"]
