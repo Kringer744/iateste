@@ -290,7 +290,7 @@ export default function UnitsPage() {
                 </span>
               </h1>
               <p className="text-slate-500 mt-2 font-medium italic text-sm max-w-lg">
-                Configure pontos de atendimento, horários, modalidades e canais digitais das suas filiais.
+                Configure propriedades, tipos de acomodação, serviços e canais digitais das suas unidades.
               </p>
             </div>
 
@@ -393,14 +393,14 @@ export default function UnitsPage() {
                         )}
                         {unit.convenios && typeof unit.convenios === "object" && (
                           <div className="flex flex-wrap gap-1.5 pt-1">
-                            {unit.convenios.gympass_wellhub && unit.convenios.gympass_wellhub !== "Não aceita" && (
+                            {unit.convenios.gympass_wellhub && unit.convenios.gympass_wellhub !== "Não listado" && (
                               <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-                                GP {unit.convenios.gympass_wellhub}
+                                BK {unit.convenios.gympass_wellhub}
                               </span>
                             )}
-                            {unit.convenios.totalpass && unit.convenios.totalpass !== "Não aceita" && (
+                            {unit.convenios.totalpass && unit.convenios.totalpass !== "Não listado" && (
                               <span className="px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400 text-[10px] font-bold uppercase tracking-wider">
-                                TP {unit.convenios.totalpass}
+                                EX {unit.convenios.totalpass}
                               </span>
                             )}
                           </div>
@@ -492,12 +492,12 @@ export default function UnitsPage() {
                         <Field label="Nome Oficial *" icon={Info}>
                           <input required type="text" value={formData.nome}
                             onChange={e => setFormData({ ...formData, nome: e.target.value })}
-                            className={inputClass} placeholder="Ex: Red Fitness – Mandaqui" />
+                            className={inputClass} placeholder="Ex: Enotel Resort – Ponta Negra" />
                         </Field>
                         <Field label="Nome Curto / Exibição" icon={Layers}>
                           <input type="text" value={formData.nome_abreviado}
                             onChange={e => setFormData({ ...formData, nome_abreviado: e.target.value })}
-                            className={inputClass} placeholder="Ex: Mandaqui" />
+                            className={inputClass} placeholder="Ex: Ponta Negra" />
                         </Field>
                       </div>
                     )}
@@ -553,7 +553,7 @@ export default function UnitsPage() {
                             <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D4AF37]/40" />
                             <input type="text" value={formData.instagram}
                               onChange={e => setFormData({ ...formData, instagram: e.target.value })}
-                              className={`${inputClass} pl-12`} placeholder="redfitness" />
+                              className={`${inputClass} pl-12`} placeholder="enotelresort" />
                           </div>
                         </Field>
                         <Field label="Website (URL)" icon={Globe}>
@@ -564,7 +564,7 @@ export default function UnitsPage() {
                               className={`${inputClass} pl-12`} placeholder="https://..." />
                           </div>
                         </Field>
-                        <Field label="Link de Matrícula / LP" icon={Sparkles}>
+                        <Field label="Link de Reserva / Booking" icon={Sparkles}>
                           <div className="relative">
                             <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D4AF37]/40" />
                             <input type="text" value={formData.link_matricula}
@@ -582,17 +582,17 @@ export default function UnitsPage() {
                           <textarea rows={7} value={formData.horarios}
                             onChange={e => setFormData({ ...formData, horarios: e.target.value })}
                             className={textareaClass}
-                            placeholder={"Seg-Sex: 06h às 23h\nSáb: 09h às 17h\nDom: 09h às 13h"} />
+                            placeholder={"Check-in: 14h\nCheck-out: 12h\nRecepção: 24h\nRestaurante: 07h às 22h"} />
                         </Field>
-                        <Field label="Modalidades & Especialidades" icon={Dumbbell}>
+                        <Field label="Serviços & Comodidades" icon={Dumbbell}>
                           <textarea id="modalidades-textarea" rows={7} value={formData.modalidades}
                             onChange={e => setFormData({ ...formData, modalidades: e.target.value })}
                             className={textareaClass}
-                            placeholder="Musculação, CrossFit, Pilates, Lutas..." />
+                            placeholder="Piscina, Spa, Restaurante, Academia, Sauna, Wi-Fi, Estacionamento..." />
                         </Field>
 
                         <div className="md:col-span-2">
-                          <Field label="Grade de Aulas / Horários (Imagem)" icon={ImagePlus}>
+                          <Field label="Foto da Estrutura / Cardápio (Imagem)" icon={ImagePlus}>
                             <div className="flex flex-col md:flex-row gap-6 items-start">
                               <div className="flex-1 w-full">
                                 <label className={`flex flex-col items-center justify-center w-full h-44 bg-slate-900/40 border-2 border-dashed ${uploadingField === "foto_grade" ? "border-[#D4AF37]/50 animate-pulse" : "border-white/5 hover:border-[#D4AF37]/30"} rounded-[2rem] ${uploadingField === "foto_grade" ? "cursor-wait pointer-events-none" : "cursor-pointer"} transition-all hover:bg-slate-900/60 overflow-hidden group`}>
@@ -642,7 +642,7 @@ export default function UnitsPage() {
                                     onClick={handleExtrairGrade}
                                     disabled={extractingGrade}
                                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all bg-gradient-to-r from-[#D4AF37]/20 to-[#a855f7]/20 hover:from-[#D4AF37]/30 hover:to-[#a855f7]/30 text-white border border-[#D4AF37]/30 hover:border-[#a855f7]/40 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    title="Usa IA para ler a imagem da grade e preencher automaticamente o campo Modalidades & Especialidades"
+                                    title="Usa IA para ler a imagem e preencher automaticamente o campo Serviços & Comodidades"
                                   >
                                     {extractingGrade ? (
                                       <>
@@ -652,7 +652,7 @@ export default function UnitsPage() {
                                     ) : (
                                       <>
                                         <Wand2 className="w-4 h-4" />
-                                        Extrair Modalidades com IA
+                                        Extrair Serviços com IA
                                       </>
                                     )}
                                   </button>
@@ -723,11 +723,11 @@ export default function UnitsPage() {
                     {/* TAB: EXTRA */}
                     {activeTab === "extra" && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <Field label="Planos & Preços (JSON)" icon={ListChecks}>
+                        <Field label="Tarifas & Acomodações (JSON)" icon={ListChecks}>
                           <textarea rows={6} className={`${textareaClass} font-mono text-xs text-[#D4AF37]/80`}
                             value={typeof formData.planos === "object" ? JSON.stringify(formData.planos, null, 2) : formData.planos}
                             onChange={e => { try { setFormData({ ...formData, planos: JSON.parse(e.target.value) }); } catch { setFormData({ ...formData, planos: e.target.value }); } }}
-                            placeholder={'{"Basico": 99.90, "Premium": 159.90}'}
+                            placeholder={'{"Standard": 350.00, "Superior": 480.00, "Suite": 780.00}'}
                           />
                         </Field>
                         <Field label="Formas de Pagamento" icon={CreditCard}>
@@ -743,45 +743,45 @@ export default function UnitsPage() {
                             onChange={e => { try { setFormData({ ...formData, infraestrutura: JSON.parse(e.target.value) }); } catch { setFormData({ ...formData, infraestrutura: e.target.value }); } }}
                           />
                         </Field>
-                        <Field label="Convênios Parceiros" icon={HeartHandshake}>
+                        <Field label="Parcerias & Convênios" icon={HeartHandshake}>
                           <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Gympass / Wellhub</label>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Booking.com</label>
                                 <select
-                                  value={typeof formData.convenios === "object" ? (formData.convenios?.gympass_wellhub || "Não aceita") : "Não aceita"}
+                                  value={typeof formData.convenios === "object" ? (formData.convenios?.gympass_wellhub || "Não listado") : "Não listado"}
                                   onChange={e => {
                                     const prev = typeof formData.convenios === "object" ? formData.convenios : {};
                                     setFormData({ ...formData, convenios: { ...prev, gympass_wellhub: e.target.value } });
                                   }}
                                   className={inputClass}
                                 >
-                                  {["Não aceita","Basic","Basic+","Silver","Gold","Gold+","Platinum","Diamond","Black"].map(o => (
+                                  {["Não listado","Parceiro","Parceiro Preferido","Parceiro Genius","Parceiro Premium"].map(o => (
                                     <option key={o} value={o}>{o}</option>
                                   ))}
                                 </select>
                               </div>
                               <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Totalpass</label>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Expedia / Hotels.com</label>
                                 <select
-                                  value={typeof formData.convenios === "object" ? (formData.convenios?.totalpass || "Não aceita") : "Não aceita"}
+                                  value={typeof formData.convenios === "object" ? (formData.convenios?.totalpass || "Não listado") : "Não listado"}
                                   onChange={e => {
                                     const prev = typeof formData.convenios === "object" ? formData.convenios : {};
                                     setFormData({ ...formData, convenios: { ...prev, totalpass: e.target.value } });
                                   }}
                                   className={inputClass}
                                 >
-                                  {["Não aceita","TP1","TP1+","TP2","TP2+","TP3","TP3+"].map(o => (
+                                  {["Não listado","Listado","VIP Access","Parceiro"].map(o => (
                                     <option key={o} value={o}>{o}</option>
                                   ))}
                                 </select>
                               </div>
                             </div>
                             <div className="space-y-2">
-                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Outros convênios (Sesc, Sesi…)</label>
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Outras parcerias (Airbnb, CVC, Decolar…)</label>
                               <input
                                 type="text"
-                                placeholder="Ex: Sesc, Sesi, Convênio Empresa XYZ"
+                                placeholder="Ex: Airbnb, CVC, Decolar, Agência XYZ"
                                 value={typeof formData.convenios === "object" ? (formData.convenios?.outros || "") : ""}
                                 onChange={e => {
                                   const prev = typeof formData.convenios === "object" ? formData.convenios : {};
