@@ -3527,7 +3527,7 @@ async def _transcrever_audio_gemini(audio_bytes: bytes, mime_type: str = "audio/
         fmt = fmt_map.get(mime_type, "ogg")
 
         result = await cliente_ia.chat.completions.create(
-            model="google/gemini-2.0-flash-lite",
+            model="google/gemini-2.0-flash",
             messages=[{
                 "role": "user",
                 "content": [
