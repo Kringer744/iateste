@@ -242,8 +242,12 @@ async def startup_event():
         logger.info("🤖 OpenRouter habilitado (OPENROUTER_API_KEY carregada)")
 
     # Limpa cooldown de provedor no startup (destrava o bot se o usuário corrigiu a chave)
-    async for key in redis_client.scan_iter("llm:provider_pause:*"):
-        await redis_client.delete(key)
+    try:
+        async for key in redis_client.scan_iter("llm:provider_pause:*"):
+            await redis_client.delete(key)
+        logger.info("✅ Redis conectado e cooldowns limpos")
+    except Exception as e:
+        logger.warning(f"⚠️ Redis scan_iter falhou no startup: {e} — continuando sem limpar cooldowns")
 
     logger.info(f"🚀 Iniciando Motor em modo: {APP_MODE.upper()}")
 
