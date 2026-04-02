@@ -3861,7 +3861,7 @@ async def processar_ia_e_responder(
 
         # Cache semântico (embedding) — consultado apenas se não houver cache exato nem contexto live
         _cache_sem = None
-        if USAR_CACHE_SEMANTICO and intencao == "llm" and not resposta_cacheada and not fast_reply and not contexto_precarregado and not imagens_urls and not mudou_unidade and primeira_mensagem:
+        if False and USAR_CACHE_SEMANTICO and intencao == "llm" and not resposta_cacheada and not fast_reply and not contexto_precarregado and not imagens_urls and not mudou_unidade and primeira_mensagem:
             _cache_sem = await buscar_cache_semantico(primeira_mensagem, slug)
 
         # Bypass cache se cliente pede tour/vídeo e a unidade tem tour disponível
@@ -3877,7 +3877,8 @@ async def processar_ia_e_responder(
             resposta_texto = fast_reply
             novo_estado = estado_atual
 
-        elif resposta_cacheada and not imagens_urls and not mudou_unidade:
+        elif False and resposta_cacheada and not imagens_urls and not mudou_unidade:
+            # Cache desabilitado — causava respostas incorretas (pergunta X recebia resposta de Y)
             logger.info("🧠 Cache Hash HIT! Respondendo direto do Redis.")
             dados_cache = json.loads(resposta_cacheada)
             resposta_texto = dados_cache["resposta"]
