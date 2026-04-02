@@ -465,9 +465,9 @@ def classificar_intencao(texto: str) -> str:
         return "unidades"
     if re.search(r"(preco|preço|valor|mensalidade|quanto custa|plano|planos|promo|promocao|promoção)", t):
         return "planos"
-    if re.search(r"(grade de aulas?|grade|modalidade|modalidades|aulas?|musculacao|musculação|funcional|spinning|cross|pilates|yoga|zumba|fit\s?dance|fit\s?combat|muay|thai|jiu|jitsu|boxe|luta|lutas|jump|step|body\s?pump|body\s?balance|bike|hidroginastica|hidroginástica|natacao|natação|danca|dança|ballet|alongamento|rpg|circuito|hiit|treino)", t):
+    if re.search(r"(restaurante|cafe da manha|café da manhã|piscina|spa|academia|sauna|lazer|servicos|serviços|comodidades|estrutura|atividades|suite|suíte|quarto|acomodacao|acomodação|cama|beliche|modalidade|modalidades|grade)", t):
         return "modalidades"
-    if re.search(r"(convenio|convênio|gympass|wellhub|totalpass)", t):
+    if re.search(r"(booking|airbnb|expedia|decolar|convenio|convênio|tarifa corporativa|parceria|ota|gympass|wellhub|totalpass)", t):
         return "convenio"
     return "llm"
 
@@ -478,12 +478,12 @@ def _faq_compativel_com_intencao(intencao: str, pergunta_faq: str) -> bool:
         return True
 
     mapa = {
-        "modalidades": {"aula", "aulas", "grade", "modalidade", "modalidades", "pilates", "zumba", "fit", "dance", "muay", "thai"},
-        "horario": {"horario", "funcionamento", "abre", "fecha"},
+        "modalidades": {"restaurante", "piscina", "spa", "academia", "lazer", "servico", "comodidade", "suite", "suíte", "quarto", "acomodacao", "modalidade", "modalidades"},
+        "horario": {"horario", "funcionamento", "abre", "fecha", "check-in", "checkout"},
         "endereco": {"endereco", "endereço", "local", "unidade", "fica"},
         "telefone": {"telefone", "whatsapp", "contato", "numero", "número"},
-        "planos": {"plano", "planos", "valor", "preco", "preço", "mensalidade", "beneficio", "benefício"},
-        "convenio": {"convenio", "convênio", "gympass", "wellhub", "totalpass"},
+        "planos": {"plano", "planos", "valor", "preco", "preço", "diaria", "tarifa", "reserva", "beneficio", "benefício"},
+        "convenio": {"convenio", "convênio", "booking", "airbnb", "expedia", "parceria"},
     }
     chaves = mapa.get(intencao)
     if not chaves:
@@ -524,7 +524,7 @@ async def resolver_contexto_unidade(
                 break
 
             # Match por tokens do nome da unidade (suporta "ricardo jafet" sem nome completo)
-            tokens_nome_sig = {t for t in nome_u.split() if len(t) >= 4 and t not in {"red", "fitness", "academia", "unidade"}}
+            tokens_nome_sig = {t for t in nome_u.split() if len(t) >= 4 and t not in {"hotel", "resort", "pousada", "unidade", "suite", "suíte"}}
             if len(tokens_texto_sig & tokens_nome_sig) >= 1:
                 tem_geo = True
                 break
@@ -648,25 +648,25 @@ def responder_telefone(unidade: dict) -> str:
 
 
 def responder_modalidades(unidade: dict) -> str:
-    """Responde sobre modalidades/aulas da unidade usando dados textuais."""
-    nome = unidade.get("nome") or "da unidade"
+    """Responde sobre serviços e comodidades da unidade usando dados textuais."""
+    nome = unidade.get("nome") or "da propriedade"
     modalidades = normalizar_lista_campo(unidade.get("modalidades"))
 
     if not modalidades:
         return (
-            f"💪 Na unidade *{nome}* temos diversas atividades incríveis!\n\n"
-            "Geralmente temos musculação, cardio e aulas coletivas. "
-            "Qual modalidade você mais gosta? 😊"
+            f"🏨 Em *{nome}* contamos com diversas comodidades!\n\n"
+            "Geralmente oferecemos piscina, spa, restaurante e academia. "
+            "O que você gostaria de saber mais? 😊"
         )
 
     lista = "\n".join([f"• {m}" for m in modalidades])
-    resposta = f"💪 Na unidade *{nome}* temos:\n\n{lista}"
+    resposta = f"🏨 Em *{nome}* você encontra:\n\n{lista}"
 
     foto_grade = unidade.get("foto_grade")
     if foto_grade:
-        resposta += "\n\n🖼️ *Também tenho a grade completa com os horários das aulas!* Quer que eu te envie? 😊"
+        resposta += "\n\n🖼️ *Também tenho fotos da nossa estrutura!* Quer que eu te envie? 😊"
     else:
-        resposta += "\n\nQual dessas você mais tem interesse? 😊"
+        resposta += "\n\nQual dessas comodidades você mais tem interesse? 😊"
 
     return resposta
 
@@ -763,7 +763,7 @@ def montar_saudacao_humanizada(
         agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
         NOMES_DIA = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"]
         nome_dia = NOMES_DIA[agora.weekday()]
-        linha3 = f"Hoje ({nome_dia}) estamos funcionando das {horario_hoje} 💪"
+        linha3 = f"Hoje ({nome_dia}) nossa recepção está disponível das {horario_hoje} 😊"
     else:
         linha3 = ""
 
@@ -779,19 +779,19 @@ def montar_saudacao_humanizada(
     return "\n\n".join(partes)
 
 
-# 🏋️ PALAVRAS-CHAVE DE TIPO DE CLIENTE — detecta aluno atual ou usuário de convênio
+# 🏨 PALAVRAS-CHAVE DE TIPO DE CLIENTE — detecta hóspede atual ou usuário de plataforma/convênio
 ALUNO_KEYWORDS = [
-    "sou aluno", "ja sou aluno", "já sou aluno", "sou cliente", "sou membro",
-    "meu contrato", "minha matricula", "minha matrícula", "meu plano atual",
-    "cancelar meu", "congelar minha", "pausar minha", "segunda via",
-    "boleto atrasado", "fatura", "renovar meu", "transferir minha",
-    "mudei de unidade", "troca de unidade", "problema com",
+    "sou hospede", "sou hóspede", "ja sou hospede", "já sou hóspede", "sou cliente", "sou membro",
+    "minha reserva", "meu check-in", "meu checkout", "minha estadia",
+    "cancelar minha reserva", "remarcar", "segunda via",
+    "fatura do hotel", "conta do quarto", "nota fiscal",
+    "mudei de quarto", "troca de quarto", "problema com",
     "atendimento ao cliente", "suporte", "reclamacao", "reclamação",
 ]
 
 GYMPASS_KEYWORDS = [
-    "gympass", "totalpass", "wellhub", "sesi", "sesc",
-    "convenio", "convênio", "beneficio corporativo", "benefício corporativo",
+    "booking", "airbnb", "expedia", "decolar", "hotels.com", "trivago",
+    "convenio", "convênio", "tarifa corporativa", "beneficio corporativo", "benefício corporativo",
     "pelo app", "pelo aplicativo", "app parceiro", "parceria empresa",
     "plano empresarial", "beneficio da empresa", "benefício da empresa",
 ]
@@ -799,8 +799,8 @@ GYMPASS_KEYWORDS = [
 
 def detectar_tipo_cliente(texto: str) -> Optional[str]:
     """
-    Detecta se o cliente já é aluno (suporte/cancelamento/dúvidas)
-    ou usa convênio/gympass (roteamento diferente).
+    Detecta se o contato já é hóspede (suporte/cancelamento/dúvidas)
+    ou reservou via plataforma (roteamento diferente).
     Retorna: 'aluno' | 'gympass' | None
     """
     if not texto:
@@ -819,9 +819,9 @@ INTENCOES = {
     "endereco": ["endereco", "endereço", "local", "localização", "fica", "onde fica", "como chegar", "localizacao"],
     "telefone": ["telefone", "contato", "whatsapp", "numero", "número", "ligar", "falar", "telefone"],
     "unidades": ["unidades", "outras unidades", "lista de unidades", "quantas unidades", "onde tem", "tem em", "unidade"],
-    "modalidades": ["modalidades", "atividades", "exercícios", "treinos", "aula", "aulas", "grade", "grade de aula", "grade de aulas", "musculação", "cardio", "spinning", "alongamento", "crossfit", "funcional"],
-    "infraestrutura": ["estacionamento", "vestiário", "chuveiro", "armários", "sauna", "piscina", "acessibilidade", "infraestrutura"],
-    "matricula": ["matricula", "matrícula", "inscrição", "cadastro", "se inscrever", "assinar", "contratar"]
+    "modalidades": ["modalidades", "serviços", "comodidades", "restaurante", "piscina", "spa", "academia", "sauna", "suíte", "suite", "quarto", "acomodação", "acomodacao", "estrutura", "atividades"],
+    "infraestrutura": ["estacionamento", "recepção", "lobby", "armários", "sauna", "piscina", "acessibilidade", "infraestrutura", "wifi", "café da manhã"],
+    "reserva": ["reserva", "reservar", "check-in", "checkout", "diaria", "diária", "booking", "disponibilidade", "disponivel", "disponível"]
 }
 
 # Clientes de IA
@@ -863,11 +863,11 @@ end
 
 # Regex compiladas para intenções frequentes (manutenção centralizada)
 REGEX_PEDIDO_PLANOS = re.compile(
-    r"(preco|valor(es)?|quanto (custa|cobra|fica)|mensalidade|planos?|promocao|promoç|"
-    r"beneficio|benefícios|benefíci|quais.{0,10}planos|me (fala|mostra|manda).{0,15}planos?|"
-    r"tem planos?|ver planos?|quero (assinar|contratar|me matricular)|"
-    r"como (faço|faz|funciona).{0,10}(matric|assinar|contratar)|"
-    r"quanto (é|e|custa|vale) o plano|opcoes.{0,10}planos?|opções.{0,10}planos?)",
+    r"(preco|valor(es)?|quanto (custa|cobra|fica)|diaria|diária|tarifa|tarifas|planos?|promocao|promoç|"
+    r"beneficio|benefícios|benefíci|quais.{0,10}(planos?|tarifas?|opcoes?)|me (fala|mostra|manda).{0,15}(planos?|tarifas?)|"
+    r"tem (planos?|tarifas?|quarto)|ver (planos?|tarifas?)|quero (reservar|me hospedar|assinar|contratar)|"
+    r"como (faço|faz|funciona).{0,10}(reserva|check.in|hospedar)|"
+    r"quanto (é|e|custa|vale) (a diaria|o quarto|a suite)|opcoes.{0,10}(planos?|quartos?)|opções.{0,10}(planos?|quartos?))",
     re.IGNORECASE,
 )
 REGEX_PEDIDO_END_HOR = re.compile(
@@ -878,8 +878,8 @@ REGEX_PEDIDO_END_HOR = re.compile(
 REGEX_PEDIDO_CONTATO = re.compile(r"(telefone|contato|whatsapp|numero|ligar|falar com alguem)", re.IGNORECASE)
 REGEX_LISTAR_UNIDADES = re.compile(
     r"(quais.{0,15}unidades?|quantas.{0,10}unidades?|tem.{0,20}unidades?|unidades?.{0,10}tem|"
-    r"mais.{0,10}unidades?|outras.{0,10}unidades?|lista.{0,10}unidades?|onde.{0,10}academia|"
-    r"academia.{0,15}(sp|sao paulo|rio|rj|mg|bh)|saber.{0,10}unidades?|todas.{0,10}unidades?|"
+    r"mais.{0,10}unidades?|outras.{0,10}unidades?|lista.{0,10}unidades?|onde.{0,10}hotel|"
+    r"hotel.{0,15}(sp|sao paulo|rio|rj|mg|bh)|saber.{0,10}unidades?|todas.{0,10}unidades?|"
     r"unidades?.{0,10}existem|unidades?.{0,10}disponiveis|unidades?.{0,10}abertas|"
     r"unidades?.{0,15}(sp|sao paulo|rio|rj|mg|bh|campinas|curitiba|belo horizonte|brasilia))",
     re.IGNORECASE,
@@ -1267,7 +1267,7 @@ def formatar_planos_bonito(planos: List[Dict], destacar_melhor_preco: bool = Tru
         # Preço principal
         if valor_float and valor_float > 0:
             valor_fmt = f"{valor_float:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-            linhas.append(f"💰 *R${valor_fmt} por mês*")
+            linhas.append(f"💰 *R${valor_fmt} por noite*")
         else:
             linhas.append("💰 *Consulte o valor*")
 
@@ -1277,9 +1277,9 @@ def formatar_planos_bonito(planos: List[Dict], destacar_melhor_preco: bool = Tru
             linhas.append("")
             linhas.append(f"⚡ *Oferta: {meses_promo}x R${promo_fmt}/mês*")
 
-        # Link de matrícula
+        # Link de reserva
         linhas.append("")
-        linhas.append("👉 Comece agora:")
+        linhas.append("👉 Reserve agora:")
         linhas.append(link.strip())
 
         # ⚠️ SEM pergunta de fechamento aqui — vai só no último bloco (ver abaixo)
@@ -1297,7 +1297,7 @@ def formatar_planos_bonito(planos: List[Dict], destacar_melhor_preco: bool = Tru
 
 
 def filtrar_planos_por_contexto(texto_cliente: str, planos: List[Dict]) -> List[Dict]:
-    """Prioriza planos mais aderentes ao que o cliente pediu (ex.: aulas coletivas)."""
+    """Prioriza acomodações/tarifas mais aderentes ao que o hóspede pediu."""
     if not planos:
         return []
 
@@ -1306,10 +1306,10 @@ def filtrar_planos_por_contexto(texto_cliente: str, planos: List[Dict]) -> List[
         return planos
 
     intencoes = {
-        "aulas_coletivas": ["aulas coletivas", "coletiva", "fit dance", "zumba", "pilates", "yoga", "muay thai", "aula"],
-        "musculacao": ["musculacao", "musculação", "peso", "hipertrofia", "academia"],
-        "premium": ["premium", "vip", "completo", "top", "melhor plano"],
-        "economico": ["barato", "mais em conta", "economico", "econômico", "preco", "preço"],
+        "suite": ["suite", "suíte", "suite superior", "suite master", "suite premium"],
+        "standard": ["standard", "basico", "básico", "simples", "mais barato"],
+        "premium": ["premium", "vip", "luxo", "melhor", "top", "completo"],
+        "economico": ["barato", "mais em conta", "economico", "econômico", "preco", "preço", "custo"],
     }
 
     pesos = {k: 0 for k in intencoes}
@@ -2150,14 +2150,14 @@ def _label_qualif(texto_cliente: str, novo_estado: str, intencao_compra: bool = 
     txt = normalizar(texto_cliente or "")
     st = normalizar(novo_estado or "")
 
-    if re.search(r"(ja sou aluno|já sou aluno|sou aluno|ja tenho cadastro|já tenho cadastro)", txt):
+    if re.search(r"(ja sou hospede|já sou hóspede|sou hospede|ja tenho reserva|já tenho reserva|ja sou aluno|já sou aluno|sou aluno)", txt):
         return "QUALIF::ALUNO_EXISTENTE"
     if re.search(r"(nao tenho interesse|não tenho interesse|so queria saber|só queria saber|so pesquisando|só pesquisando)", txt):
         return "QUALIF::NAO_QUALIFICADO"
 
-    if intencao_compra or any(k in st for k in ["conversao", "matricula"]):
+    if intencao_compra or any(k in st for k in ["conversao", "matricula", "reserva"]):
         return "QUALIF::LEAD_QUENTE"
-    if any(k in st for k in ["interessado", "animado", "hesitante"]) or re.search(r"(plano|planos|preco|preço|valor|matricul)", txt):
+    if any(k in st for k in ["interessado", "animado", "hesitante"]) or re.search(r"(plano|tarifas|preco|preço|valor|reserva|diaria)", txt):
         return "QUALIF::LEAD_MORNO"
     return "QUALIF::LEAD_FRIO"
 
@@ -2509,7 +2509,7 @@ async def monitorar_escolha_unidade(account_id: int, conversation_id: int, empre
     # Lembrete amigável — pergunta de novo sem listar todas as unidades
     await enviar_mensagem_chatwoot(
         account_id, conversation_id,
-        "Só pra eu não te perder de vista 😊\n\nQual cidade ou bairro você prefere para treinar?",
+        "Só pra eu não te perder de vista 😊\n\nQual cidade ou destino você está pensando para se hospedar?",
         _nome_ia_mon, integracao, empresa_id
     )
 
@@ -3493,9 +3493,9 @@ async def worker_resumo_ia():
                         )
 
                         prompt = (
-                            "Analise a conversa abaixo entre um lead e uma IA de vendas de academia. "
+                            "Analise a conversa abaixo entre um potencial hóspede e um concierge virtual de hotel. "
                             "Responda em português com no máximo 3 frases cobrindo: "
-                            "1) o que o lead quer, 2) nível de interesse (quente/morno/frio), "
+                            "1) o que o hóspede quer, 2) nível de interesse (quente/morno/frio), "
                             "3) próximo passo sugerido. Seja direto e objetivo.\n\n"
                             f"Conversa:\n{historico}"
                         )
@@ -3797,11 +3797,11 @@ async def processar_ia_e_responder(
         intencao = intencao_motor or (detectar_intencao(primeira_mensagem) if primeira_mensagem else None)
         _texto_cliente_norm = normalizar(texto_cliente_unificado or "")
         _intencao_compra = bool(re.search(
-            r"(vou querer|quero (esse|este|fechar|contratar|assinar)|manda(r)? (o )?link|pode mandar o link|poderia mandar o link|tenho interesse|gostei desse preco|gostei desse preço|vamos fechar|quero me matricular)",
+            r"(vou querer|quero (esse|este|fechar|reservar|contratar|assinar)|manda(r)? (o )?link|pode mandar o link|poderia mandar o link|tenho interesse|gostei desse preco|gostei desse preço|vamos fechar|quero me hospedar|quero reservar|fazer reserva)",
             _texto_cliente_norm,
         ))
         _quer_todos_planos = bool(re.search(
-            r"(fora o plano|alem do prime|além do prime|outro plano|outros planos|quais planos|todos os planos|opcoes de plano|opções de plano|saber dos planos|quero ver planos|me fala dos planos)",
+            r"(fora esse|alem dessa|além dessa|outra opcao|outras opcoes|outras opções|quais opcoes|todas as opcoes|opções de quarto|saber das tarifas|quero ver opcoes|me fala das tarifas|outros planos|quais planos)",
             _texto_cliente_norm,
         ))
         if planos_ativos and intencao in {"planos", "preco"}:
@@ -3838,7 +3838,7 @@ async def processar_ia_e_responder(
             _cache_sem = await buscar_cache_semantico(primeira_mensagem, slug)
 
         # Bypass cache se cliente pede tour/vídeo e a unidade tem tour disponível
-        _pede_tour = any(k in normalizar(primeira_mensagem or "") for k in ("tour", "video", "ver por dentro", "mostrar a academia", "conhecer a unidade"))
+        _pede_tour = any(k in normalizar(primeira_mensagem or "") for k in ("tour", "video", "ver por dentro", "mostrar o hotel", "conhecer a unidade", "conhecer o hotel", "ver o hotel"))
         _tem_tour = bool(unidade.get("link_tour_virtual"))
         if _pede_tour and _tem_tour:
             resposta_cacheada = None
@@ -3908,15 +3908,15 @@ Cidade/Estado: {unidade.get('cidade') or 'não informado'} / {unidade.get('estad
 Telefone: {tel_banco or 'não informado'}
 Horários:
 {horarios_str}
-Link de Matrícula / LP: {unidade.get('link_matricula') or 'não disponível'}
-Planos (com links de matricula):
+Link de Reserva / Booking: {unidade.get('link_matricula') or 'não disponível'}
+Tarifas & Acomodações:
 {planos_detalhados}
 Site: {unidade.get('site') or 'não informado'}
 Instagram: {unidade.get('instagram') or 'não informado'}
-Modalidades: {modalidades_prompt}
+Serviços e Comodidades: {modalidades_prompt}
 Infraestrutura: {json.dumps(unidade.get('infraestrutura', {}), ensure_ascii=False) if unidade.get('infraestrutura') else 'não informado'}
-Pagamentos: {pagamentos_prompt}
-Convênios: {convenios_prompt}
+Formas de Pagamento: {pagamentos_prompt}
+Parcerias e Convênios: {convenios_prompt}
 Tour Virtual: {'vídeo disponível' if unidade.get('link_tour_virtual') else 'não disponível'}
 """
 
@@ -4002,28 +4002,28 @@ NUNCA use inglês ou qualquer outro idioma — nem uma palavra, nem no meio de f
 NUNCA avalie respostas com frases como "is perfect", "that's great", "perfect answer" ou similares.
 Você é um atendente — apenas responda o cliente diretamente.
 
-Seu nome é {nome_ia}. Você é atendente da academia {nome_empresa}.
+Seu nome é {nome_ia}. Você é concierge virtual do hotel {nome_empresa}.
 """
             if slug:
-                prompt_sistema += f"Você está atendendo agora pela unidade: {nome_unidade}.\n"
-                prompt_sistema += "Se o cliente perguntar sobre OUTRA unidade da rede, responda normalmente usando as informações que você tem. Não diga que 'não pode' falar de outra unidade.\n"
+                prompt_sistema += f"Você está atendendo agora pela unidade/propriedade: {nome_unidade}.\n"
+                prompt_sistema += "Se o hóspede perguntar sobre OUTRA unidade da rede, responda normalmente usando as informações que você tem. Não diga que 'não pode' falar de outra unidade.\n"
             else:
-                prompt_sistema += "Você é um consultor global da marca Red Fitness. Você atende todas as unidades da rede. Quando o cliente não especificar uma unidade, pergunte qual das nossas unidades ele gostaria de conhecer.\n"
+                prompt_sistema += f"Você é concierge virtual da rede {nome_empresa}. Você atende todas as propriedades da rede. Quando o hóspede não especificar uma unidade, pergunte qual das nossas propriedades ele gostaria de conhecer.\n"
 
             _foto_grade = unidade.get("foto_grade")
             _modalidades_texto = unidade.get("modalidades") or ""
             if _foto_grade or _modalidades_texto:
-                prompt_sistema += "\n[GRADE DE AULAS & MODALIDADES — REGRAS]\n"
+                prompt_sistema += "\n[SERVIÇOS & COMODIDADES — REGRAS]\n"
                 if _modalidades_texto:
-                    prompt_sistema += "Você TEM acesso ao conteúdo textual completo das modalidades e grade de aulas desta unidade. Os dados estão no campo 'Modalidades' nos DADOS DA UNIDADE.\n"
-                    prompt_sistema += "REGRA PRIORITÁRIA: Sempre responda sobre aulas, modalidades, horários de aulas e grade usando o TEXTO que você já possui. Explique verbalmente.\n"
-                    prompt_sistema += "Se o cliente perguntar sobre uma modalidade específica (ex: fit dance, pilates, yoga), busque nos dados textuais e responda com as informações que tem.\n"
-                    prompt_sistema += "Se o cliente não consegue ler, tem dificuldade visual, ou pediu por áudio — NUNCA ofereça imagem. Use o texto para explicar verbalmente.\n"
+                    prompt_sistema += "Você TEM acesso ao conteúdo textual completo dos serviços e comodidades desta propriedade. Os dados estão no campo 'Modalidades/Serviços' nos DADOS DA UNIDADE.\n"
+                    prompt_sistema += "REGRA PRIORITÁRIA: Sempre responda sobre serviços, acomodações, restaurante, piscina e estrutura usando o TEXTO que você já possui. Explique verbalmente.\n"
+                    prompt_sistema += "Se o hóspede perguntar sobre um serviço específico (ex: spa, café da manhã, piscina), busque nos dados textuais e responda com as informações que tem.\n"
+                    prompt_sistema += "Se o hóspede não consegue ler, tem dificuldade visual, ou pediu por áudio — NUNCA ofereça imagem. Use o texto para explicar verbalmente.\n"
                 if _foto_grade:
-                    prompt_sistema += "Esta unidade também TEM uma imagem da grade de aulas disponível.\n"
-                    prompt_sistema += "A imagem é um COMPLEMENTO — ofereça APÓS já ter respondido com o texto. Exemplo: 'E se quiser ver a grade completa com os horários, posso te enviar a imagem também!'\n"
+                    prompt_sistema += "Esta propriedade também TEM uma imagem da estrutura/cardápio disponível.\n"
+                    prompt_sistema += "A imagem é um COMPLEMENTO — ofereça APÓS já ter respondido com o texto. Exemplo: 'E se quiser ver nossa estrutura completa, posso te enviar a foto também!'\n"
                     prompt_sistema += "NUNCA envie a imagem como primeira/única resposta. Sempre responda com texto primeiro.\n"
-                    prompt_sistema += "NUNCA diga que não tem a grade. Se pedirem, ofereça o texto E a imagem.\n"
+                    prompt_sistema += "NUNCA diga que não tem informações. Se pedirem, ofereça o texto E a imagem.\n"
 
             # ── Tour Virtual — Estratégia Inteligente (4 modos) ──
             _link_tour = unidade.get("link_tour_virtual")
@@ -4054,22 +4054,22 @@ Seu nome é {nome_ia}. Você é atendente da academia {nome_empresa}.
                     elif _estrategia_tour == "reativo":
                         prompt_sistema += """
 [TOUR VIRTUAL — MODO REATIVO]
-Esta unidade possui um vídeo de Tour Virtual disponível.
-- SOMENTE envie o tour se o cliente PEDIR explicitamente para ver a academia, tour, vídeo, ou conhecer por dentro.
+Esta propriedade possui um vídeo de Tour Virtual disponível.
+- SOMENTE envie o tour se o hóspede PEDIR explicitamente para ver o hotel, tour, vídeo, ou conhecer por dentro.
 - NÃO ofereça espontaneamente.
 - Para enviar: adicione <SEND_VIDEO> no final da sua resposta.
 """
                     elif _estrategia_tour == "proativo" and _eh_lead:
                         prompt_sistema += """
 [TOUR VIRTUAL — MODO PROATIVO]
-Esta unidade possui um vídeo de Tour Virtual disponível.
+Esta propriedade possui um vídeo de Tour Virtual disponível.
 
 REGRA OBRIGATÓRIA DE ENVIO:
-- Se o cliente PEDIR para ver o tour, vídeo, conhecer por dentro → ENVIE IMEDIATAMENTE adicionando <SEND_VIDEO> no final da resposta.
+- Se o hóspede PEDIR para ver o tour, vídeo, conhecer o hotel por dentro → ENVIE IMEDIATAMENTE adicionando <SEND_VIDEO> no final da resposta.
 - Se demonstrar interesse mas NÃO pediu explicitamente → ofereça primeiro. Quando aceitar, use <SEND_VIDEO>.
 
-OFERECIMENTO PROATIVO (este cliente é um LEAD):
-1. Se demonstrar interesse na unidade, ofereça o tour.
+OFERECIMENTO PROATIVO (este contato é um potencial hóspede):
+1. Se demonstrar interesse na propriedade, ofereça o tour.
 2. Após 2-3 mensagens de rapport, ofereça naturalmente se ainda não ofereceu.
 3. NÃO ofereça mais de uma vez. Se recusou, não insista.
 
@@ -4105,8 +4105,8 @@ Se o cliente PEDIR para ver → envie imediatamente com <SEND_VIDEO>.
 NÃO ofereça mais de uma vez.
 """
                     elif not _eh_lead and _estrategia_tour != "off":
-                        # Aluno/Gympass: modo reativo independente da estratégia
-                        prompt_sistema += "\n[TOUR VIRTUAL]: Esta unidade tem tour virtual. Se o cliente pedir para ver, adicione <SEND_VIDEO> no final da resposta.\n"
+                        # Hóspede/Parceiro: modo reativo independente da estratégia
+                        prompt_sistema += "\n[TOUR VIRTUAL]: Esta propriedade tem tour virtual. Se o hóspede pedir para ver, adicione <SEND_VIDEO> no final da resposta.\n"
 
             prompt_sistema += f"""
 PERSONALIDADE
@@ -4152,19 +4152,19 @@ REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO (OBRIGATÓRIO):
 - Você PODE perguntar o primeiro nome do cliente de forma natural (ex: "E qual seu nome?" ou "Com quem eu falo?"). Mas NUNCA peça outros dados pessoais (CPF, email, endereço, telefone, RG, data de nascimento). Você é um vendedor, NÃO um formulário.
 - NUNCA diga "vou pedir para um consultor te chamar" ou "vou encaminhar para um consultor" — responda com as informações que você tem ou direcione para o link.
 
-FLUXO DE VENDEDOR REAL (OBRIGATÓRIO):
-Você é um VENDEDOR, não um robô de FAQ. Siga este fluxo:
-1. Responda a pergunta do cliente de forma direta e curta
+FLUXO DE CONCIERGE REAL (OBRIGATÓRIO):
+Você é um CONCIERGE, não um robô de FAQ. Siga este fluxo:
+1. Responda a pergunta do hóspede de forma direta e curta
 2. Depois da resposta, faça UMA pergunta de descoberta que avança a conversa
 Exemplos:
-  Cliente: "Tem diária?" → "Temos sim! A diária custa R$40 💪 Você pretende treinar só hoje ou está pensando em começar academia?"
-  Cliente: "Qual o horário?" → "Nosso horário é seg-sex 06h às 23h 😊 Você já treina ou está começando agora?"
-  Cliente: "Quanto custa?" → "Temos planos a partir de R$X! Qual seu objetivo principal — musculação, cardio, ou os dois?"
+  Hóspede: "Tem disponibilidade?" → "Temos sim! Nossas diárias partem de R$350 😊 Você está planejando para quantas noites?"
+  Hóspede: "Qual o horário do check-in?" → "Nosso check-in é a partir das 14h e check-out até as 12h ✅ Já tem uma data em mente?"
+  Hóspede: "Quanto custa?" → "Nossas tarifas partem de R$350/noite! Você prefere suite standard, superior ou nossa suíte premium?"
 REGRAS do fluxo:
 - Resposta + pergunta na MESMA mensagem, sempre
-- A pergunta deve descobrir algo sobre o cliente (objetivo, frequência, localização)
-- NUNCA adicione dados que o cliente NÃO pediu (ex: não jogue horários se pediu preço)
-- Se o cliente já respondeu uma descoberta, avance para a próxima etapa (mostrar plano, agendar visita)
+- A pergunta deve descobrir algo sobre o hóspede (datas, número de pessoas, tipo de quarto)
+- NUNCA adicione dados que o hóspede NÃO pediu (ex: não jogue horários se pediu preço)
+- Se o hóspede já respondeu uma descoberta, avance para a próxima etapa (confirmar reserva, enviar link)
 
 REGRAS DE TOM (OBRIGATÓRIO):
 - NUNCA comece resposta com "Olá" se já houve troca de mensagens — vá direto ao ponto
@@ -4205,11 +4205,11 @@ REGRAS DE TOM:
 - NUNCA comece com "Olá" se a conversa já começou — vá direto ao ponto
 
 EXEMPLO DE MENSAGEM BEM FORMATADA:
-"Temos sim! A diária custa *R$40* 💪
+"Temos sim! Nossa diária no *quarto standard* parte de *R$350* 😊
 
-Se quiser, pode vir treinar hoje mesmo — estamos abertos até as 23h.
+Check-in a partir das 14h, check-out até as 12h — e o café da manhã já está incluso!
 
-Você pretende treinar só hoje ou está pensando em começar academia?"
+Você está pensando para quais datas?"
 {aviso_mudanca}
 
 DADOS DO ATENDIMENTO:
@@ -4438,7 +4438,7 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
 
                 # Inferir estado emocional a partir das palavras-chave da resposta
                 _resp_norm = normalizar(resposta_texto)
-                if any(w in _resp_norm for w in ("matricula", "matricular", "assinar", "plano", "checkout", "comecar agora")):
+                if any(w in _resp_norm for w in ("reserva", "reservar", "check-in", "checkout", "diaria", "plano", "tarifas", "comecar agora", "matricula", "matricular")):
                     novo_estado = "conversao"
                 elif any(w in _resp_norm for w in ("parabens", "que otimo", "incrivel", "adorei", "perfeito")):
                     novo_estado = "animado"
@@ -4453,22 +4453,22 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                     resposta_texto = "Desculpe, pode repetir sua pergunta? 😊"
                     novo_estado = estado_atual
 
-                # Pós-processamento de conversão: se o cliente já sinalizou compra,
-                # garante envio do link de matrícula e CTA de outros planos na mesma resposta.
+                # Pós-processamento de conversão: se o hóspede já sinalizou interesse em reservar,
+                # garante envio do link de reserva e CTA de outras opções na mesma resposta.
                 if _intencao_compra and link_plano:
                     _resp_norm_compra = normalizar(resposta_texto or "")
                     _tem_link = ("http://" in (resposta_texto or "")) or ("https://" in (resposta_texto or ""))
                     if not _tem_link:
-                        _base = resposta_texto.strip() if resposta_texto and resposta_texto.strip() else "Perfeito! Vamos fechar agora 🚀"
+                        _base = resposta_texto.strip() if resposta_texto and resposta_texto.strip() else "Perfeito! Vamos garantir sua reserva agora 🚀"
                         resposta_texto = (
                             f"{_base}\n\n"
-                            f"🔗 Para garantir sua matrícula agora: {link_plano}\n\n"
-                            "Se quiser, também te mostro *outros planos* para você comparar rapidinho."
+                            f"🔗 Para garantir sua reserva agora: {link_plano}\n\n"
+                            "Se quiser, também te mostro *outras opções de acomodação* para você comparar!"
                         )
-                    elif "outros planos" not in _resp_norm_compra:
+                    elif "outras opções" not in _resp_norm_compra:
                         resposta_texto = (
                             f"{resposta_texto.rstrip()}\n\n"
-                            "Se quiser, também te mostro *outros planos* para você comparar rapidinho."
+                            "Se quiser, também te mostro *outras opções de acomodação* para você comparar!"
                         )
                     novo_estado = "conversao"
 
@@ -4487,7 +4487,7 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                             ttl=3600
                         )
 
-                if link_plano in resposta_texto or "matricular" in resposta_texto.lower():
+                if link_plano in resposta_texto or "reservar" in resposta_texto.lower() or "matricular" in resposta_texto.lower():
                     await bd_registrar_evento_funil(
                         conversation_id, "link_matricula_enviado", "Link enviado via IA", score_incremento=2
                     )
