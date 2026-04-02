@@ -337,7 +337,7 @@ def formatar_planos_bonito(planos: List[Dict], destacar_melhor_preco: bool = Tru
         link = p.get('link_venda', '') or ''
 
         if not link.strip():
-            continue  # Plano sem link de matrícula não é exibido
+            continue  # Plano sem link de reserva não é exibido
 
         # ── Valores ──────────────────────────────────────────────────
         try:
@@ -420,9 +420,9 @@ def formatar_planos_bonito(planos: List[Dict], destacar_melhor_preco: bool = Tru
             linhas.append("")
             linhas.append(f"⚡ *Oferta: {meses_promo}x R${promo_fmt}/mês*")
 
-        # Link de matrícula
+        # Link de reserva
         linhas.append("")
-        linhas.append("👉 Comece agora:")
+        linhas.append("👉 Reserve agora:")
         linhas.append(link.strip())
 
         # ⚠️ SEM pergunta de fechamento aqui — vai só no último bloco (ver abaixo)
@@ -449,9 +449,9 @@ def filtrar_planos_por_contexto(texto_cliente: str, planos: List[Dict]) -> List[
         return planos
 
     intencoes = {
-        "aulas_coletivas": ["aulas coletivas", "coletiva", "fit dance", "zumba", "pilates", "yoga", "muay thai", "aula"],
-        "musculacao": ["musculacao", "musculação", "peso", "hipertrofia", "academia"],
-        "premium": ["premium", "vip", "completo", "top", "melhor plano"],
+        "suite": ["suite", "suíte", "suite master", "quarto vip", "acomodacao premium", "acomodação premium"],
+        "standard": ["standard", "basico", "básico", "mais em conta", "economico", "econômico"],
+        "premium": ["premium", "vip", "completo", "top", "melhor quarto", "melhor acomodacao"],
         "economico": ["barato", "mais em conta", "economico", "econômico", "preco", "preço"],
     }
 
@@ -1196,7 +1196,7 @@ async def processar_ia_e_responder(
         intencao = intencao_motor or (detectar_intencao(primeira_mensagem) if primeira_mensagem else None)
         _texto_cliente_norm = normalizar(texto_cliente_unificado or "")
         _intencao_compra = bool(re.search(
-            r"(vou querer|quero (esse|este|fechar|contratar|assinar)|manda(r)? (o )?link|pode mandar o link|poderia mandar o link|tenho interesse|gostei desse preco|gostei desse preço|vamos fechar|quero me matricular)",
+            r"(vou querer|quero (esse|este|fechar|contratar|assinar)|manda(r)? (o )?link|pode mandar o link|poderia mandar o link|tenho interesse|gostei desse preco|gostei desse preço|vamos fechar|quero reservar|quero hospedar)",
             _texto_cliente_norm,
         ))
         _quer_todos_planos = bool(re.search(
@@ -1398,14 +1398,14 @@ Telefone: {tel_banco or 'não informado'}
 Status atual: {_status_agora}
 Horários:
 {horarios_str}
-Planos (com links de matricula):
+Tarifas e acomodações (com links de reserva):
 {planos_detalhados}
 Site: {unidade.get('site') or 'não informado'}
 Instagram: {unidade.get('instagram') or 'não informado'}
-Modalidades: {modalidades_prompt}
+Serviços e comodidades: {modalidades_prompt}
 Infraestrutura: {json.dumps(unidade.get('infraestrutura', {}), ensure_ascii=False) if unidade.get('infraestrutura') else 'não informado'}
-Pagamentos: {pagamentos_prompt}
-Convênios: {convenios_prompt}
+Formas de pagamento: {pagamentos_prompt}
+Parcerias e convênios: {convenios_prompt}
 """
 
             # ── Campos conhecidos da personalidade_ia ──────────────────────────
@@ -1500,24 +1500,24 @@ Convênios: {convenios_prompt}
                 blocos_prompt.append(f"[REGRAS DE ATENDIMENTO]\n{regras_atend}")
 
             # 6.5 Fluxo de Vendedor Real (proatividade)
-            blocos_prompt.append("""[FLUXO DE VENDEDOR — OBRIGATÓRIO]
-Você é um VENDEDOR, não um robô de FAQ. Siga este fluxo SEMPRE:
-1. Responda a pergunta do cliente de forma direta e curta.
+            blocos_prompt.append("""[FLUXO DE CONCIERGE — OBRIGATÓRIO]
+Você é um CONCIERGE DIGITAL, não um robô de FAQ. Siga este fluxo SEMPRE:
+1. Responda a pergunta do hóspede de forma direta e acolhedora.
 2. Depois da resposta, faça UMA pergunta de descoberta que avance a conversa.
 
 Exemplos:
-• Cliente: "Tem diária?" → "Temos sim! A diária custa R$40 💪 Você pretende treinar só hoje ou está pensando em começar academia?"
-• Cliente: "Qual o horário?" → "Nosso horário é seg-sex 06h às 23h 😊 Você já treina ou está começando agora?"
-• Cliente: "Quanto custa?" → "Temos planos a partir de R$X! Qual seu objetivo principal — musculação, cardio, ou os dois?"
-• Cliente: "Quero começar" → "Que demais, parabéns pela decisão! 💪 Qual unidade fica mais perto de você? Posso te mostrar os planos e horários!"
+• Hóspede: "Tem quarto disponível?" → "Sim! Temos opções incríveis disponíveis 🏨 Para quantas pessoas seria a hospedagem e qual a data de entrada prevista?"
+• Hóspede: "Qual o horário do check-in?" → "Nosso check-in é a partir das 14h 😊 Você já tem reserva conosco ou gostaria de fazer uma agora?"
+• Hóspede: "Quanto custa a diária?" → "Nossas diárias partem de R$X! Qual tipo de acomodação você prefere — standard, superior ou suíte?"
+• Hóspede: "Quero reservar" → "Que ótimo, será um prazer recebê-lo! 🌟 Me conte: quantas noites e qual a data de chegada?"
 
 REGRAS:
 - Resposta + pergunta na MESMA mensagem, SEMPRE.
-- A pergunta deve descobrir algo sobre o cliente (objetivo, frequência, localização, urgência).
-- NUNCA adicione dados que o cliente NÃO pediu (ex: não jogue horários se ele perguntou preço).
-- Se o cliente já respondeu uma descoberta, avance para o próximo passo (mostrar plano, agendar visita).
+- A pergunta deve descobrir algo sobre o hóspede (datas, número de pessoas, tipo de acomodação, ocasião).
+- NUNCA adicione dados que o hóspede NÃO pediu (ex: não fale de restaurante se ele perguntou sobre quarto).
+- Se o hóspede já respondeu uma descoberta, avance para o próximo passo (mostrar tarifas, enviar link de reserva).
 - NUNCA invente serviços ou ofertas — use apenas o que consta nos dados/FAQ fornecidos.
-- Você PODE perguntar o primeiro nome do cliente de forma natural (ex: "E qual seu nome?" ou "Com quem eu falo?"). Mas NUNCA peça outros dados pessoais (CPF, email, endereço, telefone, RG, data de nascimento). Você é um vendedor, NÃO um formulário.""")
+- Você PODE perguntar o primeiro nome do hóspede de forma natural (ex: "Com quem eu falo?" ou "Qual seu nome?"). Mas NUNCA peça outros dados pessoais (CPF, email, endereço, telefone, RG). Você é um concierge, NÃO um formulário.""")
 
             # 7. Dados da Unidade e Rede
             blocos_prompt.append(f"""[INFORMAÇÕES DA UNIDADE ATUAL]
@@ -1575,7 +1575,7 @@ REGRAS:
 - Nunca invente endereços, telefones ou horários.
 - NUNCA diga "vou buscar", "estou validando" ou "vou enviar o link" — se o link existe nos dados, ENVIE IMEDIATAMENTE. Se não existe, diga que o cliente pode procurar a unidade diretamente.
 - NUNCA prometa enviar algo que você não tem nos dados. Se o campo mostra "não disponível" ou está vazio, NÃO prometa.
-- Se o link de matrícula está nos dados da unidade, inclua-o DIRETAMENTE na resposta. Não peça dados pessoais antes de enviar o link.
+- Se o link de reserva está nos dados da unidade, inclua-o DIRETAMENTE na resposta. Não peça dados pessoais antes de enviar o link.
 - NUNCA confunda unidades. Responda SEMPRE sobre a unidade que está nos DADOS DA UNIDADE ATUAL acima. Se o cliente mencionar outra unidade, informe que vai direcionar.
 {f"- RESTRIÇÕES: {restricoes}" if restricoes else ""}
 {f"- NUNCA USE ESTAS PALAVRAS/TERMOS: {palavras_proibidas}" if palavras_proibidas else ""}""")
@@ -1732,11 +1732,11 @@ RESPONDA com a mensagem diretamente — texto puro.""")
 [TOUR VIRTUAL — MODO PROATIVO]
 Esta unidade possui um vídeo de Tour Virtual disponível.
 
-VOCÊ DEVE oferecer proativamente o tour virtual ao cliente. Este cliente é um LEAD (potencial novo aluno).
+VOCÊ DEVE oferecer proativamente o tour virtual ao hóspede. Este é um LEAD (potencial hóspede).
 
 ESTRATÉGIA DE OFERECIMENTO:
 1. Se o cliente demonstrar QUALQUER sinal de interesse em conhecer, visitar ou saber mais sobre a unidade, ofereça o tour IMEDIATAMENTE.
-   Sinais de interesse incluem: quero conhecer, como é a academia, posso ir lá, gostaria de ver, é bom?, tem estrutura?, como é por dentro, quero visitar, tem piscina, me fala mais, como funciona, quero começar, to pensando em treinar, quais aparelhos, qual a estrutura.
+   Sinais de interesse incluem: quero conhecer, como é o hotel, posso ir lá, gostaria de ver, é bom?, tem estrutura?, como é por dentro, quero visitar, tem piscina, me fala mais, como funciona, quero reservar, to pensando em hospedar, quais comodidades, qual a estrutura.
 2. Após responder 2-3 mensagens de rapport com o lead (mesmo sem pergunta direta sobre a unidade), se ainda não ofereceu, OFEREÇA o tour naturalmente. Exemplo: "A propósito, temos um vídeo mostrando nossa unidade por dentro! Quer dar uma olhada? Tenho certeza que vai gostar do que vai ver!"
 3. Se o lead perguntou sobre preços/planos, após responder, complemente: "E pra você ter uma ideia melhor do que vai encontrar aqui, posso te enviar um vídeo mostrando a unidade por dentro!"
 4. NÃO ofereça o tour mais de uma vez na conversa. Se já ofereceu ou se o cliente recusou, não insista.
@@ -1889,7 +1889,7 @@ Sempre ofereça ANTES de enviar — não envie sem perguntar. Quando o lead acei
                 resposta_texto = _garantir_frase_completa(resposta_texto)
 
                 _resp_norm = normalizar(resposta_texto)
-                if any(w in _resp_norm for w in ("matricula", "matricular", "assinar", "plano", "checkout", "comecar agora")):
+                if any(w in _resp_norm for w in ("reserva", "reservar", "hospedar", "plano", "checkout", "confirmar agora", "assinar")):
                     novo_estado = "conversao"
                 elif any(w in _resp_norm for w in ("parabens", "que otimo", "incrivel", "adorei", "perfeito")):
                     novo_estado = "animado"
@@ -2028,16 +2028,16 @@ Sempre ofereça ANTES de enviar — não envie sem perguntar. Quando o lead acei
                     _resp_norm_compra = normalizar(resposta_texto or "")
                     _tem_link = ("http://" in (resposta_texto or "")) or ("https://" in (resposta_texto or ""))
                     if not _tem_link:
-                        _base = resposta_texto.strip() if resposta_texto and resposta_texto.strip() else "Perfeito! Vamos fechar agora 🚀"
+                        _base = resposta_texto.strip() if resposta_texto and resposta_texto.strip() else "Perfeito! Vamos confirmar sua reserva agora 🌟"
                         resposta_texto = (
                             f"{_base}\n\n"
-                            f"🔗 Para garantir sua matrícula agora: {link_plano}\n\n"
-                            "Se quiser, também te mostro *outros planos* para você comparar rapidinho."
+                            f"🔗 Para garantir sua reserva agora: {link_plano}\n\n"
+                            "Se quiser, também te mostro *outras opções* para você comparar rapidinho."
                         )
                     elif "outros planos" not in _resp_norm_compra:
                         resposta_texto = (
                             f"{resposta_texto.rstrip()}\n\n"
-                            "Se quiser, também te mostro *outros planos* para você comparar rapidinho."
+                            "Se quiser, também te mostro *outras opções* para você comparar rapidinho."
                         )
                     novo_estado = "conversao"
 

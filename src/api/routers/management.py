@@ -846,24 +846,24 @@ def _build_playground_prompt(p: dict, faq_text: str = "", unidades: list = None,
         blocos.append(f"[REGRAS DE ATENDIMENTO]\n{regras_atend}")
 
     # 9.5 Fluxo de Vendedor Real (proatividade)
-    blocos.append("""[FLUXO DE VENDEDOR — OBRIGATÓRIO]
-Você é um VENDEDOR, não um robô de FAQ. Siga este fluxo SEMPRE:
-1. Responda a pergunta do cliente de forma direta e curta.
+    blocos.append("""[FLUXO DE CONCIERGE — OBRIGATÓRIO]
+Você é um CONCIERGE DIGITAL, não um robô de FAQ. Siga este fluxo SEMPRE:
+1. Responda a pergunta do hóspede de forma direta e acolhedora.
 2. Depois da resposta, faça UMA pergunta de descoberta que avance a conversa.
 
 Exemplos:
-• Cliente: "Tem diária?" → "Temos sim! A diária custa R$40 💪 Você pretende treinar só hoje ou está pensando em começar academia?"
-• Cliente: "Qual o horário?" → "Nosso horário é seg-sex 06h às 23h 😊 Você já treina ou está começando agora?"
-• Cliente: "Quanto custa?" → "Temos planos a partir de R$X! Qual seu objetivo principal — musculação, cardio, ou os dois?"
-• Cliente: "Quero começar" → "Que demais, parabéns pela decisão! 💪 Qual unidade fica mais perto de você? Posso te mostrar os planos e horários!"
+• Hóspede: "Tem quarto disponível?" → "Sim! Temos opções incríveis disponíveis 🏨 Para quantas pessoas seria a hospedagem e qual a data de entrada prevista?"
+• Hóspede: "Qual o horário do check-in?" → "Nosso check-in é a partir das 14h 😊 Você já tem reserva conosco ou gostaria de fazer uma agora?"
+• Hóspede: "Quanto custa a diária?" → "Nossas diárias partem de R$X! Qual tipo de acomodação você prefere — standard, superior ou suíte?"
+• Hóspede: "Quero reservar" → "Que ótimo, será um prazer recebê-lo! 🌟 Me conte: quantas noites e qual a data de chegada?"
 
 REGRAS:
 - Resposta + pergunta na MESMA mensagem, SEMPRE.
-- A pergunta deve descobrir algo sobre o cliente (objetivo, frequência, localização, urgência).
-- NUNCA adicione dados que o cliente NÃO pediu.
-- Se o cliente já respondeu uma descoberta, avance para o próximo passo (mostrar plano, agendar visita).
+- A pergunta deve descobrir algo sobre o hóspede (datas, número de pessoas, tipo de acomodação, ocasião).
+- NUNCA adicione dados que o hóspede NÃO pediu.
+- Se o hóspede já respondeu uma descoberta, avance para o próximo passo (mostrar tarifas, enviar link de reserva).
 - NUNCA invente serviços ou ofertas — use apenas o que consta nos dados/FAQ fornecidos.
-- NUNCA peça dados pessoais para cadastro (nome completo, email, CPF, endereço). Você é um vendedor, não um formulário. Se o cliente quiser se matricular, direcione à unidade ou recepção.""")
+- NUNCA peça dados pessoais. Você é um concierge, não um formulário. Se o hóspede quiser reservar, direcione ao link de reserva ou à recepção.""")
 
     # 10. Unidades da rede
     if unidades:
@@ -887,8 +887,8 @@ REGRAS:
     if planos:
         planos_texto = formatar_planos_para_prompt(planos)
         blocos.append(
-            f"[PLANOS E PREÇOS]\n"
-            f"Planos disponíveis (com links de matrícula):\n"
+            f"[TARIFAS E ACOMODAÇÕES]\n"
+            f"Opções disponíveis (com links de reserva):\n"
             f"{planos_texto}"
         )
 

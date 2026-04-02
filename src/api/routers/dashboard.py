@@ -532,10 +532,10 @@ async def criar_unidade(
             str(_uuid.uuid4()), empresa_id, slug, body.nome, body.nome_abreviado,
             body.cidade, body.bairro, body.estado, body.endereco, body.numero,
             body.telefone_principal, body.whatsapp, body.site, body.instagram,
-            body.link_matricula, body.horarios, body.modalidades,
+            body.link_matricula, body.horarios or None, body.modalidades or None,
             body.planos or {}, body.formas_pagamento or {}, body.convenios or {},
             body.infraestrutura or {}, body.servicos or {}, body.palavras_chave or [],
-            body.foto_grade, body.link_tour_virtual
+            body.foto_grade or None, body.link_tour_virtual or None
         )
         from src.core.redis_client import redis_client
         await redis_client.delete(f"cfg:unidades:lista:empresa:{empresa_id}")
@@ -747,9 +747,9 @@ async def atualizar_unidade(
             body.nome, body.nome_abreviado, body.cidade, body.bairro,
             body.estado, body.endereco, body.numero, body.telefone_principal,
             body.whatsapp, body.site, body.instagram, body.link_matricula,
-            body.horarios, body.modalidades, body.planos or {}, 
+            body.horarios or None, body.modalidades or None, body.planos or {},
             body.formas_pagamento or {}, body.convenios or {}, body.infraestrutura or {},
-            body.servicos or {}, body.palavras_chave or [], body.foto_grade, body.link_tour_virtual,
+            body.servicos or {}, body.palavras_chave or [], body.foto_grade or None, body.link_tour_virtual or None,
             unidade_id, empresa_id
         )
         from src.core.redis_client import redis_client

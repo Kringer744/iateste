@@ -56,9 +56,9 @@ def classificar_intencao(texto: str) -> str:
         return "unidades"
     if re.search(r"(preco|preço|valor|mensalidade|quanto custa|plano|planos|promo|promocao|promoção)", t):
         return "planos"
-    if re.search(r"(grade de aulas?|grade|modalidade|modalidades|aulas?|musculacao|musculação|funcional|spinning|cross|pilates|yoga|zumba|fit\s?dance|fit\s?combat|muay|thai|jiu|jitsu|boxe|luta|lutas|jump|step|body\s?pump|body\s?balance|bike|hidroginastica|hidroginástica|natacao|natação|danca|dança|ballet|alongamento|rpg|circuito|hiit|treino)", t):
+    if re.search(r"(restaurante|cafe da manha|café da manhã|piscina|spa|academia|sauna|lazer|servicos|serviços|comodidades|estrutura|atividades|suite|suíte|quarto|acomodacao|acomodação|cama|beliche)", t):
         return "modalidades"
-    if re.search(r"(convenio|convênio|gympass|wellhub|totalpass)", t):
+    if re.search(r"(booking|airbnb|expedia|decolar|convenio|convênio|tarifa corporativa|parceria|ota)", t):
         return "convenio"
     return "llm"
 
@@ -69,12 +69,12 @@ def _faq_compativel_com_intencao(intencao: str, pergunta_faq: str) -> bool:
         return True
 
     mapa = {
-        "modalidades": {"aula", "aulas", "grade", "modalidade", "modalidades", "pilates", "zumba", "fit", "dance", "muay", "thai"},
-        "horario": {"horario", "funcionamento", "abre", "fecha"},
+        "modalidades": {"restaurante", "piscina", "spa", "academia", "lazer", "servico", "serviços", "comodidade", "suite", "suíte", "quarto", "acomodacao"},
+        "horario": {"horario", "funcionamento", "abre", "fecha", "check-in", "checkout"},
         "endereco": {"endereco", "endereço", "local", "unidade", "fica"},
         "telefone": {"telefone", "whatsapp", "contato", "numero", "número"},
-        "planos": {"plano", "planos", "valor", "preco", "preço", "mensalidade", "beneficio", "benefício"},
-        "convenio": {"convenio", "convênio", "gympass", "wellhub", "totalpass"},
+        "planos": {"plano", "planos", "valor", "preco", "preço", "diaria", "tarifa", "reserva", "beneficio", "benefício"},
+        "convenio": {"convenio", "convênio", "booking", "airbnb", "expedia", "parceria"},
     }
     chaves = mapa.get(intencao)
     if not chaves:

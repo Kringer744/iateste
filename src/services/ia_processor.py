@@ -189,25 +189,25 @@ def responder_telefone(unidade: dict) -> str:
 
 
 def responder_modalidades(unidade: dict) -> str:
-    nome = unidade.get("nome") or "da unidade"
+    nome = unidade.get("nome") or "do hotel"
     modalidades = normalizar_lista_campo(unidade.get("modalidades"))
     foto_grade = unidade.get("foto_grade")
-    
+
     if not modalidades:
         return (
-            f"💪 Na unidade *{nome}* temos diversas atividades incríveis!\n\n"
-            "Geralmente temos musculação, cardio e aulas coletivas. "
-            "Qual modalidade você mais gosta? 😊"
+            f"🏨 No *{nome}* oferecemos diversas comodidades e serviços!\n\n"
+            "Contamos com restaurante, piscina, spa, academia e muito mais. "
+            "O que você gostaria de saber? 😊"
         )
-    
+
     lista = "\n".join([f"• {m}" for m in modalidades])
-    resposta = f"💪 Na unidade *{nome}* temos:\n\n{lista}"
-    
+    resposta = f"🏨 No *{nome}* você encontra:\n\n{lista}"
+
     if foto_grade:
-        resposta += f"\n\n🖼️ *Também tenho a imagem com a grade completa de horários aqui!* Quer que eu te envie? 😊"
+        resposta += f"\n\n🖼️ *Também tenho uma imagem com todas as nossas comodidades!* Quer que eu te envie? 😊"
     else:
-        resposta += "\n\nQual dessas você mais tem interesse? 😊"
-        
+        resposta += "\n\nSobre qual desses serviços você gostaria de saber mais? 😊"
+
     return resposta
 
 
@@ -340,28 +340,27 @@ def montar_saudacao_humanizada(
     return "\n".join(partes)
 
 
-# 🏋️ PALAVRAS-CHAVE DE TIPO DE CLIENTE — detecta aluno atual ou usuário de convênio
+# 🏨 PALAVRAS-CHAVE DE TIPO DE CLIENTE — detecta hóspede atual ou parceiro corporativo
 ALUNO_KEYWORDS = [
-    "sou aluno", "ja sou aluno", "já sou aluno", "sou cliente", "sou membro",
-    "meu contrato", "minha matricula", "minha matrícula", "meu plano atual",
-    "cancelar meu", "congelar minha", "pausar minha", "segunda via",
-    "boleto atrasado", "fatura", "renovar meu", "transferir minha",
-    "mudei de unidade", "troca de unidade", "problema com",
+    "ja sou hospede", "já sou hóspede", "sou hospede", "ja estou hospedado",
+    "tenho reserva", "minha reserva", "meu check-in", "meu checkout",
+    "cancelar reserva", "alterar reserva", "problema com reserva",
+    "sou cliente", "sou membro", "fidelidade", "programa de pontos",
     "atendimento ao cliente", "suporte", "reclamacao", "reclamação",
 ]
 
 GYMPASS_KEYWORDS = [
-    "gympass", "totalpass", "wellhub", "sesi", "sesc",
+    "booking", "airbnb", "expedia", "decolar", "hurb", "hotel urbano",
     "convenio", "convênio", "beneficio corporativo", "benefício corporativo",
     "pelo app", "pelo aplicativo", "app parceiro", "parceria empresa",
-    "plano empresarial", "beneficio da empresa", "benefício da empresa",
+    "plano empresarial", "beneficio da empresa", "tarifa corporativa",
 ]
 
 
 def detectar_tipo_cliente(texto: str) -> Optional[str]:
     """
-    Detecta se o cliente já é aluno (suporte/cancelamento/dúvidas)
-    ou usa convênio/gympass (roteamento diferente).
+    Detecta se o cliente já é hóspede com reserva (suporte/alteração)
+    ou reservou via OTA/parceiro (roteamento diferente).
     Retorna: 'aluno' | 'gympass' | None
     """
     if not texto:
@@ -375,14 +374,14 @@ def detectar_tipo_cliente(texto: str) -> Optional[str]:
 
 # 🎯 MAPEAMENTO DE INTENÇÕES PARA CACHE SEMÂNTICO
 INTENCOES = {
-    "preco": ["preco", "preço", "valor", "quanto custa", "mensalidade", "planos", "promoção", "promocao", "valores", "custa"],
-    "horario": ["horario", "horário", "funcionamento", "abre", "fecha", "que horas", "aberto", "funciona", "horarios"],
+    "preco": ["preco", "preço", "valor", "quanto custa", "diaria", "diária", "tarifa", "tarifas", "planos", "promoção", "promocao", "valores", "custa"],
+    "horario": ["horario", "horário", "funcionamento", "abre", "fecha", "que horas", "aberto", "funciona", "check-in", "checkout", "check in", "check out"],
     "endereco": ["endereco", "endereço", "local", "localização", "fica", "onde fica", "como chegar", "localizacao"],
     "telefone": ["telefone", "contato", "whatsapp", "numero", "número", "ligar", "falar", "telefone"],
-    "unidades": ["unidades", "outras unidades", "lista de unidades", "quantas unidades", "onde tem", "tem em", "unidade"],
-    "modalidades": ["modalidades", "atividades", "exercícios", "treinos", "aula", "aulas", "grade", "grade de aula", "grade de aulas", "musculação", "cardio", "spinning", "alongamento", "crossfit", "funcional"],
-    "infraestrutura": ["estacionamento", "vestiário", "chuveiro", "armários", "sauna", "piscina", "acessibilidade", "infraestrutura"],
-    "matricula": ["matricula", "matrícula", "inscrição", "cadastro", "se inscrever", "assinar", "contratar"]
+    "unidades": ["unidades", "outras unidades", "lista de unidades", "quantas unidades", "onde tem", "tem em", "unidade", "hotel"],
+    "modalidades": ["restaurante", "piscina", "spa", "academia", "cafe da manha", "café da manhã", "servicos", "serviços", "comodidades", "estrutura", "lazer", "atividades"],
+    "infraestrutura": ["estacionamento", "wifi", "wi-fi", "acessibilidade", "pet", "beliche", "cama", "quarto", "suite", "suíte"],
+    "matricula": ["reserva", "reservar", "reservação", "booking", "fazer reserva", "quero reservar", "disponibilidade"]
 }
 
 # --- CONTROLE DE CONCORRÊNCIA ---
