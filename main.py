@@ -4585,7 +4585,7 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
         _cliente_enviou_audio = len(transcricoes) > 0 if transcricoes else False
         _uaz_integ = await carregar_integracao(empresa_id, 'uazapi') if empresa_id else None
         _has_whatsapp = bool(_uaz_integ)
-        _enviar_audio = _cliente_enviou_audio and _tts_ativo and _has_whatsapp
+        _enviar_audio = _tts_ativo and _has_whatsapp
         logger.info(f"🔊 [TTS Check] conv={conversation_id} | audio_cliente={_cliente_enviou_audio} | tts_ativo={_tts_ativo} | voz={_tts_voz} | has_whatsapp={_has_whatsapp} | enviar_audio={_enviar_audio}")
 
         async def _enviar_tts_ptt(texto_para_tts: str) -> bool:
