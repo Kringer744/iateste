@@ -3521,7 +3521,7 @@ async def _transcrever_audio_gemini(audio_bytes: bytes, mime_type: str = "audio/
         client = genai.Client(api_key=GOOGLE_API_KEY)
         response = await asyncio.to_thread(
             client.models.generate_content,
-            model="gemini-2.0-flash-lite",
+            model="gemini-2.0-flash",
             contents=[
                 "Transcreva este áudio literalmente em português brasileiro. "
                 "Retorne APENAS o texto falado, sem comentários, descrições ou formatação.",
