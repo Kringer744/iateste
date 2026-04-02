@@ -4273,14 +4273,12 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
 
             # ── Guard de cota do provedor LLM (cooldown) ─────────────────────
             llm_provider_pause_key = f"llm:provider_pause:{empresa_id}"
-            if await redis_client.get(llm_provider_pause_key) == "1":
-                _nome_cb = nome_cliente.split()[0].capitalize() if nome_cliente else "você"
-                resposta_texto = (
-                    f"{_nome_cb}, agora estamos com alto volume no atendimento automático 😕\n\n"
-                    "Se quiser, me manda sua dúvida em uma frase curta que priorizo aqui pra você."
-                )
-                novo_estado = estado_atual
-                goto_send = True
+            _llm_paused = await redis_client.get(llm_provider_pause_key) == "1"
+            if _llm_paused:
+                logger.warning(f"⚠️ LLM em cooldown para empresa {empresa_id}, tentando mesmo assim...")
+                await redis_client.delete(llm_provider_pause_key)
+            if False:  # Desabilitado: nunca bloqueia, sempre tenta o LLM
+                pass
             else:
                 goto_send = False
 
@@ -4364,7 +4362,7 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                         except Exception as e2:
                             if _is_provider_unavailable_error(e2):
                                 logger.warning("⚠️ Fallback de IA indisponível temporariamente")
-                                await redis_client.setex(llm_provider_pause_key, 300, "1")
+                                await redis_client.setex(llm_provider_pause_key, 30, "1")
                             else:
                                 logger.error("❌ Erro no fallback")
                             await cb_llm.record_failure()
@@ -4376,21 +4374,21 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                     except Exception as e:
                         erro_provedor = _is_provider_unavailable_error(e)
                         if erro_provedor:
-                            logger.warning("⚠️ IA indisponível temporariamente (OpenRouter)")
-                            await redis_client.setex(llm_provider_pause_key, 300, "1")
+                            logger.warning(f"⚠️ IA indisponível temporariamente (OpenRouter): {str(e)[:200]}")
+                            # Cooldown curto (30s) para permitir recuperação rápida
+                            await redis_client.setex(llm_provider_pause_key, 30, "1")
                         elif _is_openrouter_auth_error(e):
-                            logger.warning("⚠️ Falha de autenticação OpenRouter (verifique OPENROUTER_API_KEY)")
-                            await redis_client.setex(llm_provider_pause_key, 600, "1")
+                            logger.warning(f"⚠️ Falha de autenticação OpenRouter: {str(e)[:200]}")
+                            await redis_client.setex(llm_provider_pause_key, 60, "1")
                         else:
-                            logger.warning("⚠️ Erro LLM primário — tentando fallback")
+                            logger.warning(f"⚠️ Erro LLM primário — tentando fallback: {str(e)[:200]}")
                         await cb_llm.record_failure()
                         if _PROMETHEUS_OK:
                             METRIC_ERROS_TOTAL.labels(tipo="llm_fallback").inc()
 
-                        # Em indisponibilidade do provedor, evita nova tentativa imediata no fallback
-                        # para reduzir ruído de log e latência.
+                        # Em indisponibilidade do provedor, cooldown curto
                         if erro_provedor:
-                            await redis_client.setex(llm_provider_pause_key, 300, "1")
+                            await redis_client.setex(llm_provider_pause_key, 30, "1")
                             resposta_bruta = json.dumps({
                                 "resposta": "Estamos com alto volume de atendimentos agora 😕 Pode tentar novamente em instantes?",
                                 "estado": estado_atual
@@ -4404,7 +4402,7 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                             except Exception as e2:
                                 if _is_provider_unavailable_error(e2):
                                     logger.warning("⚠️ Fallback de IA indisponível temporariamente")
-                                    await redis_client.setex(llm_provider_pause_key, 300, "1")
+                                    await redis_client.setex(llm_provider_pause_key, 30, "1")
                                 else:
                                     logger.error("❌ Fallback também falhou")
                                 await cb_llm.record_failure()
