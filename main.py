@@ -3990,9 +3990,21 @@ async def processar_ia_e_responder(
             r"fazer a barba|barba|corte de cabelo|tem horario|tem horário|vaga|disponibilidade|"
             r"encaixe|encaixar|pode me encaixar|quando posso ir|que horas pode|que dia tem|"
             r"remarcar|reagendar|cancelar meu horario|cancelar meu horário|cancelar agendamento|"
-            r"meu agendamento|meus agendamentos|meus horarios|meus horários)",
+            r"meu agendamento|meus agendamentos|meus horarios|meus horários|"
+            r"pode ser|às \d|as \d|\d+h|\d+:\d+|sim|confirmo|confirma|esse horario|esse horário|"
+            r"esse mesmo|pode marcar|marca esse|quero esse|bora|fechado|fechou)",
             _texto_cliente_norm,
         ))
+
+        # ── Persistir contexto de agendamento entre mensagens (10min TTL) ──
+        if _intencao_agendar:
+            await redis_client.setex(f"agendar_ctx:{conversation_id}", 600, "1")
+        else:
+            # Restaura contexto de agendamento de mensagens anteriores
+            _ctx_agendamento_prev = await redis_client.get(f"agendar_ctx:{conversation_id}")
+            if _ctx_agendamento_prev:
+                _intencao_agendar = True
+                logger.info(f"📅 Contexto de agendamento restaurado do Redis para conv {conversation_id}")
 
         # ── SEMPRE carrega barbeiros + serviços (para info de preços etc.) ──
         _contexto_agendamento = ""
@@ -4898,6 +4910,8 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                     )
                     if _ag:
                         logger.info(f"✅ Agendamento #{_ag['id']} criado via IA para conv {conversation_id}: {_barb_nome} em {_data_str}")
+                        # Limpar contexto de agendamento do Redis (já criou)
+                        await redis_client.delete(f"agendar_ctx:{conversation_id}")
 
                         # ── Notifica barbeiro via WhatsApp (UazAPI) ──
                         try:
@@ -5003,6 +5017,8 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                         )
                         if _ag_fb:
                             logger.info(f"✅ [AGENDAR-FALLBACK] Agendamento #{_ag_fb['id']} criado! barb={_fallback_barb['nome']} data={_fb_data_hora}")
+                            # Limpar contexto de agendamento do Redis (já criou)
+                            await redis_client.delete(f"agendar_ctx:{conversation_id}")
                             # Notificar barbeiro
                             _fb_barb_fone = _fallback_barb.get('telefone', '')
                             if _fb_barb_fone:
