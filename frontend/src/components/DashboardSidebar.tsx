@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Building2, Brain, HelpCircle, Network,
-  Settings, LogOut, Hotel, BarChart3, MessageSquare, Menu, X, Send
+  Settings, LogOut, BarChart3, MessageSquare, Menu, X, Send,
+  Calendar, Users, Star, Scissors
 } from "lucide-react";
 
 interface SidebarProps {
@@ -14,10 +15,11 @@ const navItemsRaw = [
   { label: "Visão Geral", icon: LayoutDashboard, href: "/dashboard", id: "dashboard" },
   { label: "Insights IA", icon: BarChart3, href: "/dashboard/insights", id: "insights" },
   { label: "Conversas", icon: MessageSquare, href: "/dashboard/conversas", id: "conversas" },
-  { label: "Follow-ups", icon: Send, href: "/dashboard/followups", id: "followups" },
-  { label: "Unidades", icon: Building2, href: "/dashboard/units", id: "units" },
+  { label: "Agenda", icon: Calendar, href: "/dashboard/agenda", id: "agenda" },
+  { label: "Barbeiros", icon: Users, href: "/dashboard/barbeiros", id: "barbeiros" },
   { label: "Personalidade IA", icon: Brain, href: "/dashboard/personality", id: "personality" },
-  { label: "FAQ Neural", icon: HelpCircle, href: "/dashboard/faq", id: "faq" },
+  { label: "Serviços", icon: Scissors, href: "/dashboard/servicos", id: "servicos" },
+  { label: "Avaliações", icon: Star, href: "/dashboard/avaliacoes", id: "avaliacoes" },
   { label: "Integrações", icon: Network, href: "/dashboard/integrations", id: "integrations" },
 ];
 
@@ -49,13 +51,13 @@ export default function DashboardSidebar({ activePage = "dashboard" }: SidebarPr
       <div className="px-6 py-8 border-b border-white/5">
         <div className="flex items-center gap-3 group cursor-pointer" onClick={() => window.location.href = "/dashboard"}>
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#B8860B] flex items-center justify-center shadow-lg shadow-[#D4AF37]/20 group-hover:scale-110 transition-transform">
-            <Hotel className="w-5 h-5 text-black font-black" />
+            <Scissors className="w-5 h-5 text-black font-black" />
           </div>
           <div>
             <p className="font-black text-lg leading-tight tracking-tighter text-white">
-              Concierge <span className="font-light text-[#D4AF37]/80">IA</span>
+              Barber <span className="font-light text-[#D4AF37]/80">IA</span>
             </p>
-            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold">Hotel Intelligence</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold">Smart Scheduling</p>
           </div>
         </div>
       </div>
