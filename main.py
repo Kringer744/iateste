@@ -4017,6 +4017,29 @@ async def processar_ia_e_responder(
             except Exception as e:
                 logger.error(f"Erro ao carregar contexto de agendamento: {e}")
 
+        # ── UPSELL: verificar se há sugestão pendente para injetar no contexto ──
+        _upsell_ctx = await redis_client.get(f"upsell_pendente:{conversation_id}")
+        if _upsell_ctx:
+            try:
+                import json as _json_up_ctx
+                _upsell_data = _json_up_ctx.loads(_upsell_ctx)
+                _sug_list = _upsell_data.get('sugestoes', [])
+                if _sug_list:
+                    _upsell_texto = "\n\n[OPORTUNIDADE DE VENDA — SUGIRA AO CLIENTE]\n"
+                    _upsell_texto += f"O horário após o agendamento (a partir das {_upsell_data['horario_livre_apos']}) está LIVRE.\n"
+                    _upsell_texto += "Serviços adicionais que você pode sugerir:\n"
+                    for _s_up in _sug_list[:3]:
+                        _upsell_texto += f"• {_s_up['servico_nome']}: de R${_s_up['preco_original']:.2f} por R${_s_up['preco_desconto']:.2f} ({_s_up['desconto_percent']}% de desconto!) — {_s_up['duracao_minutos']}min\n"
+                    _upsell_texto += "\n⚠️ REGRA: Sugira de forma NATURAL e SEM PRESSÃO. Ex: 'Aproveitando que você já vai estar aqui, que tal fazer a barba também? Temos um desconto especial de X%!'\n"
+                    _upsell_texto += "Se o cliente aceitar, agende normalmente no horário livre.\n"
+                    _upsell_texto += "Se recusar, respeite e NÃO insista.\n"
+                    contexto_precarregado += _upsell_texto
+                    logger.info(f"💰 [UPSELL] Contexto injetado para conv {conversation_id}: {len(_sug_list)} sugestões")
+                # Limpa o upsell do Redis (já injetou)
+                await redis_client.delete(f"upsell_pendente:{conversation_id}")
+            except Exception as _up_ctx_err:
+                logger.warning(f"⚠️ [UPSELL] Erro ao injetar contexto: {_up_ctx_err}")
+
         # ── Detecção de AVALIAÇÃO (resposta numérica 1-5 após corte) ──
         if db_pool and primeira_mensagem and re.match(r'^[1-5]$', (primeira_mensagem or "").strip()):
             _fone_aval = await redis_client.get(f"fone_cliente:{conversation_id}")
@@ -4871,6 +4894,21 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                         except Exception as _e_notif:
                             logger.warning(f"⚠️ Erro ao notificar barbeiro {_barb_nome} sobre agendamento: {_e_notif}")
 
+                        # ── UPSELL: verificar slot livre após o agendamento ──
+                        try:
+                            from src.services.agendamento_service import verificar_upsell
+                            _upsell_tag = await verificar_upsell(
+                                db_pool, empresa_id, _barb['id'], _data_hora,
+                                _serv['duracao_minutos'] if _serv else 30,
+                                servico_agendado_id=_serv['id'] if _serv else None,
+                            )
+                            if _upsell_tag and _upsell_tag['sugestoes']:
+                                import json as _json_up
+                                await redis_client.setex(f"upsell_pendente:{conversation_id}", 300, _json_up.dumps(_upsell_tag))
+                                logger.info(f"💰 [UPSELL] Sugestão armazenada via tag para conv {conversation_id}")
+                        except Exception as _up_tag_err:
+                            logger.warning(f"⚠️ [UPSELL] Erro: {_up_tag_err}")
+
                     else:
                         logger.warning(f"⚠️ Conflito ao criar agendamento via IA para conv {conversation_id}")
                 elif not _barb:
@@ -4990,6 +5028,23 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                                         logger.info(f"📲 [AGENDAR-FALLBACK] Barbeiro {_fallback_barb['nome']} notificado")
                                 except Exception as _notif_err:
                                     logger.warning(f"⚠️ Falha ao notificar barbeiro (fallback): {_notif_err}")
+
+                            # ── UPSELL: verificar slot livre após o agendamento ──
+                            try:
+                                from src.services.agendamento_service import verificar_upsell
+                                _upsell = await verificar_upsell(
+                                    db_pool, empresa_id, _fallback_barb['id'],
+                                    _fb_data_hora, _fallback_serv['duracao_minutos'] if _fallback_serv else 30,
+                                    servico_agendado_id=_fallback_serv['id'] if _fallback_serv else None,
+                                )
+                                if _upsell and _upsell['sugestoes']:
+                                    _sug = _upsell['sugestoes'][0]
+                                    _upsell_key = f"upsell_pendente:{conversation_id}"
+                                    import json as _json_upsell
+                                    await redis_client.setex(_upsell_key, 300, _json_upsell.dumps(_upsell))
+                                    logger.info(f"💰 [UPSELL] Sugestão armazenada: {_sug['servico_nome']} R${_sug['preco_desconto']} (slot livre às {_upsell['horario_livre_apos']})")
+                            except Exception as _up_err:
+                                logger.warning(f"⚠️ [UPSELL] Erro ao verificar: {_up_err}")
                         else:
                             logger.warning(f"⚠️ [AGENDAR-FALLBACK] Conflito ao criar agendamento")
                     else:

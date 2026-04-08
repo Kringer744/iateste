@@ -513,6 +513,82 @@ def formatar_avaliacao_obrigado(
 
 
 # ═══════════════════════════════════════════════════════════
+#  UPSELL — SUGESTÃO DE SERVIÇO ADICIONAL
+# ═══════════════════════════════════════════════════════════
+
+async def verificar_upsell(
+    db_pool, empresa_id: int, barbeiro_id: int,
+    data_hora: datetime, duracao_minutos: int,
+    servico_agendado_id: Optional[int] = None,
+    desconto_percent: int = 10,
+) -> Optional[Dict]:
+    """
+    Verifica se o próximo slot após o agendamento está livre.
+    Se estiver, sugere um serviço adicional com desconto.
+    Retorna dict com sugestão ou None.
+    """
+    # Calcula quando o serviço agendado termina
+    fim_servico = data_hora + timedelta(minutes=duracao_minutos)
+
+    # Verifica se tem algo agendado logo depois (próximos 60min)
+    proximo_agendamento = await db_pool.fetchrow("""
+        SELECT data_hora FROM agendamentos
+        WHERE barbeiro_id = $1
+          AND data_hora >= $2
+          AND data_hora < $3
+          AND status NOT IN ('cancelado')
+        ORDER BY data_hora
+        LIMIT 1
+    """, barbeiro_id, fim_servico, fim_servico + timedelta(minutes=60))
+
+    if proximo_agendamento:
+        # Já tem algo agendado logo depois — sem espaço para upsell
+        return None
+
+    # Busca outros serviços da empresa (excluindo o que já foi agendado)
+    query = """
+        SELECT * FROM servicos
+        WHERE empresa_id = $1 AND ativo = true
+    """
+    params = [empresa_id]
+    if servico_agendado_id:
+        query += " AND id != $2"
+        params.append(servico_agendado_id)
+    query += " ORDER BY preco ASC"
+
+    outros_servicos = await db_pool.fetch(query, *params)
+    if not outros_servicos:
+        return None
+
+    # Filtra serviços que cabem no tempo livre (até 60min)
+    sugestoes = []
+    for s in outros_servicos:
+        dur = int(s.get('duracao_minutos', 30))
+        if dur <= 60:  # Cabe no espaço livre
+            preco_original = float(s.get('preco', 0))
+            preco_desconto = round(preco_original * (1 - desconto_percent / 100), 2)
+            sugestoes.append({
+                "servico_id": s['id'],
+                "servico_nome": s['nome'],
+                "duracao_minutos": dur,
+                "preco_original": preco_original,
+                "preco_desconto": preco_desconto,
+                "desconto_percent": desconto_percent,
+                "horario_disponivel": fim_servico.strftime("%H:%M"),
+            })
+
+    if not sugestoes:
+        return None
+
+    # Retorna a melhor sugestão (primeiro da lista, mais barato)
+    return {
+        "sugestoes": sugestoes,
+        "horario_livre_apos": fim_servico.strftime("%H:%M"),
+        "barbeiro_id": barbeiro_id,
+    }
+
+
+# ═══════════════════════════════════════════════════════════
 #  PARSE DE DATA/HORA DO TEXTO DO CLIENTE
 # ═══════════════════════════════════════════════════════════
 
