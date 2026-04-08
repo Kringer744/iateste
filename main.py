@@ -3985,14 +3985,19 @@ async def processar_ia_e_responder(
 
         # ── Detecção de intenção de AGENDAMENTO ──
         _intencao_agendar = bool(re.search(
-            r"(agendar|agendamento|marcar|marca um|horario disponivel|horário disponível|"
-            r"horarios disponiveis|horários disponíveis|quero cortar|quero um corte|cortar cabelo|cortar o cabelo|"
-            r"fazer a barba|barba|corte de cabelo|tem horario|tem horário|vaga|disponibilidade|"
+            r"(agendar|agendamento|agenda pra|agenda para|agenda ai|agenda aí|agenda la|agenda lá|"
+            r"marcar|marca um|marca pra|marca para|marca ai|marca aí|marca la|marca lá|"
+            r"horario disponivel|horário disponível|horarios disponiveis|horários disponíveis|"
+            r"quero cortar|quero um corte|cortar cabelo|cortar o cabelo|corta meu|"
+            r"fazer a barba|barba|corte de cabelo|preciso cortar|to precisando|tô precisando|"
+            r"tem horario|tem horário|tem vaga|vaga|disponibilidade|"
             r"encaixe|encaixar|pode me encaixar|quando posso ir|que horas pode|que dia tem|"
             r"remarcar|reagendar|cancelar meu horario|cancelar meu horário|cancelar agendamento|"
             r"meu agendamento|meus agendamentos|meus horarios|meus horários|"
-            r"pode ser|às \d|as \d|\d+h|\d+:\d+|sim|confirmo|confirma|esse horario|esse horário|"
-            r"esse mesmo|pode marcar|marca esse|quero esse|bora|fechado|fechou)",
+            r"reserva|reservar|bota pra mim|coloca pra mim|quero ir|posso ir|"
+            r"pode ser|às \d|as \d|\d+h|\d+:\d+|sim\b|confirmo|confirma|esse horario|esse horário|"
+            r"esse mesmo|pode marcar|marca esse|quero esse|bora|fechado|fechou|"
+            r"amanha|amanhã|hoje|segunda|terca|terça|quarta|quinta|sexta|sabado|sábado|domingo)",
             _texto_cliente_norm,
         ))
 
