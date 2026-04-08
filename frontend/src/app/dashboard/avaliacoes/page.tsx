@@ -68,7 +68,7 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.06, duration: 0.5, ease: "easeOut" },
+    transition: { delay: i * 0.06, duration: 0.5, ease: [0, 0, 0.2, 1] as [number, number, number, number] },
   }),
 };
 
@@ -279,7 +279,6 @@ export default function AvaliacoesPage() {
                           transition={{
                             duration: 0.8,
                             delay: 0.2 + star * 0.05,
-                            ease: "easeOut",
                           }}
                           className="h-full rounded-full bg-gradient-to-r from-[#D4AF37] to-[#B8860B]"
                         />
