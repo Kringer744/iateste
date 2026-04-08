@@ -4041,24 +4041,32 @@ async def processar_ia_e_responder(
                     _contexto_agendamento += "\nEste cliente NÃO tem agendamentos futuros.\n"
 
                 _contexto_agendamento += """
-REGRAS DE AGENDAMENTO (OBRIGATÓRIO — SIGA À RISCA):
-- Para agendar, você PRECISA de: dia, horário e profissional (se houver mais de 1).
-- Se o cliente não escolheu dia/horário, mostre os horários disponíveis e pergunte qual prefere.
-- Se o cliente não escolheu profissional e há mais de 1, pergunte qual prefere.
-- Quando tiver TODOS os dados, confirme com o cliente ANTES de agendar.
-- PREÇOS: Use SOMENTE os preços listados acima nos Serviços. NUNCA invente preços. Se não souber o preço, diga que vai verificar.
-- NUNCA invente horários que não estão na lista de disponibilidade acima.
+⚠️⚠️⚠️ REGRAS DE AGENDAMENTO — ANTI-ALUCINAÇÃO (OBRIGATÓRIO — SIGA À RISCA):
 
-⚠️ TAG OBRIGATÓRIA — CRÍTICO:
-Quando o cliente CONFIRMAR o agendamento (disser "sim", "pode sim", "quero", "confirma", etc.), você DEVE OBRIGATORIAMENTE incluir a tag abaixo NO FINAL da sua resposta. SEM ESSA TAG O AGENDAMENTO NÃO É CRIADO NO SISTEMA.
-Formato: <AGENDAR:nome_barbeiro|YYYY-MM-DD HH:MM|nome_servico>
-Exemplo: <AGENDAR:João|2026-04-10 14:00|Corte masculino>
+1. DISPONIBILIDADE: Olhe os dados "Dias com vagas" ou "Horários disponíveis" ACIMA.
+   - Se aparecer "Não há horários disponíveis", diga isso ao cliente. NÃO INVENTE vagas.
+   - Se o cliente pedir um dia que NÃO está listado, diga que não há disponibilidade e sugira os dias que TÊM vaga.
+   - NUNCA diga "temos horários disponíveis" se os dados acima dizem o contrário.
 
-- Para CANCELAR: use <CANCELAR_AGENDAMENTO:id_do_agendamento>
-- A tag NÃO aparece para o cliente, é processada internamente pelo sistema.
+2. PREÇOS: Use SOMENTE os preços listados nos Serviços acima. NUNCA invente preços.
+
+3. PROFISSIONAIS: Use SOMENTE os nomes listados em "Profissionais disponíveis" acima.
+
+4. Para agendar, você PRECISA de: dia, horário e profissional (se houver mais de 1).
+   - Se o cliente não escolheu dia/horário, LISTE os horários disponíveis dos dados acima.
+   - Se o cliente não escolheu profissional e há mais de 1, pergunte qual prefere.
+   - Quando tiver TODOS os dados, confirme com o cliente ANTES de agendar.
+
+5. ⚠️ TAG OBRIGATÓRIA — CRÍTICO:
+   Quando o cliente CONFIRMAR o agendamento (disser "sim", "pode sim", "quero", "confirma", etc.), você DEVE OBRIGATORIAMENTE incluir a tag abaixo NO FINAL da sua resposta. SEM ESSA TAG O AGENDAMENTO NÃO É CRIADO NO SISTEMA.
+   Formato: <AGENDAR:nome_barbeiro|YYYY-MM-DD HH:MM|nome_servico>
+   Exemplo: <AGENDAR:João|2026-04-10 14:00|Corte masculino>
+
+6. Para CANCELAR: use <CANCELAR_AGENDAMENTO:id_do_agendamento>
+7. A tag NÃO aparece para o cliente, é processada internamente pelo sistema.
 """
                 contexto_precarregado += _contexto_agendamento
-                logger.info(f"💈 Contexto de agendamento injetado para conv {conversation_id}")
+                logger.info(f"💈 Contexto de agendamento injetado para conv {conversation_id} | barbeiros={len(_barbeiros)} servicos={len(_servicos)} disp={_disp[:100]}")
             except Exception as e:
                 logger.error(f"Erro ao carregar contexto de agendamento: {e}")
 
