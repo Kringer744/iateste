@@ -228,7 +228,7 @@ async def obter_proximos_dias_disponiveis(
     db_pool, empresa_id: int, barbeiro_id: Optional[int] = None,
     dias_afrente: int = 7, duracao_minutos: int = 30,
 ) -> str:
-    """Retorna resumo dos próximos dias com vagas disponíveis."""
+    """Retorna resumo dos próximos dias com vagas, SEPARADO POR BARBEIRO."""
     hoje = datetime.now(TZ_SP).replace(tzinfo=None)
     linhas = []
 
@@ -237,16 +237,30 @@ async def obter_proximos_dias_disponiveis(
         slots = await obter_slots_disponiveis(db_pool, empresa_id, data, barbeiro_id, duracao_minutos)
         if slots:
             dia_nome = DIAS_SEMANA_ABREV.get(data.weekday(), "")
-            n_slots = len(slots)
-            primeiro = slots[0]["horario"]
-            ultimo = slots[-1]["horario"]
             label = "hoje" if i == 0 else ("amanhã" if i == 1 else f"{dia_nome} ({data.strftime('%d/%m')})")
-            linhas.append(f"• {label}: {n_slots} vagas ({primeiro} - {ultimo})")
+
+            # Agrupa slots por barbeiro
+            por_barbeiro = {}
+            for s in slots:
+                bname = s["barbeiro_nome"]
+                if bname not in por_barbeiro:
+                    por_barbeiro[bname] = []
+                por_barbeiro[bname].append(s["horario"])
+
+            if len(por_barbeiro) == 1:
+                # Só 1 barbeiro — formato simples
+                bname, horarios = next(iter(por_barbeiro.items()))
+                linhas.append(f"• {label} ({bname}): {', '.join(horarios)}")
+            else:
+                # Múltiplos barbeiros — mostra cada um
+                linhas.append(f"• {label}:")
+                for bname, horarios in por_barbeiro.items():
+                    linhas.append(f"  - {bname}: {', '.join(horarios)}")
 
     if not linhas:
         return "Não há horários disponíveis nos próximos dias."
 
-    return "Dias com vagas:\n" + "\n".join(linhas)
+    return "Disponibilidade por profissional:\n" + "\n".join(linhas)
 
 
 # ═══════════════════════════════════════════════════════════

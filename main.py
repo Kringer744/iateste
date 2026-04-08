@@ -2369,136 +2369,36 @@ async def enviar_mensagem_chatwoot(
 # --- BACKGROUND JOBS & FOLLOW-UP ---
 
 async def agendar_followups(conversation_id: int, account_id: int, slug: str, empresa_id: int):
-    if not db_pool:
-        return
-    try:
-        await db_pool.execute("""
-            UPDATE followups SET status = 'cancelado'
-            WHERE conversa_id = (SELECT id FROM conversas WHERE conversation_id = $1)
-              AND status = 'pendente'
-        """, conversation_id)
-
-        templates = await db_pool.fetch("""
-            SELECT t.*
-            FROM templates_followup t
-            WHERE t.empresa_id = $1
-              AND t.ativo = true
-            ORDER BY t.ordem
-        """, empresa_id)
-
-        agora = datetime.now(ZoneInfo("America/Sao_Paulo")).replace(tzinfo=None)
-        for t in templates:
-            agendado_para = agora + timedelta(minutes=t["delay_minutos"])
+    """DESATIVADO — followups substituídos por lembretes de agendamento (worker_lembretes_agendamento)."""
+    # Cancela qualquer followup pendente restante
+    if db_pool:
+        try:
             await db_pool.execute("""
-                INSERT INTO followups
-                    (conversa_id, empresa_id, unidade_id, template_id, tipo, mensagem, ordem, agendado_para, status)
-                VALUES (
-                    (SELECT id FROM conversas WHERE conversation_id = $1 AND empresa_id = $2),
-                    $2,
-                    (SELECT id FROM unidades WHERE slug = $3 AND empresa_id = $2),
-                    $4, $5, $6, $7, $8, 'pendente'
-                )
-            """, conversation_id, empresa_id, slug, t["id"], t["tipo"], t["mensagem"], t["ordem"], agendado_para)
-
-        if templates:
-            logger.info(f"📅 {len(templates)} follow-ups agendados para conversa {conversation_id}")
-        else:
-            logger.warning(f"⚠️ [Followup] Nenhum template ativo encontrado para empresa {empresa_id} — follow-ups NÃO agendados")
-    except Exception as e:
-        logger.error(f"Erro ao agendar followups: {e}", exc_info=True)
+                UPDATE followups SET status = 'cancelado'
+                WHERE conversa_id = (SELECT id FROM conversas WHERE conversation_id = $1)
+                  AND status = 'pendente'
+            """, conversation_id)
+        except Exception:
+            pass
+    return
 
 
 async def worker_followup():
+    """DESATIVADO — followups substituídos por lembretes de agendamento."""
     try:
-        while True:
-            await asyncio.sleep(30)
-            # Garante que apenas 1 worker processe follow-ups em ambiente multi-processo
-            if not await _is_worker_leader("followup", ttl=40):
-                continue
-            if not db_pool:
-                continue
+        # Na primeira execução, cancela todos os followups pendentes restantes
+        await asyncio.sleep(10)
+        if db_pool:
             try:
-                agora = datetime.now(ZoneInfo("America/Sao_Paulo")).replace(tzinfo=None)
-
-                # Log de diagnóstico: quantos followups pendentes existem no total
-                _total_pendentes = await db_pool.fetchval(
-                    "SELECT COUNT(*) FROM followups WHERE status = 'pendente'"
-                ) or 0
-                if _total_pendentes > 0:
-                    logger.info(f"📋 [Followup Worker] {_total_pendentes} followups pendentes no total, verificando agendados...")
-
-                pendentes = await db_pool.fetch("""
-                    SELECT f.*, c.conversation_id, c.account_id, u.slug, c.empresa_id,
-                           u.nome AS nome_unidade, c.contato_nome
-                    FROM followups f
-                    JOIN conversas c ON c.id = f.conversa_id
-                    LEFT JOIN unidades u ON u.id = f.unidade_id
-                    WHERE f.status = 'pendente' AND f.agendado_para <= $1
-                    ORDER BY f.agendado_para
-                    LIMIT 20
-                    FOR UPDATE OF f SKIP LOCKED
-                """, agora)
-
-                if pendentes:
-                    logger.info(f"📬 [Followup Worker] {len(pendentes)} followups prontos para envio")
-
-                for f in pendentes:
-                    if (
-                        await redis_client.get(f"atend_manual:{f['empresa_id']}:{f['conversation_id']}") == "1"
-                        or await redis_client.get(f"pause_ia:{f['empresa_id']}:{f['conversation_id']}") == "1"
-                    ):
-                        await db_pool.execute("UPDATE followups SET status = 'cancelado' WHERE id = $1", f['id'])
-                        continue
-
-                    respondeu = await db_pool.fetchval("""
-                        SELECT 1 FROM mensagens
-                        WHERE conversa_id = $1 AND role = 'user' AND created_at > NOW() - interval '5 minutes'
-                    """, f['conversa_id'])
-                    if respondeu:
-                        await db_pool.execute("UPDATE followups SET status = 'cancelado' WHERE id = $1", f['id'])
-                        continue
-
-                    integracao = await carregar_integracao(f['empresa_id'], 'chatwoot')
-                    if not integracao:
-                        await db_pool.execute(
-                            "UPDATE followups SET status = 'erro', erro_log = 'Sem integração' WHERE id = $1", f['id']
-                        )
-                        continue
-
-                    # Carrega nome_ia da personalidade (evita "Assistente Virtual" hardcoded)
-                    _pers_fu = await carregar_personalidade(f['empresa_id']) or {}
-                    _nome_ia_fu = _pers_fu.get('nome_ia') or 'Atendente'
-
-                    nome_contato = (f['contato_nome'] or '').split()[0] if f['contato_nome'] else 'você'
-                    nome_unidade = (f['nome_unidade'] or '').strip()
-                    if not nome_unidade and f.get('slug'):
-                        nome_unidade = str(f['slug']).replace('-', ' ').replace('_', ' ').title()
-                    mensagem_followup = _render_followup_template(f['mensagem'] or '', nome_contato, nome_unidade)
-
-                    # Validação: conversation_id e account_id são obrigatórios
-                    if not f['conversation_id'] or not f['account_id']:
-                        await db_pool.execute(
-                            "UPDATE followups SET status = 'erro', erro_log = 'conversation_id ou account_id ausente' WHERE id = $1", f['id']
-                        )
-                        continue
-
-                    _fu_result = await enviar_mensagem_chatwoot(
-                        f['account_id'], f['conversation_id'], mensagem_followup,
-                        _nome_ia_fu, integracao, f['empresa_id']
-                    )
-                    if _fu_result:
-                        await db_pool.execute(
-                            "UPDATE followups SET status = 'enviado', enviado_em = NOW() WHERE id = $1", f['id']
-                        )
-                        logger.info(f"✅ Follow-up #{f['id']} enviado para conv {f['conversation_id']}")
-                    else:
-                        await db_pool.execute(
-                            "UPDATE followups SET status = 'erro', erro_log = 'Falha ao enviar mensagem via Chatwoot' WHERE id = $1", f['id']
-                        )
-                        logger.warning(f"⚠️ Follow-up #{f['id']} falhou ao enviar para conv {f['conversation_id']}")
-
+                _cancelados = await db_pool.execute(
+                    "UPDATE followups SET status = 'cancelado' WHERE status = 'pendente'"
+                )
+                logger.info(f"🛑 [Followup Worker] DESATIVADO. Followups pendentes cancelados: {_cancelados}")
             except Exception as e:
-                logger.error(f"Erro no worker de follow-up: {e}")
+                logger.warning(f"⚠️ Erro ao cancelar followups pendentes: {e}")
+        # Worker encerra — lembretes de agendamento são gerenciados por worker_lembretes_agendamento
+        while True:
+            await asyncio.sleep(3600)  # Dorme 1h — não faz nada
     except asyncio.CancelledError:
         logger.info("🛑 worker_followup cancelado")
         raise
@@ -2567,10 +2467,11 @@ async def worker_lembretes_agendamento():
 
                 for ag in pendentes_1d:
                     try:
-                        msg = formatar_lembrete(dict(ag), ag['barbeiro_nome'], tipo="1d")
+                        _pers = await carregar_personalidade(ag['empresa_id']) or {}
+                        _templates = {k: v for k, v in _pers.items() if k.startswith('msg_') and v}
+                        msg = formatar_lembrete(dict(ag), ag['barbeiro_nome'], tipo="1d", templates=_templates)
                         integracao = await carregar_integracao(ag['empresa_id'], 'chatwoot')
                         if integracao and ag.get('conversation_id'):
-                            _pers = await carregar_personalidade(ag['empresa_id']) or {}
                             _nome_ia = _pers.get('nome_ia') or 'Atendente'
                             await enviar_mensagem_chatwoot(
                                 None, ag['conversation_id'], msg, _nome_ia, integracao, ag['empresa_id']
@@ -2606,10 +2507,11 @@ async def worker_lembretes_agendamento():
 
                 for ag in pendentes_1h:
                     try:
-                        msg = formatar_lembrete(dict(ag), ag['barbeiro_nome'], tipo="1h")
+                        _pers = await carregar_personalidade(ag['empresa_id']) or {}
+                        _templates = {k: v for k, v in _pers.items() if k.startswith('msg_') and v}
+                        msg = formatar_lembrete(dict(ag), ag['barbeiro_nome'], tipo="1h", templates=_templates)
                         integracao = await carregar_integracao(ag['empresa_id'], 'chatwoot')
                         if integracao and ag.get('conversation_id'):
-                            _pers = await carregar_personalidade(ag['empresa_id']) or {}
                             _nome_ia = _pers.get('nome_ia') or 'Atendente'
                             await enviar_mensagem_chatwoot(
                                 None, ag['conversation_id'], msg, _nome_ia, integracao, ag['empresa_id']
@@ -2642,7 +2544,9 @@ async def worker_lembretes_agendamento():
 
                 for ag in concluidos:
                     try:
-                        msg = formatar_pedido_avaliacao(dict(ag), ag['barbeiro_nome'])
+                        _pers = await carregar_personalidade(ag['empresa_id']) or {}
+                        _templates = {k: v for k, v in _pers.items() if k.startswith('msg_') and v}
+                        msg = formatar_pedido_avaliacao(dict(ag), ag['barbeiro_nome'], templates=_templates)
                         # Marca flag no Redis para capturar resposta numérica como avaliação
                         if ag.get('cliente_telefone'):
                             fone = "".join(filter(str.isdigit, str(ag['cliente_telefone'])))
@@ -4973,12 +4877,14 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                     logger.warning(f"⚠️ Barbeiro '{_barb_nome}' não encontrado para agendamento via IA (empresa={empresa_id})")
             except Exception as e:
                 logger.error(f"Erro ao processar tag <AGENDAR>: {e}", exc_info=True)
-        elif _intencao_agendar and db_pool and resposta_texto:
+        elif db_pool and resposta_texto:
             # Fallback: IA confirmou agendamento mas esqueceu a tag — tenta criar automaticamente
+            # Nota: não exige _intencao_agendar pois pode falhar em mensagens de confirmação simples
             _confirmou_sem_tag = bool(re.search(
                 r'(confirmad[oa]|agendad[oa]|marcad[oa]|está marcad|agendamento.*feit|reserva.*confirmad)',
                 resposta_texto.lower()
             ))
+            logger.info(f"📋 [AGENDAR-CHECK] conv={conversation_id} intencao={_intencao_agendar} confirmou_sem_tag={_confirmou_sem_tag} resp_inicio={resposta_texto[:80]}")
             if _confirmou_sem_tag:
                 logger.warning(f"⚠️ [AGENDAR-FALLBACK] IA confirmou sem tag! Tentando extrair dados... Resposta: {resposta_texto[:200]}")
                 try:
@@ -4991,12 +4897,15 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                     _resp_lower = resposta_texto.lower()
                     _fallback_data = parse_data_texto(_resp_lower)
                     _fallback_hora = parse_hora_texto(_resp_lower)
+                    logger.info(f"📅 [AGENDAR-FALLBACK] Parse resposta: data={_fallback_data} hora={_fallback_hora}")
 
                     # Se não achou na resposta, tenta do texto do cliente
                     if not _fallback_data and texto_cliente_unificado:
                         _fallback_data = parse_data_texto(texto_cliente_unificado)
+                        logger.info(f"📅 [AGENDAR-FALLBACK] Parse cliente: data={_fallback_data}")
                     if not _fallback_hora and texto_cliente_unificado:
                         _fallback_hora = parse_hora_texto(texto_cliente_unificado)
+                        logger.info(f"📅 [AGENDAR-FALLBACK] Parse cliente: hora={_fallback_hora}")
 
                     # Se ainda não achou hora, tenta no estado/histórico da conversa
                     if not _fallback_hora and novo_estado:
