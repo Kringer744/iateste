@@ -13,7 +13,7 @@ import socket, sys, os
 
 # Testa Redis
 redis_url = os.environ.get('REDIS_URL', '')
-host = 'barberbot_redis'
+host = 'hotelbot_redis'
 try:
     s = socket.create_connection((host, 6379), timeout=5)
     s.close()
@@ -24,7 +24,7 @@ except Exception as e:
 
 # Testa PostgreSQL
 try:
-    s = socket.create_connection(('barberbot_postgres', 5432), timeout=5)
+    s = socket.create_connection(('hotelbot_postgres', 5432), timeout=5)
     s.close()
     print('PostgreSQL TCP: OK')
 except Exception as e:
