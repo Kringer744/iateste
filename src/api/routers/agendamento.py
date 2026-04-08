@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from src.core.database import get_db_pool
-from src.api.routers.auth import get_current_user
+from src.core.security import get_current_user_token as get_current_user
 from src.services.agendamento_service import (
     listar_barbeiros, buscar_barbeiro_por_nome,
     listar_servicos, buscar_servico_por_nome,
