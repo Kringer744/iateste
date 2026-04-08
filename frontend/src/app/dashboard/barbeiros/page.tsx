@@ -106,9 +106,10 @@ export default function BarbeirosPage() {
         setIsModalOpen(false);
         fetchBarbeiros();
       }, 1500);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Erro ao salvar:", e);
-      alert("Erro ao salvar barbeiro.");
+      const msg = e?.response?.data?.detail || e?.response?.data?.message || e?.message || "Erro desconhecido";
+      alert(`Erro ao salvar barbeiro: ${msg}`);
     } finally {
       setSaving(false);
     }

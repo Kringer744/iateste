@@ -5,6 +5,14 @@ from src.core.config import DATABASE_URL, logger
 
 db_pool: Optional[asyncpg.Pool] = None
 
+
+async def get_db_pool() -> asyncpg.Pool:
+    """Retorna o pool de conexões do banco de dados."""
+    if db_pool is None:
+        raise RuntimeError("Database pool não inicializado. Verifique DATABASE_URL.")
+    return db_pool
+
+
 async def init_db_pool():
     global db_pool
     if DATABASE_URL:
