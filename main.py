@@ -4072,29 +4072,41 @@ async def processar_ia_e_responder(
                     _contexto_disp += "\nEste cliente NÃO tem agendamentos futuros.\n"
 
                 _contexto_disp += """
-⚠️⚠️⚠️ REGRAS DE AGENDAMENTO — ANTI-ALUCINAÇÃO (OBRIGATÓRIO — SIGA À RISCA):
+⚠️⚠️⚠️ REGRAS DE AGENDAMENTO — OBRIGATÓRIO — SIGA À RISCA:
 
-1. DISPONIBILIDADE: Olhe os dados "Dias com vagas" ou "Horários disponíveis" ACIMA.
-   - Se aparecer "Não há horários disponíveis", diga isso ao cliente. NÃO INVENTE vagas.
-   - Se o cliente pedir um dia que NÃO está listado, diga que não há disponibilidade e sugira os dias que TÊM vaga.
-   - NUNCA diga "temos horários disponíveis" se os dados acima dizem o contrário.
+1. DISPONIBILIDADE: Olhe os dados "Dias com vagas" acima.
+   - Se NÃO há horários, diga isso. NÃO INVENTE vagas.
+   - Se o dia pedido NÃO está listado, sugira os dias que TÊM vaga.
 
-2. PREÇOS: Use SOMENTE os preços listados nos Serviços acima. NUNCA invente preços.
+2. PREÇOS: Use SOMENTE os preços listados nos Serviços. NUNCA invente.
 
-3. PROFISSIONAIS: Use SOMENTE os nomes listados em "Profissionais disponíveis" acima.
+3. PROFISSIONAIS: Use SOMENTE os nomes listados acima.
 
-4. Para agendar, você PRECISA de: dia, horário e profissional (se houver mais de 1).
-   - Se o cliente não escolheu dia/horário, LISTE os horários disponíveis dos dados acima.
-   - Se o cliente não escolheu profissional e há mais de 1, pergunte qual prefere.
-   - Quando tiver TODOS os dados, confirme com o cliente ANTES de agendar.
+4. ⚠️⚠️⚠️ FLUXO OBRIGATÓRIO DE AGENDAMENTO — NUNCA PULE ETAPAS:
+   Você PRECISA coletar TODOS estes dados ANTES de confirmar:
+   a) DIA — qual dia o cliente quer
+   b) HORÁRIO EXATO — ex: 08:00, 09:00, 10:00 (NUNCA confirme sem horário específico!)
+   c) PROFISSIONAL — se houver mais de 1, pergunte qual
+   d) SERVIÇO — qual serviço
 
-5. ⚠️ TAG OBRIGATÓRIA — CRÍTICO:
-   Quando o cliente CONFIRMAR o agendamento (disser "sim", "pode sim", "quero", "confirma", etc.), você DEVE OBRIGATORIAMENTE incluir a tag abaixo NO FINAL da sua resposta. SEM ESSA TAG O AGENDAMENTO NÃO É CRIADO NO SISTEMA.
-   Formato: <AGENDAR:nome_barbeiro|YYYY-MM-DD HH:MM|nome_servico>
-   Exemplo: <AGENDAR:João|2026-04-10 14:00|Corte masculino>
+   ❌ PROIBIDO: Confirmar agendamento dizendo apenas "amanhã" sem horário.
+   ❌ PROIBIDO: Dizer "Agendado para amanhã" sem ter perguntado e recebido o HORÁRIO EXATO.
+   ✅ CORRETO: "Para qual horário? Temos 08:00, 09:00 e 10:00 disponíveis."
+   ✅ CORRETO: Só confirmar quando tiver DIA + HORA + BARBEIRO.
+
+   Se o cliente escolher o barbeiro mas NÃO o horário, PERGUNTE: "Qual horário prefere? Temos X, Y e Z."
+   Se o cliente disser "amanhã com o Gui", PERGUNTE: "Ótimo! Para qual horário? Temos 08:00, 09:00 e 10:00."
+
+5. ⚠️⚠️⚠️ TAG OBRIGATÓRIA — SEM ESSA TAG O AGENDAMENTO NÃO É CRIADO:
+   SOMENTE quando tiver DIA + HORÁRIO + BARBEIRO + SERVIÇO definidos E o cliente confirmar,
+   inclua a tag abaixo NO FINAL da sua resposta:
+   <AGENDAR:nome_barbeiro|YYYY-MM-DD HH:MM|nome_servico>
+   Exemplo: <AGENDAR:Gui|2026-04-09 09:00|Corte masculino>
+
+   ⚠️ REPITO: Você DEVE incluir essa tag. Sem ela o sistema NÃO cria o agendamento.
+   ⚠️ A tag NÃO aparece para o cliente, é processada internamente.
 
 6. Para CANCELAR: use <CANCELAR_AGENDAMENTO:id_do_agendamento>
-7. A tag NÃO aparece para o cliente, é processada internamente pelo sistema.
 """
                 contexto_precarregado += _contexto_disp
                 logger.info(f"💈 Contexto de disponibilidade injetado para conv {conversation_id} | disp={_disp[:100]}")
@@ -4973,8 +4985,9 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                     from src.services.agendamento_service import (
                         criar_agendamento, buscar_barbeiro_por_nome, buscar_servico_por_nome,
                         parse_data_texto, parse_hora_texto, listar_barbeiros, listar_servicos,
+                        obter_slots_disponiveis,
                     )
-                    # Extrair data/hora da resposta
+                    # Extrair data/hora da resposta da IA
                     _resp_lower = resposta_texto.lower()
                     _fallback_data = parse_data_texto(_resp_lower)
                     _fallback_hora = parse_hora_texto(_resp_lower)
@@ -4984,6 +4997,32 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                         _fallback_data = parse_data_texto(texto_cliente_unificado)
                     if not _fallback_hora and texto_cliente_unificado:
                         _fallback_hora = parse_hora_texto(texto_cliente_unificado)
+
+                    # Se ainda não achou hora, tenta no estado/histórico da conversa
+                    if not _fallback_hora and novo_estado:
+                        _estado_lower = novo_estado.lower() if isinstance(novo_estado, str) else str(novo_estado).lower()
+                        _fallback_hora = parse_hora_texto(_estado_lower)
+                        if _fallback_hora:
+                            logger.info(f"📅 [AGENDAR-FALLBACK] Hora extraída do histórico: {_fallback_hora}")
+
+                    # Último recurso: se tem data e barbeiro mas falta hora, usa primeiro slot disponível
+                    if not _fallback_hora and _fallback_data:
+                        try:
+                            _fb_barbs_temp = await listar_barbeiros(db_pool, empresa_id)
+                            _fb_barb_temp = None
+                            for _bt in _fb_barbs_temp:
+                                if _bt['nome'].lower() in _resp_lower:
+                                    _fb_barb_temp = _bt
+                                    break
+                            if not _fb_barb_temp and len(_fb_barbs_temp) == 1:
+                                _fb_barb_temp = _fb_barbs_temp[0]
+                            if _fb_barb_temp:
+                                _fb_slots = await obter_slots_disponiveis(db_pool, empresa_id, _fallback_data, _fb_barb_temp['id'])
+                                if _fb_slots:
+                                    _fallback_hora = _fb_slots[0]['horario']
+                                    logger.info(f"📅 [AGENDAR-FALLBACK] Hora = primeiro slot disponível: {_fallback_hora}")
+                        except Exception as _slot_err:
+                            logger.warning(f"⚠️ [AGENDAR-FALLBACK] Erro ao buscar slots: {_slot_err}")
 
                     # Extrair barbeiro — procura nomes conhecidos na resposta
                     _fallback_barb = None
