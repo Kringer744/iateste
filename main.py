@@ -4860,8 +4860,11 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                         # ── Notifica barbeiro via WhatsApp (UazAPI) ──
                         try:
                             _barb_fone = _barb.get('telefone', '') or ''
+                            logger.info(f"📲 [AGENDAR-TAG] Tentando notificar barbeiro {_barb_nome}, telefone='{_barb_fone}'")
                             if _barb_fone:
                                 _barb_fone_clean = "".join(filter(str.isdigit, str(_barb_fone)))
+                                if not _barb_fone_clean.startswith("55"):
+                                    _barb_fone_clean = "55" + _barb_fone_clean
                                 if _barb_fone_clean:
                                     _uaz_notif = await carregar_integracao(empresa_id, 'uazapi')
                                     if _uaz_notif:
@@ -5011,7 +5014,8 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                             # Limpar contexto de agendamento do Redis (já criou)
                             await redis_client.delete(f"agendar_ctx:{conversation_id}")
                             # Notificar barbeiro
-                            _fb_barb_fone = _fallback_barb.get('telefone', '')
+                            _fb_barb_fone = _fallback_barb.get('telefone', '') or ''
+                            logger.info(f"📲 [AGENDAR-FALLBACK] Tentando notificar barbeiro {_fallback_barb['nome']}, telefone='{_fb_barb_fone}'")
                             if _fb_barb_fone:
                                 try:
                                     _fb_integ = await carregar_integracao(empresa_id, 'uazapi')
@@ -5023,7 +5027,11 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                                         if not _fb_fone_limpo.startswith("55"):
                                             _fb_fone_limpo = "55" + _fb_fone_limpo
                                         from src.services.uazapi_client import UazAPIClient
-                                        _fb_uaz = UazAPIClient(_fb_integ['api_url'], _fb_integ['token'])
+                                        _fb_uaz = UazAPIClient(
+                                            _fb_integ.get('url') or _fb_integ.get('api_url'),
+                                            _fb_integ.get('token'),
+                                            _fb_integ.get('instance', 'default')
+                                        )
                                         await _fb_uaz.send_text(_fb_fone_limpo, _fb_msg)
                                         logger.info(f"📲 [AGENDAR-FALLBACK] Barbeiro {_fallback_barb['nome']} notificado")
                                 except Exception as _notif_err:
