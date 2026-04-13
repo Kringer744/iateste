@@ -139,7 +139,7 @@ export default function AgendaPage() {
     try {
       const params: any = { data: formatDate(selectedDate) };
       if (filteredBarbeiro !== "") params.barbeiro_id = filteredBarbeiro;
-      const { data } = await axios.get("/api-backend/agendamento/agendamentos", { ...config, params });
+      const { data } = await axios.get("/api-backend/agendamento/agendamentos", { ...getConfig(), params });
       setAgendamentos(Array.isArray(data) ? data : data.agendamentos || []);
     } catch {
       setAgendamentos([]);
