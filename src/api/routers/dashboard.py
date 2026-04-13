@@ -535,12 +535,12 @@ async def criar_unidade(
             body.link_matricula,
             json.dumps(body.horarios) if body.horarios and body.horarios != "" else None,
             json.dumps(body.modalidades) if body.modalidades and body.modalidades != "" else None,
-            json.dumps(body.planos) if body.planos else '{}',
-            json.dumps(body.formas_pagamento) if body.formas_pagamento else '{}',
-            json.dumps(body.convenios) if body.convenios else '{}',
-            json.dumps(body.infraestrutura) if body.infraestrutura else '{}',
-            json.dumps(body.servicos) if body.servicos else '{}',
-            body.palavras_chave or [],
+            json.dumps(body.planos or {}),
+            json.dumps(body.formas_pagamento or {}),
+            json.dumps(body.convenios or {}),
+            json.dumps(body.infraestrutura or {}),
+            json.dumps(body.servicos or {}),
+            body.palavras_chave if body.palavras_chave else [],
             body.foto_grade or None, body.link_tour_virtual or None
         )
         from src.core.redis_client import redis_client
@@ -548,8 +548,8 @@ async def criar_unidade(
         logger.info(f"✅ Unidade '{body.nome}' criada (id={row['id']}, empresa_id={empresa_id})")
         return {"id": row["id"], "slug": slug, "nome": body.nome, "empresa_id": empresa_id}
     except Exception as e:
-        logger.error(f"Erro ao criar unidade: {e}")
-        raise HTTPException(status_code=500, detail="Erro ao criar unidade")
+        logger.error(f"Erro ao criar unidade: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Erro ao criar unidade: {str(e)}")
 
 @router.post("/unidades/upload")
 async def upload_unidade_foto(
@@ -755,12 +755,12 @@ async def atualizar_unidade(
             body.whatsapp, body.site, body.instagram, body.link_matricula,
             json.dumps(body.horarios) if body.horarios and body.horarios != "" else None,
             json.dumps(body.modalidades) if body.modalidades and body.modalidades != "" else None,
-            json.dumps(body.planos) if body.planos else '{}',
-            json.dumps(body.formas_pagamento) if body.formas_pagamento else '{}',
-            json.dumps(body.convenios) if body.convenios else '{}',
-            json.dumps(body.infraestrutura) if body.infraestrutura else '{}',
-            json.dumps(body.servicos) if body.servicos else '{}',
-            body.palavras_chave or [],
+            json.dumps(body.planos or {}),
+            json.dumps(body.formas_pagamento or {}),
+            json.dumps(body.convenios or {}),
+            json.dumps(body.infraestrutura or {}),
+            json.dumps(body.servicos or {}),
+            body.palavras_chave if body.palavras_chave else [],
             body.foto_grade or None, body.link_tour_virtual or None,
             unidade_id, empresa_id
         )
