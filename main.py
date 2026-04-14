@@ -1017,11 +1017,19 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"⚠️ Erro ao limpar cooldowns no startup: {e}")
 
+    # Cancela follow-ups pendentes — sistema é de agendamento, não vendas
+    try:
+        _fu_cancel = await db_pool.execute("UPDATE followups SET status = 'cancelado' WHERE status = 'pendente'")
+        if "UPDATE" in _fu_cancel and _fu_cancel != "UPDATE 0":
+            logger.info(f"🛑 Follow-ups pendentes cancelados no startup: {_fu_cancel}")
+    except Exception as e:
+        logger.warning(f"⚠️ Erro ao cancelar followups: {e}")
+
     worker_tasks = [
-        asyncio.create_task(worker_followup(), name="worker_followup"),
+        # asyncio.create_task(worker_followup(), name="worker_followup"),  # DESATIVADO — sistema é de agendamento, não vendas
         asyncio.create_task(worker_metricas_diarias(), name="worker_metricas_diarias"),
         asyncio.create_task(worker_sync_planos(), name="worker_sync_planos"),
-        asyncio.create_task(worker_cleanup_followups(), name="worker_cleanup_followups"),
+        # asyncio.create_task(worker_cleanup_followups(), name="worker_cleanup_followups"),  # DESATIVADO junto com followup
         asyncio.create_task(worker_lembretes_agendamento(), name="worker_lembretes_agendamento"),
         # asyncio.create_task(worker_resumo_ia(), name="worker_resumo_ia"),
     ]
@@ -3497,7 +3505,7 @@ async def worker_lembretes_agendamento():
                             _fone = "55" + _fone
 
                         _cli = UazAPIClient(base_url=_uaz.get("url", ""), token=_uaz.get("token", ""), instance_name=_uaz.get("instance", "default"))
-                        await _cli.enviar_texto(_fone, _msg)
+                        await _cli.send_text(_fone, _msg)
                         await db_pool.execute("UPDATE agendamentos SET lembrete_1d_enviado = true WHERE id = $1", _ag['id'])
                         logger.info(f"📅 Lembrete 1D enviado para {_ag['cliente_nome']} (ag #{_ag['id']})")
                     except Exception as e:
@@ -3532,7 +3540,7 @@ async def worker_lembretes_agendamento():
                             _fone = "55" + _fone
 
                         _cli = UazAPIClient(base_url=_uaz.get("url", ""), token=_uaz.get("token", ""), instance_name=_uaz.get("instance", "default"))
-                        await _cli.enviar_texto(_fone, _msg)
+                        await _cli.send_text(_fone, _msg)
                         await db_pool.execute("UPDATE agendamentos SET lembrete_1h_enviado = true WHERE id = $1", _ag['id'])
                         logger.info(f"⏰ Lembrete 1H enviado para {_ag['cliente_nome']} (ag #{_ag['id']})")
                     except Exception as e:
@@ -3932,7 +3940,7 @@ async def processar_ia_e_responder(
                                     token=_uaz_agr.get("token", ""),
                                     instance_name=_uaz_agr.get("instance", "default")
                                 )
-                                await _uaz_cli_agr.enviar_texto(_fone_agr, _msg_obrigado)
+                                await _uaz_cli_agr.send_text(_fone_agr, _msg_obrigado)
                                 logger.info(f"🙏 Agradecimento de avaliação enviado para {_fone_agr}")
                             return  # Não precisa chamar a IA — avaliação processada
                 except Exception as e:
@@ -4945,7 +4953,7 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                                     instance_name=_uaz_confirm.get("instance", "default")
                                 )
                                 logger.info(f"📩 [Confirm] Enviando para {_cli_fone_limpo}: {_msg_cliente[:60]}...")
-                                await _uaz_cli_confirm.enviar_texto(_cli_fone_limpo, _msg_cliente)
+                                await _uaz_cli_confirm.send_text(_cli_fone_limpo, _msg_cliente)
                                 logger.info(f"📩 Confirmação enviada para cliente {_ag_cliente_nome} ({_cli_fone_limpo})")
                             else:
                                 logger.warning(f"⚠️ [Confirm] UazAPI não configurada para empresa {empresa_id}")
@@ -5013,7 +5021,7 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                                     token=_uaz_notif.get("token", ""),
                                     instance_name=_uaz_notif.get("instance", "default")
                                 )
-                                await _uaz_cli.enviar_texto(_ag_barb_fone_limpo, _msg_barbeiro)
+                                await _uaz_cli.send_text(_ag_barb_fone_limpo, _msg_barbeiro)
                                 logger.info(f"📲 Notificação enviada para barbeiro {_ag_barbeiro_nome} ({_ag_barb_fone_limpo})")
                             except Exception as e:
                                 logger.error(f"❌ Erro ao notificar barbeiro: {e}")
@@ -5063,7 +5071,7 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                                     token=_uaz_aval.get("token", ""),
                                     instance_name=_uaz_aval.get("instance", "default")
                                 )
-                                await _uaz_cli_aval.enviar_texto(_fone_aval, _msg_aval)
+                                await _uaz_cli_aval.send_text(_fone_aval, _msg_aval)
                                 logger.info(f"⭐ Pedido de avaliação enviado via CONCLUIR para {_fone_aval}")
                         else:
                             logger.warning(f"⚠️ Agendamento #{_ag_concluir['id']} não pôde ser concluído (status != confirmado)")
@@ -5788,17 +5796,18 @@ async def chatwoot_webhook(
                         account_id, id_conv, _msg_confirmacao, _nome_ia_temp, integracao, empresa_id
                     )
 
-                    lock_key = f"agendar_lock:{id_conv}"
-                    if await redis_client.set(lock_key, "1", nx=True, ex=5):
-                        try:
-                            existe = await db_pool.fetchval(
-                                "SELECT 1 FROM followups f JOIN conversas c ON c.id = f.conversa_id "
-                                "WHERE c.conversation_id = $1 AND f.status = 'pendente' LIMIT 1", id_conv
-                            )
-                            if not existe:
-                                await agendar_followups(id_conv, account_id, slug, empresa_id)
-                        finally:
-                            await redis_client.delete(lock_key)
+                    # Follow-up DESATIVADO — sistema é de agendamento, não vendas
+                    # lock_key = f"agendar_lock:{id_conv}"
+                    # if await redis_client.set(lock_key, "1", nx=True, ex=5):
+                    #     try:
+                    #         existe = await db_pool.fetchval(
+                    #             "SELECT 1 FROM followups f JOIN conversas c ON c.id = f.conversa_id "
+                    #             "WHERE c.conversation_id = $1 AND f.status = 'pendente' LIMIT 1", id_conv
+                    #         )
+                    #         if not existe:
+                    #             await agendar_followups(id_conv, account_id, slug, empresa_id)
+                    #     finally:
+                    #         await redis_client.delete(lock_key)
                     # Confirmação já enviada — NÃO cai no buffer/LLM
                     return {"status": "unidade_confirmada"}
                 else:
@@ -5839,17 +5848,18 @@ async def chatwoot_webhook(
         contato_telefone=_telefone_para_bd
     )
 
-    lock_key = f"agendar_lock:{id_conv}"
-    if await redis_client.set(lock_key, "1", nx=True, ex=5):
-        try:
-            existe = await db_pool.fetchval(
-                "SELECT 1 FROM followups f JOIN conversas c ON c.id = f.conversa_id "
-                "WHERE c.conversation_id = $1 AND f.status = 'pendente' LIMIT 1", id_conv
-            )
-            if not existe:
-                await agendar_followups(id_conv, account_id, slug, empresa_id)
-        finally:
-            await redis_client.delete(lock_key)
+    # Follow-up DESATIVADO — sistema é de agendamento, não vendas
+    # lock_key = f"agendar_lock:{id_conv}"
+    # if await redis_client.set(lock_key, "1", nx=True, ex=5):
+    #     try:
+    #         existe = await db_pool.fetchval(
+    #             "SELECT 1 FROM followups f JOIN conversas c ON c.id = f.conversa_id "
+    #             "WHERE c.conversation_id = $1 AND f.status = 'pendente' LIMIT 1", id_conv
+    #         )
+    #         if not existe:
+    #             await agendar_followups(id_conv, account_id, slug, empresa_id)
+    #     finally:
+    #         await redis_client.delete(lock_key)
 
     await bd_atualizar_msg_cliente(id_conv)
 
