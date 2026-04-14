@@ -372,3 +372,95 @@ async def api_avaliacoes_barbeiro(barbeiro_id: int, user=Depends(get_current_use
         ORDER BY av.created_at DESC LIMIT 50
     """, barbeiro_id, user['empresa_id'])
     return {"media": media, "avaliacoes": [dict(r) for r in rows]}
+
+
+# ═══════════════════════════════════════════════════════════
+#  PERSONA / NOTAS DE CLIENTES
+# ═══════════════════════════════════════════════════════════
+
+class PersonaClienteCreate(BaseModel):
+    contato_fone: str
+    tipo: str = Field(default="persona", description="persona, preferencia, historico")
+    conteudo: str
+
+class PersonaClienteUpdate(BaseModel):
+    conteudo: Optional[str] = None
+    tipo: Optional[str] = None
+    relevancia: Optional[float] = None
+
+
+@router.get("/clientes/{telefone}/persona")
+async def get_persona_cliente(telefone: str, user=Depends(get_current_user)):
+    """Lista persona/notas de um cliente pelo telefone."""
+    db = await get_db_pool()
+    empresa_id = user.get("empresa_id")
+    fone_limpo = "".join(filter(str.isdigit, telefone))
+    rows = await db.fetch(
+        """SELECT id, tipo, conteudo, relevancia, created_at, updated_at
+           FROM memoria_cliente
+           WHERE contato_fone = $1 AND empresa_id = $2
+           ORDER BY relevancia DESC, updated_at DESC""",
+        fone_limpo, empresa_id
+    )
+    return [dict(r) for r in rows]
+
+
+@router.post("/clientes/persona", status_code=201)
+async def criar_persona_cliente(body: PersonaClienteCreate, user=Depends(get_current_user)):
+    """Barbeiro adiciona nota/persona sobre um cliente."""
+    db = await get_db_pool()
+    empresa_id = user.get("empresa_id")
+    fone_limpo = "".join(filter(str.isdigit, body.contato_fone))
+    row = await db.fetchrow(
+        """INSERT INTO memoria_cliente (empresa_id, contato_fone, tipo, conteudo, relevancia)
+           VALUES ($1, $2, $3, $4, 1.0)
+           RETURNING id""",
+        empresa_id, fone_limpo, body.tipo, body.conteudo
+    )
+    # Limpa cache Redis
+    from src.core.redis_client import redis_client
+    await redis_client.delete(f"{empresa_id}:memoria_lp:{fone_limpo}")
+    return {"id": row["id"], "status": "created"}
+
+
+@router.put("/clientes/persona/{nota_id}")
+async def atualizar_persona_cliente(nota_id: int, body: PersonaClienteUpdate, user=Depends(get_current_user)):
+    """Atualiza uma nota/persona de cliente."""
+    db = await get_db_pool()
+    empresa_id = user.get("empresa_id")
+    sets = []
+    params = []
+    idx = 1
+    if body.conteudo is not None:
+        sets.append(f"conteudo = ${idx}")
+        params.append(body.conteudo)
+        idx += 1
+    if body.tipo is not None:
+        sets.append(f"tipo = ${idx}")
+        params.append(body.tipo)
+        idx += 1
+    if body.relevancia is not None:
+        sets.append(f"relevancia = ${idx}")
+        params.append(body.relevancia)
+        idx += 1
+    if not sets:
+        raise HTTPException(status_code=400, detail="Nenhum campo para atualizar")
+    sets.append("updated_at = NOW()")
+    params.extend([nota_id, empresa_id])
+    await db.execute(
+        f"UPDATE memoria_cliente SET {', '.join(sets)} WHERE id = ${idx} AND empresa_id = ${idx+1}",
+        *params
+    )
+    return {"status": "updated"}
+
+
+@router.delete("/clientes/persona/{nota_id}")
+async def deletar_persona_cliente(nota_id: int, user=Depends(get_current_user)):
+    """Remove uma nota/persona de cliente."""
+    db = await get_db_pool()
+    empresa_id = user.get("empresa_id")
+    await db.execute(
+        "DELETE FROM memoria_cliente WHERE id = $1 AND empresa_id = $2",
+        nota_id, empresa_id
+    )
+    return {"status": "deleted"}

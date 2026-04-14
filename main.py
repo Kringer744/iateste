@@ -3882,9 +3882,24 @@ async def processar_ia_e_responder(
 
         prompt_sistema = None  # Inicializa para o drain (definido no fluxo IA)
 
+        # ── FAQ Neural: tenta responder direto do FAQ antes de chamar a IA ──
+        faq_reply = None
+        if texto_cliente_unificado and not fast_reply and not fast_reply_lista and not imagens_urls:
+            try:
+                faq_reply = await buscar_resposta_faq(texto_cliente_unificado, slug, empresa_id)
+                if faq_reply:
+                    logger.info(f"📚 FAQ Match! Respondendo direto do FAQ para: {texto_cliente_unificado[:50]}")
+            except Exception as e:
+                logger.warning(f"⚠️ Erro ao buscar FAQ: {e}")
+
         if fast_reply:
             logger.info("⚡ Fast-Path Ativado! Respondendo sem IA.")
             resposta_texto = fast_reply
+            novo_estado = estado_atual
+
+        elif faq_reply and not contexto_precarregado:
+            logger.info("📚 FAQ Fast-Path! Respondendo direto do FAQ.")
+            resposta_texto = faq_reply
             novo_estado = estado_atual
 
         elif False and resposta_cacheada and not imagens_urls and not mudou_unidade:
@@ -4190,6 +4205,28 @@ REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO (OBRIGATÓRIO):
 - Você está atendendo a unidade indicada em "INFORMAÇÕES DA UNIDADE". Se o cliente perguntar sobre outra unidade, use os dados que tiver sobre ela (na lista de unidades) ou ofereça buscar.
 - Você PODE perguntar o primeiro nome do cliente de forma natural (ex: "E qual seu nome?" ou "Com quem eu falo?"). Mas NUNCA peça outros dados pessoais (CPF, email, endereço, telefone, RG, data de nascimento). Você é um vendedor, NÃO um formulário.
 - NUNCA diga "vou pedir para um consultor te chamar" ou "vou encaminhar para um consultor" — responda com as informações que você tem ou direcione para o link.
+
+AGENDAMENTO — SISTEMA REAL (OBRIGATÓRIO):
+Quando o cliente confirmar um agendamento (barbeiro, data e horário), você DEVE incluir a tag no FINAL da sua resposta:
+<AGENDAR:nome_barbeiro|nome_servico|YYYY-MM-DD|HH:MM>
+Exemplo: <AGENDAR:Sulivan|Corte Masculino|2026-04-15|09:00>
+O sistema vai salvar automaticamente no banco e notificar o barbeiro.
+REGRAS:
+- Só use a tag quando o cliente CONFIRMAR explicitamente o horário
+- Use os nomes exatos dos barbeiros e serviços disponíveis no contexto
+- Se o cliente não especificar serviço, use o serviço padrão "Corte Masculino"
+- NUNCA invente barbeiros ou horários que não estejam nos dados do sistema
+
+UPSELL INTELIGENTE (OBRIGATÓRIO):
+Após confirmar o agendamento, verifique se existe horário vago logo depois do serviço agendado.
+Se houver, ofereça NATURALMENTE um serviço COMPLEMENTAR (diferente do que o cliente já escolheu).
+Exemplo: cliente agendou Corte das 08:30 às 09:00 e o horário 09:00-09:30 está livre →
+"Aproveitando que você já vai estar aqui, que tal fazer a barba também? Temos o horário das 09:00 livre logo em seguida! 💈"
+REGRAS DO UPSELL:
+- NUNCA ofereça o mesmo serviço que o cliente já agendou
+- Só ofereça se realmente houver horário vago após o agendamento
+- Seja natural e não insistente — ofereça UMA vez só
+- Use os serviços cadastrados no sistema
 
 FLUXO DE CONCIERGE REAL (OBRIGATÓRIO):
 Você é um CONCIERGE, não um robô de FAQ. Siga este fluxo:
@@ -4544,6 +4581,103 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                 _enviar_tour = True
             else:
                 logger.warning(f"⚠️ [Tour] IA usou <SEND_VIDEO> mas unidade não tem link_tour_virtual!")
+
+        # --- Handler: tag <AGENDAR:barbeiro|servico|data|hora> ---
+        _agendar_match = re.search(r'<AGENDAR:\s*([^|]+)\|([^|]+)\|(\d{4}-\d{2}-\d{2})\|(\d{2}:\d{2})>', resposta_texto or '')
+        if _agendar_match and db_pool:
+            resposta_texto = re.sub(r'<AGENDAR:[^>]*>', '', resposta_texto).strip()
+            _ag_barbeiro_nome = _agendar_match.group(1).strip()
+            _ag_servico_nome = _agendar_match.group(2).strip()
+            _ag_data_str = _agendar_match.group(3)
+            _ag_hora_str = _agendar_match.group(4)
+            try:
+                from src.services.agendamento_service import buscar_barbeiro_por_nome, buscar_servico_por_nome, criar_agendamento
+                _ag_barbeiro = await buscar_barbeiro_por_nome(db_pool, empresa_id, _ag_barbeiro_nome)
+                _ag_servico = await buscar_servico_por_nome(db_pool, empresa_id, _ag_servico_nome)
+
+                if _ag_barbeiro:
+                    _ag_data_hora = datetime.strptime(f"{_ag_data_str} {_ag_hora_str}", "%Y-%m-%d %H:%M")
+                    _ag_cliente_nome = await redis_client.get(f"nome_cliente:{conversation_id}") or "Cliente"
+                    _ag_cliente_fone = await redis_client.get(f"fone_cliente:{conversation_id}") or ""
+                    _ag_duracao = _ag_servico.get("duracao_minutos", 30) if _ag_servico else 30
+
+                    _ag_result = await criar_agendamento(
+                        db_pool, empresa_id,
+                        barbeiro_id=_ag_barbeiro["id"],
+                        data_hora=_ag_data_hora,
+                        cliente_nome=_ag_cliente_nome,
+                        cliente_telefone=_ag_cliente_fone,
+                        servico_id=_ag_servico["id"] if _ag_servico else None,
+                        duracao_minutos=_ag_duracao,
+                    )
+                    logger.info(f"✅ Agendamento salvo no banco: {_ag_cliente_nome} com {_ag_barbeiro_nome} em {_ag_data_str} {_ag_hora_str}")
+
+                    # ── Notificação WhatsApp para o barbeiro ──
+                    _ag_barb_fone = _ag_barbeiro.get("telefone")
+                    if _ag_barb_fone:
+                        _uaz_notif = await carregar_integracao(empresa_id, 'uazapi')
+                        if _uaz_notif:
+                            _ag_barb_fone_limpo = "".join(filter(str.isdigit, str(_ag_barb_fone)))
+                            if not _ag_barb_fone_limpo.startswith("55"):
+                                _ag_barb_fone_limpo = "55" + _ag_barb_fone_limpo
+
+                            # Busca persona/notas do cliente
+                            _persona_bloco = ""
+                            if _ag_cliente_fone:
+                                try:
+                                    _fone_limpo = "".join(filter(str.isdigit, str(_ag_cliente_fone)))
+                                    _persona_rows = await db_pool.fetch(
+                                        """SELECT tipo, conteudo FROM memoria_cliente
+                                           WHERE contato_fone = $1 AND empresa_id = $2
+                                           ORDER BY relevancia DESC, updated_at DESC LIMIT 5""",
+                                        _fone_limpo, empresa_id
+                                    )
+                                    if _persona_rows:
+                                        _notas = [f"• {r['conteudo']}" for r in _persona_rows]
+                                        _persona_bloco = "\n\n🧑 *Sobre o cliente:*\n" + "\n".join(_notas)
+                                except Exception:
+                                    pass
+
+                            # Busca últimas avaliações do cliente com este barbeiro
+                            _avaliacoes_bloco = ""
+                            try:
+                                _av_rows = await db_pool.fetch(
+                                    """SELECT nota, comentario, created_at FROM avaliacoes
+                                       WHERE empresa_id = $1 AND barbeiro_id = $2 AND cliente_telefone = $3
+                                       ORDER BY created_at DESC LIMIT 3""",
+                                    empresa_id, _ag_barbeiro["id"], _ag_cliente_fone
+                                )
+                                if _av_rows:
+                                    _av_items = [f"• {'⭐' * r['nota']} {r.get('comentario', '')}" for r in _av_rows]
+                                    _avaliacoes_bloco = "\n\n📊 *Últimas avaliações:*\n" + "\n".join(_av_items)
+                            except Exception:
+                                pass
+
+                            _msg_barbeiro = (
+                                f"📅 *Novo Agendamento!*\n\n"
+                                f"👤 *Cliente:* {_ag_cliente_nome}\n"
+                                f"📱 *Telefone:* {_ag_cliente_fone}\n"
+                                f"✂️ *Serviço:* {_ag_servico_nome}\n"
+                                f"📆 *Data:* {_ag_data_str}\n"
+                                f"🕐 *Horário:* {_ag_hora_str}"
+                                f"{_persona_bloco}"
+                                f"{_avaliacoes_bloco}"
+                            )
+
+                            try:
+                                _uaz_cli = UazAPIClient(
+                                    base_url=_uaz_notif.get("url", ""),
+                                    token=_uaz_notif.get("token", ""),
+                                    instance_name=_uaz_notif.get("instance", "default")
+                                )
+                                await _uaz_cli.enviar_texto(_ag_barb_fone_limpo, _msg_barbeiro)
+                                logger.info(f"📲 Notificação enviada para barbeiro {_ag_barbeiro_nome} ({_ag_barb_fone_limpo})")
+                            except Exception as e:
+                                logger.error(f"❌ Erro ao notificar barbeiro: {e}")
+                else:
+                    logger.warning(f"⚠️ Barbeiro '{_ag_barbeiro_nome}' não encontrado no banco")
+            except Exception as e:
+                logger.error(f"❌ Erro ao processar tag AGENDAR: {e}", exc_info=True)
 
         # --- Salvar estado ---
         async with redis_client.pipeline(transaction=True) as pipe:
