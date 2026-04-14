@@ -1598,13 +1598,18 @@ async def processar_anexos_mensagens(mensagens_acumuladas: List[str]) -> Dict[st
             elif f["type"] == "image":
                 imagens_urls.append(f["url"])
 
-    transcricoes = await asyncio.gather(*tasks_audio)
+    transcricoes_raw = await asyncio.gather(*tasks_audio)
+    # Filtra None (áudio que não pôde ser baixado/transcrito)
+    transcricoes = [t for t in transcricoes_raw if t is not None]
 
     mensagens_lista = []
     for i, txt in enumerate(textos, 1):
         mensagens_lista.append(f"{i}. {txt}")
     for i, transc in enumerate(transcricoes, len(textos) + 1):
         mensagens_lista.append(f"{i}. [Áudio] {transc}")
+    # Se havia áudios mas nenhum foi transcrito e não há texto, avisa
+    if tasks_audio and not transcricoes and not textos:
+        mensagens_lista.append("[Cliente enviou áudio mas não foi possível transcrever. Peça que envie por texto.]")
 
     return {
         "textos": textos,
@@ -3466,7 +3471,7 @@ async def worker_lembretes_agendamento():
     try:
         while True:
             try:
-                if not await _worker_leader_check("lembretes_agendamento"):
+                if not await _is_worker_leader("lembretes_agendamento", ttl=350):
                     await asyncio.sleep(300)
                     continue
 
@@ -3683,22 +3688,39 @@ async def _transcrever_audio_gemini(audio_bytes: bytes, mime_type: str = "audio/
         return None
 
 
+def _audio_url_variants(url: str) -> list:
+    """Gera variantes da URL do áudio para tentar download (fallback de hostname)."""
+    variants = [url]
+    if CHATWOOT_URL:
+        # Se a URL original usa hostname interno (ex: http://hotelbot_chatwoot:3000/...),
+        # tenta reescrever com o CHATWOOT_URL externo
+        from urllib.parse import urlparse
+        parsed = urlparse(url)
+        parsed_cw = urlparse(CHATWOOT_URL.rstrip("/"))
+        if parsed.hostname != parsed_cw.hostname:
+            rewritten = url.replace(f"{parsed.scheme}://{parsed.netloc}", CHATWOOT_URL.rstrip("/"), 1)
+            if rewritten != url:
+                variants.append(rewritten)
+    return variants
+
+
 async def transcrever_audio(url: str):
-    try:
-        resp = await baixar_midia_com_retry(url, timeout=15.0)
-    except httpx.TimeoutException as e:
-        logger.error(f"⏱️ Timeout ao baixar áudio: {e}")
-        if _PROMETHEUS_OK:
-            METRIC_ERROS_TOTAL.labels(tipo="whisper_timeout").inc()
-        return "[Erro ao baixar áudio: timeout]"
-    except httpx.HTTPStatusError as e:
-        logger.error(f"❌ HTTP {e.response.status_code} ao baixar áudio: {e}")
-        if _PROMETHEUS_OK:
-            METRIC_ERROS_TOTAL.labels(tipo="whisper_http").inc()
-        return "[Erro ao baixar áudio]"
-    except Exception as e:
-        logger.error(f"Erro ao baixar áudio: {e}")
-        return "[Erro ao baixar áudio]"
+    resp = None
+    # Tenta baixar o áudio — se falhar com a URL original, tenta reescrever via CHATWOOT_URL
+    for attempt_url in _audio_url_variants(url):
+        try:
+            resp = await baixar_midia_com_retry(attempt_url, timeout=15.0)
+            break  # Download OK
+        except httpx.TimeoutException as e:
+            logger.error(f"⏱️ Timeout ao baixar áudio ({attempt_url[:80]}): {e}")
+        except httpx.HTTPStatusError as e:
+            logger.error(f"❌ HTTP {e.response.status_code} ao baixar áudio ({attempt_url[:80]}): {e}")
+        except Exception as e:
+            logger.error(f"Erro ao baixar áudio ({attempt_url[:80]}): {e}")
+
+    if resp is None:
+        logger.warning(f"⚠️ Não foi possível baixar o áudio de nenhuma URL variante")
+        return None  # Retorna None em vez de string de erro — IA ignora áudio silenciosamente
 
     audio_bytes = resp.content
 
