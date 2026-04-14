@@ -1316,7 +1316,7 @@ def formatar_planos_bonito(planos: List[Dict], destacar_melhor_preco: bool = Tru
 
 
 def filtrar_planos_por_contexto(texto_cliente: str, planos: List[Dict]) -> List[Dict]:
-    """Prioriza acomodações/tarifas mais aderentes ao que o hóspede pediu."""
+    """Prioriza acomodações/tarifas mais aderentes ao que o cliente pediu."""
     if not planos:
         return []
 
@@ -3497,7 +3497,7 @@ async def worker_resumo_ia():
                         prompt = (
                             "Analise a conversa abaixo entre um potencial hóspede e um concierge virtual de hotel. "
                             "Responda em português com no máximo 3 frases cobrindo: "
-                            "1) o que o hóspede quer, 2) nível de interesse (quente/morno/frio), "
+                            "1) o que o cliente quer, 2) nível de interesse (quente/morno/frio), "
                             "3) próximo passo sugerido. Seja direto e objetivo.\n\n"
                             f"Conversa:\n{historico}"
                         )
@@ -3976,11 +3976,11 @@ Tour Virtual: {'vídeo disponível' if unidade.get('link_tour_virtual') else 'n�
 """
 
             # ── Campos conhecidos da personalidade_ia ──────────────────────────
-            tom_voz          = pers.get('tom_voz') or 'Profissional, claro e prestativo'
-            estilo           = pers.get('estilo_comunicacao') or ''
-            saudacao         = pers.get('saudacao_personalizada') or f"Olá! Sou {nome_ia}, como posso ajudar?"
-            instrucoes_base  = pers.get('instrucoes_base') or "Atenda o cliente de forma educada."
-            regras_atend     = pers.get('regras_atendimento') or "Seja breve e objetivo."
+            tom_voz          = pers.get('tom_voz') or 'Descontraído, próximo e profissional — como um barbeiro experiente falando com um cliente'
+            estilo           = pers.get('estilo_comunicacao') or 'Direto ao ponto, usa gírias leves, nunca formal demais. Fala como um cara da barbearia.'
+            saudacao         = pers.get('saudacao_personalizada') or f"E aí! Sou o {nome_ia}, da barbearia. Vai querer corte, barba ou combo? 😎"
+            instrucoes_base  = pers.get('instrucoes_base') or "Você é o atendente da barbearia. Seu objetivo é agendar o cliente com um barbeiro. Mostre os horários disponíveis, sugira barbeiros, e quando o cliente confirmar, SEMPRE use a tag <AGENDAR:barbeiro|servico|data|hora> para salvar no sistema."
+            regras_atend     = pers.get('regras_atendimento') or "Seja breve e objetivo. Guie o cliente para agendar. Quando ele confirmar horário, SEMPRE inclua a tag <AGENDAR>. Ofereça upsell se houver horário vago depois."
 
             # ── Campos extras da personalidade_ia (consumidos dinamicamente) ──
             # Qualquer coluna presente na tabela mas não listada acima é injetada
@@ -4057,14 +4057,16 @@ NUNCA use inglês ou qualquer outro idioma — nem uma palavra, nem no meio de f
 NUNCA avalie respostas com frases como "is perfect", "that's great", "perfect answer" ou similares.
 Você é um atendente — apenas responda o cliente diretamente.
 
-Seu nome é {nome_ia}. Você é concierge virtual do hotel {nome_empresa}.
+Seu nome é {nome_ia}. Você é o atendente virtual de {nome_empresa}.
+DATA DE HOJE: {datetime.now(ZoneInfo('America/Sao_Paulo')).strftime('%Y-%m-%d %A')}.
+Use esta data para calcular "amanhã", "segunda", etc. ao gerar tags <AGENDAR>.
 IMPORTANTE: NUNCA diga que vai "enviar um áudio", "mandar um áudio" ou "responder por áudio". O sistema de áudio é automático — você só precisa responder a pergunta normalmente. Se o cliente pedir áudio, responda a pergunta dele diretamente sem mencionar áudio.
 """
             if slug:
-                prompt_sistema += f"Você está atendendo agora pela unidade/propriedade: {nome_unidade}.\n"
-                prompt_sistema += "Se o hóspede perguntar sobre OUTRA unidade da rede, responda normalmente usando as informações que você tem. Não diga que 'não pode' falar de outra unidade.\n"
+                prompt_sistema += f"Você está atendendo agora pela unidade: {nome_unidade}.\n"
+                prompt_sistema += "Se o cliente perguntar sobre OUTRA unidade, responda normalmente usando as informações que você tem. Não diga que 'não pode' falar de outra unidade.\n"
             else:
-                prompt_sistema += f"Você é concierge virtual da rede {nome_empresa}. Você atende todas as propriedades da rede. Quando o hóspede não especificar uma unidade, pergunte qual das nossas propriedades ele gostaria de conhecer.\n"
+                prompt_sistema += f"Você é atendente virtual de {nome_empresa}. Você atende todas as unidades. Quando o cliente não especificar uma unidade, pergunte qual ele gostaria.\n"
 
             _foto_grade = unidade.get("foto_grade")
             _modalidades_texto = unidade.get("modalidades") or ""
@@ -4073,8 +4075,8 @@ IMPORTANTE: NUNCA diga que vai "enviar um áudio", "mandar um áudio" ou "respon
                 if _modalidades_texto:
                     prompt_sistema += "Você TEM acesso ao conteúdo textual completo dos serviços e comodidades desta propriedade. Os dados estão no campo 'Modalidades/Serviços' nos DADOS DA UNIDADE.\n"
                     prompt_sistema += "REGRA PRIORITÁRIA: Sempre responda sobre serviços, acomodações, restaurante, piscina e estrutura usando o TEXTO que você já possui. Explique verbalmente.\n"
-                    prompt_sistema += "Se o hóspede perguntar sobre um serviço específico (ex: spa, café da manhã, piscina), busque nos dados textuais e responda com as informações que tem.\n"
-                    prompt_sistema += "Se o hóspede não consegue ler, tem dificuldade visual, ou pediu por áudio — NUNCA ofereça imagem. Use o texto para explicar verbalmente.\n"
+                    prompt_sistema += "Se o cliente perguntar sobre um serviço específico (ex: spa, café da manhã, piscina), busque nos dados textuais e responda com as informações que tem.\n"
+                    prompt_sistema += "Se o cliente não consegue ler, tem dificuldade visual, ou pediu por áudio — NUNCA ofereça imagem. Use o texto para explicar verbalmente.\n"
                 if _foto_grade:
                     prompt_sistema += "Esta propriedade também TEM uma imagem da estrutura/cardápio disponível.\n"
                     prompt_sistema += "A imagem é um COMPLEMENTO — ofereça APÓS já ter respondido com o texto. Exemplo: 'E se quiser ver nossa estrutura completa, posso te enviar a foto também!'\n"
@@ -4111,7 +4113,7 @@ IMPORTANTE: NUNCA diga que vai "enviar um áudio", "mandar um áudio" ou "respon
                         prompt_sistema += """
 [TOUR VIRTUAL — MODO REATIVO]
 Esta propriedade possui um vídeo de Tour Virtual disponível.
-- SOMENTE envie o tour se o hóspede PEDIR explicitamente para ver o hotel, tour, vídeo, ou conhecer por dentro.
+- SOMENTE envie o tour se o cliente PEDIR explicitamente para ver o hotel, tour, vídeo, ou conhecer por dentro.
 - NÃO ofereça espontaneamente.
 - Para enviar: adicione <SEND_VIDEO> no final da sua resposta.
 """
@@ -4121,7 +4123,7 @@ Esta propriedade possui um vídeo de Tour Virtual disponível.
 Esta propriedade possui um vídeo de Tour Virtual disponível.
 
 REGRA OBRIGATÓRIA DE ENVIO:
-- Se o hóspede PEDIR para ver o tour, vídeo, conhecer o hotel por dentro → ENVIE IMEDIATAMENTE adicionando <SEND_VIDEO> no final da resposta.
+- Se o cliente PEDIR para ver o tour, vídeo, conhecer o hotel por dentro → ENVIE IMEDIATAMENTE adicionando <SEND_VIDEO> no final da resposta.
 - Se demonstrar interesse mas NÃO pediu explicitamente → ofereça primeiro. Quando aceitar, use <SEND_VIDEO>.
 
 OFERECIMENTO PROATIVO (este contato é um potencial hóspede):
@@ -4162,7 +4164,7 @@ NÃO ofereça mais de uma vez.
 """
                     elif not _eh_lead and _estrategia_tour != "off":
                         # Hóspede/Parceiro: modo reativo independente da estratégia
-                        prompt_sistema += "\n[TOUR VIRTUAL]: Esta propriedade tem tour virtual. Se o hóspede pedir para ver, adicione <SEND_VIDEO> no final da resposta.\n"
+                        prompt_sistema += "\n[TOUR VIRTUAL]: Esta propriedade tem tour virtual. Se o cliente pedir para ver, adicione <SEND_VIDEO> no final da resposta.\n"
 
             prompt_sistema += f"""
 PERSONALIDADE
@@ -4208,16 +4210,23 @@ REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO (OBRIGATÓRIO):
 - Você PODE perguntar o primeiro nome do cliente de forma natural (ex: "E qual seu nome?" ou "Com quem eu falo?"). Mas NUNCA peça outros dados pessoais (CPF, email, endereço, telefone, RG, data de nascimento). Você é um vendedor, NÃO um formulário.
 - NUNCA diga "vou pedir para um consultor te chamar" ou "vou encaminhar para um consultor" — responda com as informações que você tem ou direcione para o link.
 
-AGENDAMENTO — SISTEMA REAL (OBRIGATÓRIO):
-Quando o cliente confirmar um agendamento (barbeiro, data e horário), você DEVE incluir a tag no FINAL da sua resposta:
+⚠️ AGENDAMENTO — TAG OBRIGATÓRIA (PRIORIDADE MÁXIMA):
+Quando o cliente confirmar barbeiro + horário (mesmo com "ok", "ta", "pode ser", "bora", "sim"),
+você DEVE incluir esta tag NO FINAL da resposta — SEM EXCEÇÃO:
 <AGENDAR:nome_barbeiro|nome_servico|YYYY-MM-DD|HH:MM>
-Exemplo: <AGENDAR:Sulivan|Corte Masculino|2026-04-15|09:00>
-O sistema vai salvar automaticamente no banco e notificar o barbeiro.
-REGRAS:
-- Só use a tag quando o cliente CONFIRMAR explicitamente o horário
-- Use os nomes exatos dos barbeiros e serviços disponíveis no contexto
-- Se o cliente não especificar serviço, use o serviço padrão "Corte Masculino"
-- NUNCA invente barbeiros ou horários que não estejam nos dados do sistema
+
+EXEMPLOS:
+- Cliente: "pode ser com o Sulivan às 8:30" → <AGENDAR:Sulivan|Corte Masculino|2026-04-14|08:30>
+- Cliente: "quero amanhã 10h com o Gui" → <AGENDAR:Gui|Corte Masculino|2026-04-14|10:00>
+- Cliente: "ta" (após você propor horário) → <AGENDAR:Barbeiro|Servico|DATA|HORA>
+
+REGRAS CRÍTICAS:
+- A tag é INVISÍVEL pro cliente — ele não vê. Sem ela o agendamento NÃO é salvo.
+- Se o cliente disser "ta", "ok", "pode ser", "bora" após você propor um horário, GERE A TAG com os dados da proposta.
+- Use a DATA DE HOJE informada acima para calcular datas relativas (amanhã, segunda, etc.)
+- Use os nomes EXATOS dos barbeiros e serviços dos dados do sistema
+- Se o cliente não especificar serviço, use "Corte Masculino"
+- NUNCA confirme agendamento sem incluir a tag — sem tag = não salva = cliente fica sem horário
 
 UPSELL INTELIGENTE (OBRIGATÓRIO):
 Após confirmar o agendamento, verifique se existe horário vago logo depois do serviço agendado.
@@ -4230,19 +4239,19 @@ REGRAS DO UPSELL:
 - Seja natural e não insistente — ofereça UMA vez só
 - Use os serviços cadastrados no sistema
 
-FLUXO DE CONCIERGE REAL (OBRIGATÓRIO):
-Você é um CONCIERGE, não um robô de FAQ. Siga este fluxo:
-1. Responda a pergunta do hóspede de forma direta e curta
-2. Depois da resposta, faça UMA pergunta de descoberta que avança a conversa
+FLUXO DE ATENDIMENTO (OBRIGATÓRIO):
+Você é um atendente de barbearia, não um robô de FAQ. Siga este fluxo:
+1. Responda a pergunta do cliente de forma direta e curta
+2. Depois da resposta, faça UMA pergunta que avança para o agendamento
 Exemplos:
-  Hóspede: "Tem disponibilidade?" → "Temos sim! Nossas diárias partem de R$350 😊 Você está planejando para quantas noites?"
-  Hóspede: "Qual o horário do check-in?" → "Nosso check-in é a partir das 14h e check-out até as 12h ✅ Já tem uma data em mente?"
-  Hóspede: "Quanto custa?" → "Nossas tarifas partem de R$350/noite! Você prefere suite standard, superior ou nossa suíte premium?"
+  Cliente: "quero cortar" → "Show! Temos o Gui e o Sulivan disponíveis. Qual prefere e que dia fica melhor pra você?"
+  Cliente: "quem tem disponível?" → "Temos o Gui com horários às 10:00 e 12:00, e o Sulivan às 08:30 e 09:30. Qual deles prefere?"
+  Cliente: "quanto custa?" → "O corte é R$45 e a barba R$25! Quer agendar um horário?"
 REGRAS do fluxo:
 - Resposta + pergunta na MESMA mensagem, sempre
-- A pergunta deve descobrir algo sobre o hóspede (datas, número de pessoas, tipo de quarto)
-- NUNCA adicione dados que o hóspede NÃO pediu (ex: não jogue horários se pediu preço)
-- Se o hóspede já respondeu uma descoberta, avance para a próxima etapa (confirmar reserva, enviar link)
+- Guie o cliente para agendar: pergunte barbeiro, serviço, dia e horário
+- Quando tiver barbeiro + dia + horário confirmados → GERE A TAG <AGENDAR:...> IMEDIATAMENTE
+- NUNCA diga "vou agendar" sem gerar a tag — sem tag = sem agendamento real
 
 REGRAS DE TOM (OBRIGATÓRIO):
 - NUNCA comece resposta com "Olá" se já houve troca de mensagens — vá direto ao ponto
@@ -4283,11 +4292,13 @@ REGRAS DE TOM:
 - NUNCA comece com "Olá" se a conversa já começou — vá direto ao ponto
 
 EXEMPLO DE MENSAGEM BEM FORMATADA:
-"Temos sim! Nossa diária no *quarto standard* parte de *R$350* 😊
+"Temos horários amanhã com o *Sulivan* às *08:30* e *09:30*, e com o *Gui* às *10:00* e *12:00* ✂️
 
-Check-in a partir das 14h, check-out até as 12h — e o café da manhã já está incluso!
+Qual barbeiro e horário fica melhor pra você?"
 
-Você está pensando para quais datas?"
+LEMBRETE FINAL — TAG <AGENDAR>:
+Quando confirmar agendamento, SEMPRE coloque a tag no final. Sem ela o sistema NÃO salva.
+Exemplo: <AGENDAR:Sulivan|Corte Masculino|2026-04-14|08:30>
 {aviso_mudanca}
 
 DADOS DO ATENDIMENTO:
@@ -4529,7 +4540,7 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                     resposta_texto = "Desculpe, pode repetir sua pergunta? 😊"
                     novo_estado = estado_atual
 
-                # Pós-processamento de conversão: se o hóspede já sinalizou interesse em reservar,
+                # Pós-processamento de conversão: se o cliente já sinalizou interesse em reservar,
                 # garante envio do link de reserva e CTA de outras opções na mesma resposta.
                 if _intencao_compra and link_plano:
                     _resp_norm_compra = normalizar(resposta_texto or "")
