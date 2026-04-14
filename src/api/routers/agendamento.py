@@ -375,6 +375,50 @@ async def api_avaliacoes_barbeiro(barbeiro_id: int, user=Depends(get_current_use
 
 
 # ═══════════════════════════════════════════════════════════
+#  CLIENTES (lista única a partir de agendamentos + memoria)
+# ═══════════════════════════════════════════════════════════
+
+@router.get("/clientes")
+async def api_listar_clientes(
+    busca: Optional[str] = None,
+    user=Depends(get_current_user),
+):
+    """Lista clientes únicos (de agendamentos + memoria_cliente)."""
+    db = await get_db_pool()
+    empresa_id = user['empresa_id']
+    rows = await db.fetch("""
+        SELECT
+            cliente_telefone AS telefone,
+            MAX(cliente_nome) AS nome,
+            COUNT(*) AS total_agendamentos,
+            MAX(data_hora) AS ultimo_agendamento
+        FROM agendamentos
+        WHERE empresa_id = $1 AND cliente_telefone IS NOT NULL AND cliente_telefone != ''
+        GROUP BY cliente_telefone
+        ORDER BY MAX(data_hora) DESC
+    """, empresa_id)
+
+    clientes = []
+    for r in rows:
+        fone = r['telefone']
+        nome = r['nome'] or fone
+        if busca and busca.lower() not in nome.lower() and busca not in fone:
+            continue
+        notas_count = await db.fetchval(
+            "SELECT COUNT(*) FROM memoria_cliente WHERE contato_fone = $1 AND empresa_id = $2",
+            "".join(filter(str.isdigit, fone)), empresa_id
+        )
+        clientes.append({
+            "telefone": fone,
+            "nome": nome,
+            "total_agendamentos": r['total_agendamentos'],
+            "ultimo_agendamento": r['ultimo_agendamento'].isoformat() if r['ultimo_agendamento'] else None,
+            "total_notas": notas_count,
+        })
+    return clientes
+
+
+# ═══════════════════════════════════════════════════════════
 #  PERSONA / NOTAS DE CLIENTES
 # ═══════════════════════════════════════════════════════════
 

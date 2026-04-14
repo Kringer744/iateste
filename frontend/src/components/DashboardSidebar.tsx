@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Building2, Brain, HelpCircle, Network,
   Settings, LogOut, BarChart3, MessageSquare, Menu, X, Send,
-  Calendar, Users, Star, Scissors
+  Calendar, Users, Star, Scissors, UserCheck
 } from "lucide-react";
 
 interface SidebarProps {
@@ -20,6 +20,7 @@ const navItemsRaw = [
   { label: "Personalidade IA", icon: Brain, href: "/dashboard/personality", id: "personality" },
   { label: "Serviços", icon: Scissors, href: "/dashboard/servicos", id: "servicos" },
   { label: "Avaliações", icon: Star, href: "/dashboard/avaliacoes", id: "avaliacoes" },
+  { label: "Clientes", icon: UserCheck, href: "/dashboard/clientes", id: "clientes" },
   { label: "Mensagens", icon: MessageSquare, href: "/dashboard/mensagens", id: "mensagens" },
   { label: "Integrações", icon: Network, href: "/dashboard/integrations", id: "integrations" },
 ];
