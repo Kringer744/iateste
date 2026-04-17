@@ -82,6 +82,26 @@ function getWeekDates(d: Date): Date[] {
   return Array.from({ length: 7 }, (_, i) => addDays(monday, i));
 }
 
+function getMonthGrid(d: Date): Date[] {
+  // 6x7 grid starting on Monday, covering the month containing `d`
+  const first = new Date(d.getFullYear(), d.getMonth(), 1);
+  const dayOfWeek = first.getDay(); // 0 Sun
+  const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const start = addDays(first, -offset);
+  return Array.from({ length: 42 }, (_, i) => addDays(start, i));
+}
+
+function monthLabel(d: Date): string {
+  return d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+}
+
+function monthRangeLabel(d: Date): string {
+  const first = new Date(d.getFullYear(), d.getMonth(), 1);
+  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  const f = (x: Date) => x.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  return `${f(first)} – ${f(last)}`;
+}
+
 function pad(n: number): string {
   return n.toString().padStart(2, "0");
 }
@@ -89,7 +109,7 @@ function pad(n: number): string {
 /* ─── Component ─── */
 export default function AgendaPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [view, setView] = useState<"dia" | "semana">("dia");
+  const [view, setView] = useState<"dia" | "semana" | "mes">("mes");
   const [barbeiros, setBarbeiros] = useState<Barbeiro[]>([]);
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [filteredBarbeiro, setFilteredBarbeiro] = useState<number | "">("" );
@@ -227,8 +247,16 @@ export default function AgendaPage() {
 
   /* ─── Navigate ─── */
   const goToday = () => setSelectedDate(new Date());
-  const goPrev = () => setSelectedDate((d) => addDays(d, view === "dia" ? -1 : -7));
-  const goNext = () => setSelectedDate((d) => addDays(d, view === "dia" ? 1 : 7));
+  const goPrev = () => setSelectedDate((d) => {
+    if (view === "dia") return addDays(d, -1);
+    if (view === "semana") return addDays(d, -7);
+    return new Date(d.getFullYear(), d.getMonth() - 1, 1);
+  });
+  const goNext = () => setSelectedDate((d) => {
+    if (view === "dia") return addDays(d, 1);
+    if (view === "semana") return addDays(d, 7);
+    return new Date(d.getFullYear(), d.getMonth() + 1, 1);
+  });
 
   /* ─── Open modal with prefilled time ─── */
   const openModalAtTime = (hour: number) => {
@@ -573,6 +601,104 @@ export default function AgendaPage() {
     </div>
   );
 
+  /* ─── Render: Month View (Lunor monochrome pills) ─── */
+  const pillColor = (apt: Agendamento) => {
+    if (apt.status === "cancelado") return "bg-[#141414] text-zinc-600 border-white/[0.04] line-through";
+    if (apt.status === "concluido") return "bg-[#141414] text-zinc-400 border-white/[0.06]";
+    return "bg-[#1A1A1A] text-zinc-200 border-white/[0.08]";
+  };
+  const pillDotColor = (apt: Agendamento) => {
+    if (apt.status === "cancelado") return "bg-zinc-700";
+    if (apt.status === "concluido") return "bg-emerald-500/60";
+    return "bg-white";
+  };
+
+  const MonthView = () => {
+    const today = new Date();
+    const todayStr = formatDate(today);
+    const currentMonth = selectedDate.getMonth();
+    const grid = getMonthGrid(selectedDate);
+
+    return (
+      <div className="grid grid-cols-7 gap-1.5">
+        {/* Weekday header */}
+        {DIAS_SEMANA.map((d, i) => (
+          <div key={`h-${i}`} className="text-center pb-2 text-[11px] text-zinc-500 tracking-tight">
+            {d}
+          </div>
+        ))}
+
+        {/* Day cells */}
+        {grid.map((date, idx) => {
+          const appts = getAppointmentsForDay(date);
+          const isCurrentMonth = date.getMonth() === currentMonth;
+          const isTodayCell = formatDate(date) === todayStr;
+          const isSelected = formatDate(date) === formatDate(selectedDate);
+
+          return (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: idx * 0.005 }}
+              onClick={() => {
+                setSelectedDate(date);
+                setView("dia");
+              }}
+              className={`relative bg-[#0F0F0F] border rounded-xl p-2 min-h-[108px] cursor-pointer transition-colors overflow-hidden ${
+                isSelected
+                  ? "border-white/[0.18]"
+                  : isTodayCell
+                  ? "border-white/[0.12]"
+                  : "border-white/[0.05] hover:border-white/[0.1]"
+              } ${!isCurrentMonth ? "opacity-40" : ""}`}
+            >
+              {/* Day number */}
+              <div className="flex items-center justify-between mb-1.5">
+                <span
+                  className={`text-[11px] tabular-nums tracking-tight ${
+                    isTodayCell
+                      ? "inline-flex items-center justify-center w-5 h-5 rounded-full bg-white text-black font-semibold"
+                      : isCurrentMonth
+                      ? "text-zinc-300"
+                      : "text-zinc-600"
+                  }`}
+                >
+                  {date.getDate()}
+                </span>
+                {appts.length > 0 && (
+                  <span className="text-[9px] text-zinc-600 tabular-nums">{appts.length}</span>
+                )}
+              </div>
+
+              {/* Event pills */}
+              <div className="space-y-1">
+                {appts.slice(0, 3).map((apt) => {
+                  const d = new Date(apt.data_hora);
+                  return (
+                    <div
+                      key={apt.id}
+                      className={`text-[10px] px-1.5 py-0.5 rounded-md border truncate tracking-tight ${pillColor(apt)}`}
+                      title={`${pad(d.getHours())}:${pad(d.getMinutes())} · ${apt.cliente_nome} · ${apt.servico_nome || ""}`}
+                    >
+                      <span className="tabular-nums font-medium">{pad(d.getHours())}:{pad(d.getMinutes())}</span>{" "}
+                      {apt.cliente_nome}
+                    </div>
+                  );
+                })}
+                {appts.length > 3 && (
+                  <div className="text-[10px] text-zinc-500 tracking-tight px-1.5">
+                    +{appts.length - 3} mais
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    );
+  };
+
   /* ─── Main Render ─── */
   return (
     <div className="flex min-h-screen bg-[#0A0A0A] text-white">
@@ -624,14 +750,19 @@ export default function AgendaPage() {
                   <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
                 </button>
                 <p className="text-sm text-zinc-300 ml-2 capitalize hidden sm:block tracking-tight">
-                  {dayLabel(selectedDate)}
+                  {view === "mes" ? monthLabel(selectedDate) : dayLabel(selectedDate)}
                 </p>
+                {view === "mes" && (
+                  <p className="text-[11px] text-zinc-500 ml-2 hidden md:block tabular-nums tracking-tight">
+                    {monthRangeLabel(selectedDate)}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center gap-2 sm:ml-auto">
                 {/* View toggle */}
                 <div className="flex items-center bg-[#1A1A1A] rounded-lg p-1 border border-white/[0.06]">
-                  {(["dia", "semana"] as const).map((v) => (
+                  {(["dia", "semana", "mes"] as const).map((v) => (
                     <button
                       key={v}
                       onClick={() => setView(v)}
@@ -641,7 +772,7 @@ export default function AgendaPage() {
                           : "text-zinc-500 hover:text-zinc-300"
                       }`}
                     >
-                      {v === "dia" ? "Dia" : "Semana"}
+                      {v === "dia" ? "Dia" : v === "semana" ? "Semana" : "Mês"}
                     </button>
                   ))}
                 </div>
@@ -676,7 +807,7 @@ export default function AgendaPage() {
                   exit={{ opacity: 0, x: -6 }}
                   transition={{ duration: 0.15 }}
                 >
-                  {view === "dia" ? <DayView /> : <WeekView />}
+                  {view === "dia" ? <DayView /> : view === "semana" ? <WeekView /> : <MonthView />}
                 </motion.div>
               </AnimatePresence>
             )}
