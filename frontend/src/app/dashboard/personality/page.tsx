@@ -658,7 +658,7 @@ export default function PersonalityPage() {
                 <div className="relative w-8 h-8">
                   <div className="absolute inset-0 rounded-full border border-t-[#FFFFFF] border-white/5 animate-spin" />
                 </div>
-                <p className="text-[10px] text-slate-600 uppercase tracking-widest">Carregando...</p>
+                <p className="text-[10px] text-slate-600 tracking-tight">Carregando...</p>
               </div>
             ) : filteredList.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 gap-3 px-4 text-center">
@@ -846,9 +846,9 @@ export default function PersonalityPage() {
 
                           {/* ─ IDENTIDADE ─ */}
                           {activeSection === "identidade" && (<>
-                            <div className="flex items-center gap-2 pb-1 border-b border-white/5 mb-5">
+                            <div className="flex items-center gap-2.5 pb-4 border-b border-white/[0.06] mb-5">
                               <Brain className="w-4 h-4 text-[#FFFFFF]" />
-                              <h3 className="font-black text-sm text-white uppercase tracking-wider">Identidade da IA</h3>
+                              <h3 className="text-[15px] font-medium text-white tracking-tight">Identidade da IA</h3>
                             </div>
 
                             <div className={card}>
@@ -913,9 +913,9 @@ export default function PersonalityPage() {
 
                           {/* ─ ENGINE ─ */}
                           {activeSection === "engine" && (<>
-                            <div className="flex items-center gap-2 pb-1 border-b border-white/5 mb-5">
+                            <div className="flex items-center gap-2.5 pb-4 border-b border-white/[0.06] mb-5">
                               <Cpu className="w-4 h-4 text-[#FFFFFF]" />
-                              <h3 className="font-black text-sm text-white uppercase tracking-wider">Motor & Comportamento</h3>
+                              <h3 className="text-[15px] font-medium text-white tracking-tight">Motor & Comportamento</h3>
                             </div>
 
                             <div className={card}>
@@ -931,7 +931,7 @@ export default function PersonalityPage() {
                                   >
                                     <span className="text-lg">{m.badge}</span>
                                     <div className="flex-1">
-                                      <p className="text-xs font-black">{m.label}</p>
+                                      <p className="text-xs font-medium">{m.label}</p>
                                       <p className="text-[10px] opacity-60">{m.sub}</p>
                                     </div>
                                     {fd.model_name === m.id && <CheckCircle2 className="w-4 h-4 flex-shrink-0" />}
@@ -952,7 +952,7 @@ export default function PersonalityPage() {
                                     }`}
                                   >
                                     <span className="text-xl">{t.icon}</span>
-                                    <p className="text-[10px] font-black">{t.id}</p>
+                                    <p className="text-[10px] font-medium">{t.id}</p>
                                     <p className="text-[9px] opacity-60">{t.desc}</p>
                                   </button>
                                 ))}
@@ -964,7 +964,7 @@ export default function PersonalityPage() {
                                 <div>
                                   <div className="flex justify-between mb-2">
                                     <label className={`${lClass} mb-0`}><span className="flex items-center gap-1"><Thermometer className="w-3 h-3 text-[#FFFFFF]/40" />Temperatura</span></label>
-                                    <span className="text-xs font-black text-[#FFFFFF] bg-[#FFFFFF]/10 px-2 py-0.5 rounded-lg">{fd.temperature}</span>
+                                    <span className="text-xs font-medium text-[#FFFFFF] bg-[#FFFFFF]/10 px-2 py-0.5 rounded-lg">{fd.temperature}</span>
                                   </div>
                                   <p className="text-[10px] text-slate-600 mb-2">Baixo = preciso · Alto = criativo</p>
                                   <input type="range" min="0" max="1" step="0.1" value={fd.temperature}
@@ -975,7 +975,7 @@ export default function PersonalityPage() {
                                 <div>
                                   <div className="flex justify-between mb-2">
                                     <label className={`${lClass} mb-0`}>Max Tokens</label>
-                                    <span className="text-xs font-black text-[#FFFFFF] bg-[#FFFFFF]/10 px-2 py-0.5 rounded-lg">{fd.max_tokens}</span>
+                                    <span className="text-xs font-medium text-[#FFFFFF] bg-[#FFFFFF]/10 px-2 py-0.5 rounded-lg">{fd.max_tokens}</span>
                                   </div>
                                   <p className="text-[10px] text-slate-600 mb-2">Limite de tokens por resposta</p>
                                   <input type="range" min="100" max="4000" step="100" value={fd.max_tokens}
@@ -993,7 +993,7 @@ export default function PersonalityPage() {
                               ].map(({ key, label, desc, color }) => (
                                 <div key={key} className={`${card} !py-4 !space-y-0 flex items-center justify-between`}>
                                   <div>
-                                    <p className="text-xs font-black text-white">{label}</p>
+                                    <p className="text-xs font-medium text-white">{label}</p>
                                     <p className="text-[10px] text-slate-500 mt-0.5">{desc}</p>
                                   </div>
                                   <button type="button" onClick={() => setFormData({ ...formData, [key]: !(fd[key] as boolean) })}
@@ -1008,9 +1008,9 @@ export default function PersonalityPage() {
 
                           {/* ─ VENDAS ─ */}
                           {activeSection === "vendas" && (<>
-                            <div className="flex items-center gap-2 pb-1 border-b border-white/5 mb-5">
+                            <div className="flex items-center gap-2.5 pb-4 border-b border-white/[0.06] mb-5">
                               <TrendingUp className="w-4 h-4 text-[#FFFFFF]" />
-                              <h3 className="font-black text-sm text-white uppercase tracking-wider">Estratégia de Vendas & Conversão</h3>
+                              <h3 className="text-[15px] font-medium text-white tracking-tight">Estratégia de Vendas & Conversão</h3>
                             </div>
 
                             <div className={card}>
@@ -1058,7 +1058,7 @@ export default function PersonalityPage() {
                                   <PlayCircle className="w-4 h-4 text-[#FFFFFF]" />
                                 </div>
                                 <div>
-                                  <p className="text-xs font-black text-white">Estrategia Tour Virtual</p>
+                                  <p className="text-xs font-medium text-white">Estrategia Tour Virtual</p>
                                   <p className="text-[10px] text-slate-500 mt-0.5">
                                     Como a IA deve oferecer o tour virtual para leads
                                   </p>
@@ -1135,9 +1135,9 @@ export default function PersonalityPage() {
 
                           {/* ─ BRANDING ─ */}
                           {activeSection === "branding" && (<>
-                            <div className="flex items-center gap-2 pb-1 border-b border-white/5 mb-5">
+                            <div className="flex items-center gap-2.5 pb-4 border-b border-white/[0.06] mb-5">
                               <Sparkles className="w-4 h-4 text-[#FFFFFF]" />
-                              <h3 className="font-black text-sm text-white uppercase tracking-wider">Branding & Identidade Visual</h3>
+                              <h3 className="text-[15px] font-medium text-white tracking-tight">Branding & Identidade Visual</h3>
                             </div>
 
                             <div className={card}>
@@ -1160,10 +1160,10 @@ export default function PersonalityPage() {
                             <div className={card}>
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-xs font-black text-[#FFFFFF] uppercase tracking-widest">Emojis Rotativos da IA</p>
+                                  <p className="text-xs font-medium text-[#FFFFFF] tracking-tight">Emojis Rotativos da IA</p>
                                   <p className="text-[10px] text-slate-500 mt-0.5">A IA alterna entre os emojis escolhidos. Selecione até 6.</p>
                                 </div>
-                                <span className="text-[10px] font-black text-slate-500 bg-white/5 px-2 py-1 rounded-lg">
+                                <span className="text-[10px] font-medium text-slate-500 bg-white/5 px-2 py-1 rounded-lg">
                                   {getEmojiList(fd.emoji_tipo).length}/6
                                 </span>
                               </div>
@@ -1187,7 +1187,7 @@ export default function PersonalityPage() {
                               <div className="flex gap-1 flex-wrap">
                                 {EMOJI_CATEGORIES.map((cat, i) => (
                                   <button key={cat.label} type="button" onClick={() => setEmojiCatIdx(i)}
-                                    className={`text-[10px] font-black px-2.5 py-1 rounded-lg transition-all ${
+                                    className={`text-[10px] font-medium px-2.5 py-1 rounded-lg transition-all ${
                                       emojiCatIdx === i
                                         ? "bg-[#FFFFFF]/15 text-[#FFFFFF] border border-[#FFFFFF]/30"
                                         : "text-slate-500 hover:text-slate-300 bg-white/3 border border-transparent"
@@ -1240,7 +1240,7 @@ export default function PersonalityPage() {
 
                               {/* Preview rotativo */}
                               <div className="bg-black/30 rounded-xl p-4 border border-white/5 flex flex-col gap-2 justify-center">
-                                <p className="text-[9px] font-black text-slate-600 uppercase mb-1">Preview</p>
+                                <p className="text-[9px] font-medium text-slate-600 uppercase mb-1">Preview</p>
                                 {(() => {
                                   const list = getEmojiList(fd.emoji_tipo);
                                   const e0 = list[0] || "✨";
@@ -1268,9 +1268,9 @@ export default function PersonalityPage() {
 
                           {/* ─ CONTEXTO ─ */}
                           {activeSection === "contexto" && (<>
-                            <div className="flex items-center gap-2 pb-1 border-b border-white/5 mb-5">
+                            <div className="flex items-center gap-2.5 pb-4 border-b border-white/[0.06] mb-5">
                               <ListChecks className="w-4 h-4 text-[#FFFFFF]" />
-                              <h3 className="font-black text-sm text-white uppercase tracking-wider">Contexto & Regras</h3>
+                              <h3 className="text-[15px] font-medium text-white tracking-tight">Contexto & Regras</h3>
                             </div>
                             <div className={card}>
                               <div>
@@ -1302,37 +1302,37 @@ export default function PersonalityPage() {
 
                           {/* ─ SEGURANÇA ─ */}
                           {activeSection === "seguranca" && (<>
-                            <div className="flex items-center gap-2 pb-1 border-b border-red-500/20 mb-5">
-                              <ShieldAlert className="w-4 h-4 text-red-400" />
-                              <h3 className="font-black text-sm text-white uppercase tracking-wider">Segurança & Restrições</h3>
+                            <div className="flex items-center gap-2.5 pb-4 border-b border-white/[0.06] mb-5">
+                              <ShieldAlert className="w-4 h-4 text-zinc-300" strokeWidth={1.75} />
+                              <h3 className="text-[15px] font-medium text-white tracking-tight">Segurança e restrições</h3>
                             </div>
-                            <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-5 space-y-4">
+                            <div className={card}>
                               <div>
-                                <label className="block text-[10px] font-black text-red-400/70 uppercase tracking-widest mb-2">Restrições Críticas</label>
-                                <textarea rows={5} value={fd.restricoes} onChange={e => setFormData({...formData, restricoes: e.target.value})} className={`${taClass} border-red-500/10`} placeholder="Nunca fale de política, não dê descontos acima de 10%..." />
+                                <label className={lClass}>Restrições críticas</label>
+                                <textarea rows={5} value={fd.restricoes} onChange={e => setFormData({...formData, restricoes: e.target.value})} className={taClass} placeholder="Nunca fale de política, não dê descontos acima de 10%..." />
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <label className="block text-[10px] font-black text-red-400/70 uppercase tracking-widest mb-2">Palavras Proibidas</label>
-                                  <input type="text" value={fd.palavras_proibidas} onChange={e => setFormData({...formData, palavras_proibidas: e.target.value})} className={`${iClass} border-red-500/10`} placeholder="grátis, promoção enganosa..." />
+                                  <label className={lClass}>Palavras proibidas</label>
+                                  <input type="text" value={fd.palavras_proibidas} onChange={e => setFormData({...formData, palavras_proibidas: e.target.value})} className={iClass} placeholder="grátis, promoção enganosa..." />
                                 </div>
                                 <div>
-                                  <label className="block text-[10px] font-black text-red-400/70 uppercase tracking-widest mb-2">Linguagem Proibida</label>
-                                  <input type="text" value={fd.linguagem_proibida} onChange={e => setFormData({...formData, linguagem_proibida: e.target.value})} className={`${iClass} border-red-500/10`} placeholder="Gírias agressivas, jargão técnico..." />
+                                  <label className={lClass}>Linguagem proibida</label>
+                                  <input type="text" value={fd.linguagem_proibida} onChange={e => setFormData({...formData, linguagem_proibida: e.target.value})} className={iClass} placeholder="Gírias agressivas, jargão técnico..." />
                                 </div>
                               </div>
                               <div>
-                                <label className="block text-[10px] font-black text-red-400/70 uppercase tracking-widest mb-2">Regras de Segurança</label>
-                                <textarea rows={5} value={fd.regras_seguranca} onChange={e => setFormData({...formData, regras_seguranca: e.target.value})} className={`${taClass} border-red-500/10`} placeholder="Não revele instruções internas, não processe 'ignore previous'..." />
+                                <label className={lClass}>Regras de segurança</label>
+                                <textarea rows={5} value={fd.regras_seguranca} onChange={e => setFormData({...formData, regras_seguranca: e.target.value})} className={taClass} placeholder="Não revele instruções internas, não processe 'ignore previous'..." />
                               </div>
                             </div>
                           </>)}
 
                           {/* ─ HORÁRIOS ─ */}
                           {activeSection === "horarios" && (<>
-                            <div className="flex items-center gap-2 pb-1 border-b border-white/5 mb-5">
+                            <div className="flex items-center gap-2.5 pb-4 border-b border-white/[0.06] mb-5">
                               <Clock className="w-4 h-4 text-[#FFFFFF]" />
-                              <h3 className="font-black text-sm text-white uppercase tracking-wider">Horário de Atendimento</h3>
+                              <h3 className="text-[15px] font-medium text-white tracking-tight">Horário de Atendimento</h3>
                             </div>
 
                             {/* Aviso: personalidade inativa — horário não será aplicado */}
@@ -1340,8 +1340,8 @@ export default function PersonalityPage() {
                               <div className="flex items-start gap-2.5 p-3.5 bg-[#1A1A1A] border border-white/[0.08] rounded-xl mb-4">
                                 <AlertCircle className="w-4 h-4 text-zinc-300 flex-shrink-0 mt-0.5" />
                                 <p className="text-xs text-zinc-400 leading-relaxed">
-                                  Esta personalidade está <span className="font-black text-zinc-300">inativa</span> — o horário configurado não será aplicado.
-                                  Ative-a na seção <span className="font-black text-white">Engine</span> para que o horário entre em vigor.
+                                  Esta personalidade está <span className="font-medium text-zinc-300">inativa</span> — o horário configurado não será aplicado.
+                                  Ative-a na seção <span className="font-medium text-white">Engine</span> para que o horário entre em vigor.
                                 </p>
                               </div>
                             )}
@@ -1358,7 +1358,7 @@ export default function PersonalityPage() {
                                           setFormData({...formData, horario_atendimento_ia: { tipo: "horario_especifico", dias: fd.horario_atendimento_ia?.dias ?? HORARIO_DEFAULT.dias }});
                                         }
                                       }}
-                                      className={`flex-1 py-3 rounded-xl font-black text-xs uppercase tracking-widest border transition-all ${
+                                      className={`flex-1 py-3 rounded-xl font-medium text-xs tracking-tight border transition-all ${
                                         atual === tipo ? "bg-[#FFFFFF]/10 text-[#FFFFFF] border-[#FFFFFF]/30" : "bg-black/20 text-slate-500 border-white/5 hover:text-white"
                                       }`}
                                     >
@@ -1435,7 +1435,7 @@ export default function PersonalityPage() {
                                               )}
                                             </div>
                                           ) : (
-                                            <span className="text-[10px] text-slate-700 uppercase tracking-widest">Inativo</span>
+                                            <span className="text-[10px] text-slate-700 tracking-tight">Inativo</span>
                                           )}
                                         </div>
                                       </div>
@@ -1448,9 +1448,9 @@ export default function PersonalityPage() {
 
                           {/* ─ VOZ DA IA (TTS) ─ */}
                           {activeSection === "voz" && (<>
-                            <div className="flex items-center gap-2 pb-1 border-b border-white/5 mb-5">
+                            <div className="flex items-center gap-2.5 pb-4 border-b border-white/[0.06] mb-5">
                               <Mic2 className="w-4 h-4 text-[#FFFFFF]" />
-                              <h3 className="font-black text-sm text-white uppercase tracking-wider">Voz da IA — Resposta por Áudio</h3>
+                              <h3 className="text-[15px] font-medium text-white tracking-tight">Voz da IA — Resposta por Áudio</h3>
                             </div>
 
                             <p className="text-xs text-slate-400 mb-4 leading-relaxed">
@@ -1462,7 +1462,7 @@ export default function PersonalityPage() {
                             {/* Toggle TTS Ativo */}
                             <div className={`${card} !py-4 !space-y-0 flex items-center justify-between`}>
                               <div>
-                                <p className="text-xs font-black text-white flex items-center gap-2">
+                                <p className="text-xs font-medium text-white flex items-center gap-2">
                                   <Mic2 className="w-3.5 h-3.5 text-[#FFFFFF]" />
                                   Resposta por Áudio
                                 </p>
@@ -1486,7 +1486,7 @@ export default function PersonalityPage() {
                                     { id: "masculina" as const, label: "Masculinas", icon: "👨" },
                                   ]).map(f => (
                                     <button key={f.id} type="button" onClick={() => setTtsGenderFilter(f.id)}
-                                      className={`flex-1 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest border transition-all ${
+                                      className={`flex-1 py-2.5 rounded-xl font-medium text-[10px] tracking-tight border transition-all ${
                                         ttsGenderFilter === f.id
                                           ? "bg-[#FFFFFF]/10 text-[#FFFFFF] border-[#FFFFFF]/30"
                                           : "bg-black/20 text-slate-500 border-white/5 hover:text-white"
@@ -1519,7 +1519,7 @@ export default function PersonalityPage() {
                                           <span className="text-lg">{v.genero === "feminina" ? "👩" : "👨"}</span>
                                           <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
-                                              <p className={`text-xs font-black ${isSelected ? "text-[#FFFFFF]" : "text-slate-300"}`}>{v.nome}</p>
+                                              <p className={`text-xs font-medium ${isSelected ? "text-[#FFFFFF]" : "text-slate-300"}`}>{v.nome}</p>
                                               <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
                                                 isSelected ? "bg-[#FFFFFF]/20 text-[#FFFFFF]" : "bg-white/5 text-slate-500"
                                               }`}>{v.tag}</span>
@@ -1626,8 +1626,8 @@ export default function PersonalityPage() {
                               </p>
                               {s.summary && (
                                 <div className="flex items-center gap-1 mt-1">
-                                  <Zap className="w-2.5 h-2.5 text-purple-400" />
-                                  <span className="text-[9px] text-purple-400">Memória</span>
+                                  <Zap className="w-2.5 h-2.5 text-zinc-400" strokeWidth={1.75} />
+                                  <span className="text-[9px] text-zinc-400">Memória</span>
                                 </div>
                               )}
                             </div>
@@ -1658,8 +1658,8 @@ export default function PersonalityPage() {
                                 )}
                               </p>
                               {pgActiveSession?.summary && (
-                                <p className="text-[10px] text-purple-400 flex items-center gap-1 mt-0.5">
-                                  <Zap className="w-2.5 h-2.5" /> Memória ativa — a IA lembra do contexto
+                                <p className="text-[10px] text-zinc-400 flex items-center gap-1 mt-0.5">
+                                  <Zap className="w-2.5 h-2.5" strokeWidth={1.75} /> Memória ativa — a IA lembra do contexto
                                 </p>
                               )}
                             </div>
@@ -1818,20 +1818,18 @@ export default function PersonalityPage() {
                   </div>
 
                   <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="text-[10px] text-slate-600 uppercase tracking-widest hidden lg:block">
+                    <div className="text-xs text-zinc-500 tracking-tight hidden lg:block">
                       {selected === "new" ? "Nova personalidade" : `Editando #${selected}`}
                     </div>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                    <button
                       onClick={doSave}
                       disabled={saving}
-                      className="flex items-center gap-2.5 bg-[#FFFFFF] text-black px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs  transition-all disabled:opacity-50"
+                      className="flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 tracking-tight"
                     >
-                      {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Salvando...</>
-                        : success ? <><CheckCircle2 className="w-4 h-4" /> Salvo!</>
-                        : <><Save className="w-4 h-4" /> Salvar Personalidade</>}
-                    </motion.button>
+                      {saving ? <><Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.75} /> Salvando…</>
+                        : success ? <><CheckCircle2 className="w-4 h-4" strokeWidth={1.75} /> Salvo</>
+                        : <><Save className="w-4 h-4" strokeWidth={1.75} /> Salvar personalidade</>}
+                    </button>
                   </div>
                 </div>
               </motion.div>
