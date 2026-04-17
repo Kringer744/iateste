@@ -262,9 +262,6 @@ export default function IntegrationsPage() {
           ) : (
             <AnimatePresence mode="wait">
 
-              {/* EVO section removed */}
-              )}
-
               {/* ── Chatwoot & UazAPI ── */}
               {activeTab !== "evo" && (
                 <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
