@@ -6,7 +6,7 @@ import {
   Brain, Plus, Pencil, Trash2, Save, Loader2, CheckCircle2,
   Sparkles, Target, Cpu, Thermometer, Send, Bot, PlayCircle,
   Mic2, MessageSquare, Clock, TrendingUp, ShieldAlert, ListChecks,
-  AlertCircle, AlertTriangle, Search, ChevronRight, Zap, X, RotateCcw, Copy
+  AlertCircle, AlertTriangle, Search, ChevronRight, Zap, X, RotateCcw, Copy, Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
