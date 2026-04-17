@@ -1,7 +1,3 @@
 "use client";
 export const dynamic = "force-dynamic";
-import HotelPlaceholder from "@/components/HotelPlaceholder";
-
-export default function Page() {
-  return <HotelPlaceholder activePage="integrations" titulo="Integrações" descricao="Conecte PMS, motor de reservas, WhatsApp, Chatwoot e mais." />;
-}
+export { default } from "@/app/dashboard/integrations/page";

@@ -7,7 +7,7 @@ import {
   Search, AlertTriangle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 // ─── Types ────────────────────────────────────────────────────────
 interface Servico {
@@ -147,7 +147,7 @@ export default function ServicosPage() {
   // ─── Render ───────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#09090f] text-white flex">
-      <DashboardSidebar activePage="servicos" />
+      <AppSidebar activePage="servicos" />
 
       <main className="flex-1 min-w-0 flex flex-col overflow-hidden">
         {/* Header */}

@@ -8,7 +8,7 @@ import {
   StickyNote, Tag, Clock, AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const inputClass =
@@ -182,7 +182,7 @@ export default function ClientesPage() {
   // ── Render ──────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex">
-      <DashboardSidebar activePage="clientes" />
+      <AppSidebar activePage="clientes" />
 
       <main className="flex-1 min-w-0 overflow-auto">
         <div className="relative z-10 p-8 lg:p-10 max-w-7xl mx-auto">

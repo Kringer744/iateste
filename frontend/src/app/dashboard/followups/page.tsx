@@ -9,7 +9,7 @@ import {
   ToggleLeft, ToggleRight, Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -383,7 +383,7 @@ export default function FollowupsPage() {
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="flex h-screen bg-slate-950 text-white overflow-hidden">
-      <DashboardSidebar activePage="followups" />
+      <AppSidebar activePage="followups" />
 
       <div className="flex-1 flex flex-col overflow-hidden lg:ml-64">
         {/* Header */}

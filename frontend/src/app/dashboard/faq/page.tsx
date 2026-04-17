@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { HelpCircle, Plus, Trash2, Edit2, Loader2, Save, X, CheckCircle2, Globe, Building2, Brain } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 interface FAQItem {
   id?: number;
@@ -76,7 +76,7 @@ export default function FAQPage() {
 
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
-      <DashboardSidebar activePage="faq" />
+      <AppSidebar activePage="faq" />
       <main className="flex-1 min-w-0 overflow-auto">
         <div className="fixed top-0 right-0 w-[500px] h-[400px] bg-[#FFFFFF]/3 rounded-full blur-[120px] pointer-events-none" />
         <div className="relative z-10 p-8 lg:p-10 max-w-6xl mx-auto pb-20">

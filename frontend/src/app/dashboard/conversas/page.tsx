@@ -22,7 +22,7 @@ function timeAgo(dateStr?: string): string {
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 }
 import { motion, AnimatePresence } from "framer-motion";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 interface Conversation {
   id: number;
@@ -193,7 +193,7 @@ export default function ConversasPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex">
-      <DashboardSidebar activePage="conversas" />
+      <AppSidebar activePage="conversas" />
       <main className="flex-1 min-w-0 flex flex-col overflow-hidden">
         {/* Top Bar */}
         <header className="flex-shrink-0 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/[0.06] px-6 lg:px-8 py-5 flex items-center justify-between gap-4">

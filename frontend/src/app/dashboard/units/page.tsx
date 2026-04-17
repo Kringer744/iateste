@@ -9,7 +9,7 @@ import {
   ListChecks, HeartHandshake, Eye, Settings2, Info, ImagePlus, Upload, Video, Wand2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 // ─── Componentes auxiliares fora do componente principal ───────────────────────
 // IMPORTANTE: devem ficar FORA para evitar remount a cada keystroke
@@ -283,7 +283,7 @@ export default function UnitsPage() {
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
       {/* Persistent Sidebar */}
-      <DashboardSidebar activePage="units" />
+      <AppSidebar activePage="units" />
 
       {/* Main content */}
       <main className="flex-1 min-w-0 overflow-auto">

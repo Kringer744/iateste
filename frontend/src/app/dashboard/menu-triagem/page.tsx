@@ -6,7 +6,7 @@ import {
   LayoutList, Save, Loader2, CheckCircle2, Plus, X, Zap, AlertCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 type MenuOpcao = { id: string; titulo: string; descricao: string };
 
@@ -95,7 +95,7 @@ export default function MenuTriagemPage() {
 
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
-      <DashboardSidebar activePage="menu-triagem" />
+      <AppSidebar activePage="menu-triagem" />
 
       <main className="flex-1 min-w-0 overflow-auto">
         <div className="fixed top-0 right-0 w-[600px] h-[400px] bg-[#FFFFFF]/3 rounded-full blur-[120px] pointer-events-none" />

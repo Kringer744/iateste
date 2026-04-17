@@ -9,7 +9,7 @@ import {
   AlertCircle, AlertTriangle, Search, ChevronRight, Zap, X, RotateCcw, Copy, Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -603,7 +603,7 @@ export default function PersonalityPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex overflow-hidden" style={{ height: "100vh" }}>
-      <DashboardSidebar activePage="personality" />
+      <AppSidebar activePage="personality" />
 
       {/* ── MAIN LAYOUT (single column, top bar + editor) ───────────── */}
       <div className="flex-1 flex flex-col overflow-hidden">

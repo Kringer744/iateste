@@ -8,7 +8,7 @@ import {
   CheckCircle, XCircle, Wifi, Clock, KeyRound, Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 interface Integration { id?: number; tipo: string; config: any; ativo: boolean; updated_at?: string; }
 
@@ -145,7 +145,7 @@ export default function IntegrationsPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex">
-      <DashboardSidebar activePage="integrations" />
+      <AppSidebar activePage="integrations" />
       <main className="flex-1 min-w-0 overflow-auto">
         <div className="p-6 lg:p-10 max-w-4xl mx-auto pb-20">
 

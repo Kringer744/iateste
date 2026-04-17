@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
         source: "/api-backend/:path*",
         destination: `${API_URL}/:path*`,
       },
+      // /barbearia/* é um alias visual de /dashboard/*.
+      // Usamos rewrite (não redirect) para manter a URL /barbearia
+      // na barra do navegador enquanto renderiza a página de /dashboard.
+      { source: "/barbearia", destination: "/dashboard" },
+      { source: "/barbearia/:path*", destination: "/dashboard/:path*" },
     ];
   },
 };
