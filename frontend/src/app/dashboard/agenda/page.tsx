@@ -334,103 +334,241 @@ export default function AgendaPage() {
     );
   };
 
-  /* ─── Render: Day View ─── */
-  const DayView = () => (
-    <div className="space-y-0.5">
-      {HOURS.map((hour) => {
-        const appts = getAppointmentsForSlot(selectedDate, hour);
-        return (
-          <div key={hour} className="flex group">
-            {/* Time column */}
-            <div className="w-16 flex-shrink-0 text-right pr-3 pt-2">
-              <span className="text-xs font-mono text-gray-600 group-hover:text-gray-400 transition-colors">
-                {pad(hour)}:00
-              </span>
-            </div>
+  /* ─── Timeline constants ─── */
+  const HOUR_HEIGHT = 72; // px per hour
+  const START_HOUR = HOURS[0]; // 8
+  const END_HOUR = HOURS[HOURS.length - 1] + 1; // 21
+  const TIMELINE_HEIGHT = (END_HOUR - START_HOUR) * HOUR_HEIGHT;
 
-            {/* Slot area */}
-            <div className="flex-1 min-h-[72px] border-t border-white/5 py-1.5 relative">
-              {appts.length > 0 ? (
-                <div className="space-y-1.5">
-                  {appts.map((apt) => (
-                    <AppointmentCard key={apt.id} apt={apt} />
-                  ))}
-                </div>
-              ) : (
-                <button
-                  onClick={() => openModalAtTime(hour)}
-                  className="w-full h-full min-h-[56px] rounded-xl border border-dashed border-white/5 hover:border-[#FFFFFF]/30 hover:bg-[#FFFFFF]/5 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"
-                >
-                  <Plus className="w-4 h-4 text-[#FFFFFF]/50" />
-                </button>
-              )}
-            </div>
+  /* ─── Appointments for a whole day ─── */
+  const getAppointmentsForDay = (date: Date): Agendamento[] => {
+    const dateStr = formatDate(date);
+    return agendamentos
+      .filter((a) => {
+        const d = new Date(a.data_hora);
+        return formatDate(d) === dateStr && d.getHours() >= START_HOUR && d.getHours() < END_HOUR;
+      })
+      .sort((a, b) => new Date(a.data_hora).getTime() - new Date(b.data_hora).getTime());
+  };
+
+  /* ─── Now-indicator position for today ─── */
+  const isToday = (date: Date) => formatDate(date) === formatDate(new Date());
+  const nowOffsetPx = () => {
+    const now = new Date();
+    const hr = now.getHours();
+    const min = now.getMinutes();
+    if (hr < START_HOUR || hr >= END_HOUR) return null;
+    return ((hr - START_HOUR) + min / 60) * HOUR_HEIGHT;
+  };
+
+  /* ─── Event block component (absolute-positioned) ─── */
+  const EventBlock = ({ apt, compact = false }: { apt: Agendamento; compact?: boolean }) => {
+    const time = new Date(apt.data_hora);
+    const hr = time.getHours();
+    const min = time.getMinutes();
+    const duration = apt.duracao_minutos || 30;
+    const top = ((hr - START_HOUR) + min / 60) * HOUR_HEIGHT;
+    const height = Math.max((duration / 60) * HOUR_HEIGHT - 2, 22);
+    const barColor = STATUS_BAR_COLOR[apt.status] || STATUS_BAR_COLOR.confirmado;
+    const isCancelled = apt.status === "cancelado";
+    const timeStr = `${pad(hr)}:${pad(min)}`;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.15 }}
+        style={{ top, height }}
+        className={`absolute left-1 right-1 bg-[#141414] border border-white/[0.06] hover:border-white/[0.12] rounded-lg overflow-hidden group cursor-pointer transition-colors ${
+          isCancelled ? "opacity-50" : ""
+        }`}
+      >
+        <span className={`absolute left-0 top-0 bottom-0 w-[3px] ${barColor}`} />
+        <div className={`${compact ? "px-2 py-1" : "px-2.5 py-1.5"} pl-3 h-full flex flex-col justify-start overflow-hidden`}>
+          <div className="flex items-baseline gap-1.5 mb-0.5">
+            <span className={`${compact ? "text-[10px]" : "text-[11px]"} tabular-nums text-zinc-300 font-medium leading-none`}>
+              {timeStr}
+            </span>
+            {!compact && duration > 0 && (
+              <span className="text-[10px] text-zinc-600 tabular-nums leading-none">· {duration}min</span>
+            )}
           </div>
-        );
-      })}
-    </div>
-  );
+          <p className={`${compact ? "text-[11px]" : "text-xs"} font-medium text-white truncate leading-tight tracking-tight ${isCancelled ? "line-through" : ""}`}>
+            {apt.cliente_nome}
+          </p>
+          {!compact && height > 54 && (
+            <p className="text-[10px] text-zinc-500 truncate leading-tight mt-0.5 tracking-tight">
+              {apt.servico_nome}{apt.barbeiro_nome ? ` · ${apt.barbeiro_nome}` : ""}
+            </p>
+          )}
+        </div>
+      </motion.div>
+    );
+  };
 
-  /* ─── Render: Week View ─── */
+  /* ─── Render: Day View (timeline proportional) ─── */
+  const DayView = () => {
+    const appts = getAppointmentsForDay(selectedDate);
+    const nowPx = isToday(selectedDate) ? nowOffsetPx() : null;
+    return (
+      <div className="flex" style={{ minHeight: TIMELINE_HEIGHT }}>
+        {/* Time rail */}
+        <div className="w-14 flex-shrink-0 relative" style={{ height: TIMELINE_HEIGHT }}>
+          {HOURS.map((hour) => (
+            <div
+              key={hour}
+              className="absolute left-0 right-0 text-right pr-3"
+              style={{ top: (hour - START_HOUR) * HOUR_HEIGHT - 6 }}
+            >
+              <span className="text-[10px] tabular-nums text-zinc-600">{pad(hour)}:00</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Events column */}
+        <div
+          className="relative flex-1 border-l border-white/[0.04]"
+          style={{ height: TIMELINE_HEIGHT }}
+          onClick={(e) => {
+            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            const hourFloat = y / HOUR_HEIGHT + START_HOUR;
+            const hour = Math.floor(hourFloat);
+            if (hour >= START_HOUR && hour < END_HOUR) openModalAtTime(hour);
+          }}
+        >
+          {/* Hour gridlines */}
+          {HOURS.map((hour) => (
+            <div
+              key={hour}
+              className="absolute left-0 right-0 border-t border-white/[0.04]"
+              style={{ top: (hour - START_HOUR) * HOUR_HEIGHT }}
+            />
+          ))}
+          {/* Half-hour gridlines (dashed) */}
+          {HOURS.map((hour) => (
+            <div
+              key={`half-${hour}`}
+              className="absolute left-0 right-0 border-t border-dashed border-white/[0.02]"
+              style={{ top: (hour - START_HOUR) * HOUR_HEIGHT + HOUR_HEIGHT / 2 }}
+            />
+          ))}
+
+          {/* Now indicator */}
+          {nowPx !== null && (
+            <div
+              className="absolute left-0 right-0 z-20 pointer-events-none"
+              style={{ top: nowPx }}
+            >
+              <div className="flex items-center">
+                <span className="w-2 h-2 rounded-full bg-red-400 -ml-[4px] shadow-[0_0_8px_rgba(248,113,113,0.6)]" />
+                <span className="flex-1 h-px bg-red-400/70" />
+              </div>
+            </div>
+          )}
+
+          {/* Events */}
+          {appts.map((apt) => (
+            <div key={apt.id} onClick={(e) => e.stopPropagation()}>
+              <EventBlock apt={apt} />
+            </div>
+          ))}
+
+          {/* Empty state */}
+          {appts.length === 0 && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <Calendar className="w-6 h-6 text-zinc-700 mb-2" strokeWidth={1.5} />
+              <p className="text-xs text-zinc-600 tracking-tight">Sem agendamentos. Clique em um horário para adicionar.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  /* ─── Render: Week View (7 timeline columns) ─── */
   const WeekView = () => (
     <div className="overflow-x-auto">
       <div className="min-w-[900px]">
         {/* Week header */}
-        <div className="grid grid-cols-[64px_repeat(7,1fr)] gap-0.5 mb-1">
+        <div className="grid grid-cols-[56px_repeat(7,1fr)] sticky top-0 bg-[#141414] z-10 pb-2 mb-1 border-b border-white/[0.04]">
           <div />
           {weekDates.map((d, i) => {
-            const isToday = formatDate(d) === formatDate(new Date());
+            const today = isToday(d);
+            const dayAppts = getAppointmentsForDay(d);
             return (
               <div key={i} className="text-center py-2">
-                <p className={`text-[11px] tracking-tight ${isToday ? "text-white" : "text-zinc-500"}`}>
+                <p className={`text-[11px] tracking-tight ${today ? "text-white" : "text-zinc-500"}`}>
                   {DIAS_SEMANA[i]}
                 </p>
-                <p className={`text-[15px] font-medium tabular-nums mt-0.5 ${isToday ? "text-white" : "text-zinc-300"}`}>
+                <p className={`text-[16px] font-medium tabular-nums mt-0.5 ${today ? "text-white" : "text-zinc-300"}`}>
                   {d.getDate()}
                 </p>
+                {dayAppts.length > 0 && (
+                  <p className="text-[10px] text-zinc-500 tabular-nums mt-0.5">{dayAppts.length} ag.</p>
+                )}
               </div>
             );
           })}
         </div>
 
-        {/* Time grid */}
-        {HOURS.map((hour) => (
-          <div key={hour} className="grid grid-cols-[64px_repeat(7,1fr)] gap-0.5">
-            <div className="text-right pr-2 pt-1">
-              <span className="text-[10px] font-mono text-gray-600">{pad(hour)}:00</span>
-            </div>
-            {weekDates.map((d, i) => {
-              const appts = getAppointmentsForSlot(d, hour);
-              return (
-                <div
-                  key={i}
-                  className="min-h-[52px] border-t border-white/5 p-0.5 hover:bg-white/[0.02] transition-colors cursor-pointer"
-                  onClick={() => {
-                    if (appts.length === 0) {
-                      setSelectedDate(d);
-                      openModalAtTime(hour);
-                    }
-                  }}
-                >
-                  {appts.map((apt) => {
-                    const st = STATUS_CONFIG[apt.status] || STATUS_CONFIG.confirmado;
-                    const barColor = STATUS_BAR_COLOR[apt.status] || STATUS_BAR_COLOR.confirmado;
-                    return (
-                      <div
-                        key={apt.id}
-                        className={`relative text-[10px] rounded-lg px-1.5 py-1 mb-0.5 border overflow-hidden ${st.bg} ${st.border}`}
-                      >
-                        <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${barColor}`} />
-                        <p className={`font-semibold truncate pl-1 ${st.text}`}>{apt.cliente_nome}</p>
-                        <p className="text-gray-500 truncate pl-1">{apt.servico_nome}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
+        {/* Timeline */}
+        <div className="grid grid-cols-[56px_repeat(7,1fr)]" style={{ height: TIMELINE_HEIGHT }}>
+          {/* Time rail */}
+          <div className="relative">
+            {HOURS.map((hour) => (
+              <div
+                key={hour}
+                className="absolute left-0 right-0 text-right pr-2"
+                style={{ top: (hour - START_HOUR) * HOUR_HEIGHT - 6 }}
+              >
+                <span className="text-[10px] tabular-nums text-zinc-600">{pad(hour)}:00</span>
+              </div>
+            ))}
           </div>
-        ))}
+
+          {/* Day columns */}
+          {weekDates.map((d, idx) => {
+            const appts = getAppointmentsForDay(d);
+            const nowPx = isToday(d) ? nowOffsetPx() : null;
+            return (
+              <div
+                key={idx}
+                className="relative border-l border-white/[0.04]"
+                onClick={(e) => {
+                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                  const y = e.clientY - rect.top;
+                  const hour = Math.floor(y / HOUR_HEIGHT) + START_HOUR;
+                  if (hour >= START_HOUR && hour < END_HOUR) {
+                    setSelectedDate(d);
+                    openModalAtTime(hour);
+                  }
+                }}
+              >
+                {HOURS.map((hour) => (
+                  <div
+                    key={hour}
+                    className="absolute left-0 right-0 border-t border-white/[0.04]"
+                    style={{ top: (hour - START_HOUR) * HOUR_HEIGHT }}
+                  />
+                ))}
+                {nowPx !== null && (
+                  <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: nowPx }}>
+                    <div className="flex items-center">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                      <span className="flex-1 h-px bg-red-400/70" />
+                    </div>
+                  </div>
+                )}
+                {appts.map((apt) => (
+                  <div key={apt.id} onClick={(e) => e.stopPropagation()}>
+                    <EventBlock apt={apt} compact />
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
