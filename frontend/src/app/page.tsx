@@ -10,11 +10,25 @@ export default function Home() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      router.push("/dashboard");
-    } else {
+    if (!token) {
       router.push("/login");
+      return;
     }
+    fetch("/api-backend/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (r) => {
+        if (!r.ok) throw new Error("auth");
+        const me = await r.json();
+        if (me.perfil === "admin_master") {
+          router.push("/admin");
+          return;
+        }
+        const segmento = me.segmento || "barbearia";
+        router.push(segmento === "hotel" ? "/hotel" : "/dashboard");
+      })
+      .catch(() => {
+        localStorage.removeItem("token");
+        router.push("/login");
+      });
   }, [router]);
 
   return (

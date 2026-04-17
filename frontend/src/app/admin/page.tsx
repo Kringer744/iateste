@@ -20,7 +20,7 @@ export default function AdminPage() {
   const [filtroEmpresa, setFiltroEmpresa] = useState<string>("");
 
   // Criar empresa
-  const [novaEmpresa, setNovaEmpresa] = useState({ nome: "", nome_fantasia: "", cnpj: "", email: "", telefone: "" });
+  const [novaEmpresa, setNovaEmpresa] = useState({ nome: "", nome_fantasia: "", cnpj: "", email: "", telefone: "", segmento: "barbearia" });
   const [criandoEmpresa, setCriandoEmpresa] = useState(false);
   const [msgEmpresa, setMsgEmpresa] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -76,7 +76,7 @@ export default function AdminPage() {
     try {
       await axios.post("/api-backend/auth/create-empresa", novaEmpresa, getConfig());
       setMsgEmpresa({ ok: true, text: `Empresa "${novaEmpresa.nome}" criada com sucesso!` });
-      setNovaEmpresa({ nome: "", nome_fantasia: "", cnpj: "", email: "", telefone: "" });
+      setNovaEmpresa({ nome: "", nome_fantasia: "", cnpj: "", email: "", telefone: "", segmento: "barbearia" });
       await fetchData();
     } catch (err: any) {
       setMsgEmpresa({ ok: false, text: err.response?.data?.detail || "Erro ao criar empresa." });
@@ -219,6 +219,34 @@ export default function AdminPage() {
               Nova Empresa
             </h2>
             <form onSubmit={handleCriarEmpresa} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1 block">Segmento *</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: "barbearia", label: "Barbearia" },
+                    { value: "hotel", label: "Hotel" },
+                  ].map((opt) => {
+                    const active = novaEmpresa.segmento === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setNovaEmpresa({ ...novaEmpresa, segmento: opt.value })}
+                        className={`py-3 px-4 rounded-xl text-sm font-semibold border transition-all ${
+                          active
+                            ? "bg-primary/10 border-primary/40 text-primary"
+                            : "bg-white/5 border-white/10 text-gray-400 hover:border-white/20"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] text-gray-500 mt-1.5">
+                  Define a árvore de rotas e as telas que os usuários desta empresa verão.
+                </p>
+              </div>
               <div>
                 <label className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1 block">Nome *</label>
                 <input
@@ -389,6 +417,9 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary uppercase tracking-wider">
+                      {emp.segmento === "hotel" ? "Hotel" : "Barbearia"}
+                    </span>
                     <span className={`text-xs font-bold px-3 py-1 rounded-full ${emp.status === "active" ? "bg-green-500/10 text-green-400" : "bg-gray-500/10 text-gray-400"}`}>
                       {emp.status === "active" ? "Ativo" : emp.status}
                     </span>

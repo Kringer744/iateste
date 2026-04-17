@@ -21,6 +21,9 @@ _LOGIN_RATE_WINDOW = 60  # segundos
 
 # ---------- schemas ----------
 
+SEGMENTOS_VALIDOS = {"barbearia", "hotel"}
+
+
 class CriarEmpresaRequest(BaseModel):
     nome: str
     nome_fantasia: Optional[str] = None
@@ -29,6 +32,7 @@ class CriarEmpresaRequest(BaseModel):
     telefone: Optional[str] = None
     website: Optional[str] = None
     plano: Optional[str] = None
+    segmento: Optional[str] = "barbearia"
 
 
 class AtualizarEmpresaRequest(BaseModel):
@@ -40,6 +44,7 @@ class AtualizarEmpresaRequest(BaseModel):
     website: Optional[str] = None
     plano: Optional[str] = None
     status: Optional[str] = None
+    segmento: Optional[str] = None
 
 class ConviteRequest(BaseModel):
     email: str
@@ -63,14 +68,17 @@ async def _buscar_empresa(empresa_id: int):
 async def _criar_empresa(body: "CriarEmpresaRequest") -> int:
     import src.core.database as _database
     import uuid as _uuid
+    segmento = (body.segmento or "barbearia").lower()
+    if segmento not in SEGMENTOS_VALIDOS:
+        raise HTTPException(status_code=400, detail=f"Segmento inválido. Use: {sorted(SEGMENTOS_VALIDOS)}")
     row = await _database.db_pool.fetchrow(
         """
-        INSERT INTO empresas (uuid, nome, nome_fantasia, cnpj, email, telefone, website, plano, status, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active', NOW())
+        INSERT INTO empresas (uuid, nome, nome_fantasia, cnpj, email, telefone, website, plano, segmento, status, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'active', NOW())
         RETURNING id
         """,
         str(_uuid.uuid4()), body.nome, body.nome_fantasia, body.cnpj,
-        body.email, body.telefone, body.website, body.plano
+        body.email, body.telefone, body.website, body.plano, segmento
     )
     return row["id"]
 
@@ -138,12 +146,22 @@ async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequ
             detail="E-mail ou senha incorretos",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    # Resolve segmento da empresa do usuário (barbearia | hotel)
+    empresa = await _buscar_empresa(user['empresa_id']) if user.get('empresa_id') else None
+    segmento = (empresa["segmento"] if empresa and empresa.get("segmento") else "barbearia")
+
     access_token = create_access_token(
-        data={"sub": user['email'], "perfil": user['perfil'], "empresa_id": user['empresa_id']},
+        data={
+            "sub": user['email'],
+            "perfil": user['perfil'],
+            "empresa_id": user['empresa_id'],
+            "segmento": segmento,
+        },
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
-    logger.info(f"✅ Login: {user['email']}")
-    return {"access_token": access_token, "token_type": "bearer"}
+    logger.info(f"✅ Login: {user['email']} (segmento={segmento})")
+    return {"access_token": access_token, "token_type": "bearer", "segmento": segmento}
 
 
 @router.get("/me")
@@ -151,12 +169,17 @@ async def read_users_me(token_payload: dict = Depends(get_current_user_token)):
     user = await buscar_usuario_por_email(token_payload.get("sub"))
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    empresa = await _buscar_empresa(user['empresa_id']) if user.get('empresa_id') else None
+    segmento = (empresa["segmento"] if empresa and empresa.get("segmento")
+                else token_payload.get("segmento") or "barbearia")
     return {
         "id": user['id'],
         "nome": user['nome'],
         "email": user['email'],
         "perfil": user['perfil'],
         "empresa_id": user['empresa_id'],
+        "segmento": segmento,
+        "empresa_nome": empresa["nome"] if empresa else None,
     }
 
 
@@ -167,7 +190,7 @@ async def listar_empresas(token_payload: dict = Depends(get_current_user_token))
         raise HTTPException(status_code=403, detail="Apenas admin_master pode listar empresas")
     import src.core.database as _database
     rows = await _database.db_pool.fetch(
-        "SELECT id, uuid, nome, nome_fantasia, cnpj, email, telefone, website, plano, status, created_at FROM empresas ORDER BY id"
+        "SELECT id, uuid, nome, nome_fantasia, cnpj, email, telefone, website, plano, segmento, status, created_at FROM empresas ORDER BY id"
     )
     return [dict(r) for r in rows]
 
@@ -195,7 +218,9 @@ async def atualizar_empresa(
     if token_payload.get("perfil") != "admin_master":
         raise HTTPException(status_code=403, detail="Apenas admin_master pode editar empresas")
 
-    _CAMPOS_PERMITIDOS = {"nome", "nome_fantasia", "cnpj", "email", "telefone", "website", "plano", "status"}
+    _CAMPOS_PERMITIDOS = {"nome", "nome_fantasia", "cnpj", "email", "telefone", "website", "plano", "status", "segmento"}
+    if body.segmento is not None and body.segmento not in SEGMENTOS_VALIDOS:
+        raise HTTPException(status_code=400, detail=f"Segmento inválido. Use: {sorted(SEGMENTOS_VALIDOS)}")
     fields = {k: v for k, v in body.dict().items() if v is not None and k in _CAMPOS_PERMITIDOS}
     if not fields:
         raise HTTPException(status_code=400, detail="Nenhum campo para atualizar")

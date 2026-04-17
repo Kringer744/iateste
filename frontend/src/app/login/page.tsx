@@ -35,7 +35,8 @@ export default function LoginPage() {
       if (meRes.data.perfil === "admin_master") {
         router.push("/admin");
       } else {
-        router.push("/dashboard");
+        const segmento = meRes.data.segmento || "barbearia";
+        router.push(segmento === "hotel" ? "/hotel" : "/dashboard");
       }
     } catch (err: any) {
       console.error(err);

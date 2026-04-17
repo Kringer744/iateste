@@ -4,8 +4,8 @@ export const dynamic = "force-dynamic";
 
 import { useSegmentGuard } from "@/hooks/useSegmentGuard";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { ready } = useSegmentGuard("barbearia");
+export default function HotelLayout({ children }: { children: React.ReactNode }) {
+  const { ready } = useSegmentGuard("hotel");
 
   if (!ready) {
     return (
