@@ -11,14 +11,14 @@ import DashboardSidebar from "@/components/DashboardSidebar";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const inputClass =
-  "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#E11D48]/40 focus:bg-slate-900/80 transition-all font-medium text-sm";
+  "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 focus:bg-slate-900/80 transition-all font-medium text-sm";
 const textareaClass = `${inputClass} resize-none leading-relaxed`;
 
 function Field({ label, icon: Icon, children }: { label: string; icon?: any; children: React.ReactNode }) {
   return (
     <div className="space-y-3">
       <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
-        {Icon && <Icon className="w-3.5 h-3.5 text-[#E11D48]/50" />} {label}
+        {Icon && <Icon className="w-3.5 h-3.5 text-[#FFFFFF]/50" />} {label}
       </label>
       {children}
     </div>
@@ -132,22 +132,22 @@ export default function BarbeirosPage() {
 
       <main className="flex-1 min-w-0 overflow-auto">
         {/* Decorative glow */}
-        <div className="fixed top-0 right-0 w-[600px] h-[400px] bg-[#E11D48]/3 rounded-full blur-[120px] pointer-events-none" />
+        <div className="fixed top-0 right-0 w-[600px] h-[400px] bg-[#FFFFFF]/3 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 p-8 lg:p-10 max-w-7xl mx-auto">
           {/* ── Header ───────────────────────────────────────────────── */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-1.5 h-5 bg-[#E11D48] rounded-full" />
-                <span className="text-[10px] font-black text-[#E11D48] uppercase tracking-[0.4em]">
+                <div className="w-1.5 h-5 bg-[#FFFFFF] rounded-full" />
+                <span className="text-[10px] font-black text-[#FFFFFF] uppercase tracking-[0.4em]">
                   Closer IA
                 </span>
               </div>
               <h1 className="text-4xl font-black tracking-tight">
                 <span
                   style={{
-                    background: "linear-gradient(135deg, #fff 0%, #E11D48 100%)",
+                    background: "linear-gradient(135deg, #fff 0%, #FFFFFF 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                   }}
@@ -164,7 +164,7 @@ export default function BarbeirosPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleOpenModal()}
-              className="flex items-center gap-3 bg-[#E11D48] text-black px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-[0_0_25px_rgba(225,29,72,0.3)] hover:shadow-[0_0_40px_rgba(225,29,72,0.4)] transition-all min-w-[200px] justify-center"
+              className="flex items-center gap-3 bg-[#FFFFFF] text-black px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-[0_0_25px_rgba(225,29,72,0.3)] hover:shadow-[0_0_40px_rgba(225,29,72,0.4)] transition-all min-w-[200px] justify-center"
             >
               <Plus className="w-5 h-5" />
               Novo Barbeiro
@@ -174,7 +174,7 @@ export default function BarbeirosPage() {
           {/* ── Loading state ────────────────────────────────────────── */}
           {loading ? (
             <div className="flex items-center justify-center py-32">
-              <Loader2 className="w-8 h-8 text-[#E11D48] animate-spin" />
+              <Loader2 className="w-8 h-8 text-[#FFFFFF] animate-spin" />
             </div>
           ) : barbeiros.length === 0 ? (
             /* ── Empty state ─────────────────────────────────────────── */
@@ -204,13 +204,13 @@ export default function BarbeirosPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 hover:border-[#E11D48]/20 transition-all group"
+                  className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 hover:border-[#FFFFFF]/20 transition-all group"
                 >
                   {/* Card header */}
                   <div className="flex items-start justify-between mb-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E11D48]/20 to-[#E11D48]/5 border border-[#E11D48]/20 flex items-center justify-center">
-                        <Scissors className="w-5 h-5 text-[#E11D48]" />
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FFFFFF]/20 to-[#FFFFFF]/5 border border-[#FFFFFF]/20 flex items-center justify-center">
+                        <Scissors className="w-5 h-5 text-[#FFFFFF]" />
                       </div>
                       <div>
                         <h3 className="font-bold text-white text-lg leading-tight">{b.nome}</h3>
@@ -253,7 +253,7 @@ export default function BarbeirosPage() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleOpenModal(b)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-[#E11D48]/10 border border-white/10 hover:border-[#E11D48]/30 rounded-xl text-xs font-bold text-slate-400 hover:text-[#E11D48] transition-all"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-[#FFFFFF]/10 border border-white/10 hover:border-[#FFFFFF]/30 rounded-xl text-xs font-bold text-slate-400 hover:text-[#FFFFFF] transition-all"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                       Editar
@@ -301,7 +301,7 @@ export default function BarbeirosPage() {
               {/* Modal header */}
               <div className="flex items-center justify-between px-8 py-6 border-b border-white/5">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E11D48] to-[#BE123C] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FFFFFF] to-[#E5E7EB] flex items-center justify-center">
                     <Scissors className="w-5 h-5 text-black" />
                   </div>
                   <div>
@@ -375,7 +375,7 @@ export default function BarbeirosPage() {
                     className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-sm font-black uppercase tracking-wider transition-all ${
                       success
                         ? "bg-emerald-500 text-white"
-                        : "bg-[#E11D48] text-black shadow-[0_0_25px_rgba(225,29,72,0.3)] hover:shadow-[0_0_40px_rgba(225,29,72,0.4)]"
+                        : "bg-[#FFFFFF] text-black shadow-[0_0_25px_rgba(225,29,72,0.3)] hover:shadow-[0_0_40px_rgba(225,29,72,0.4)]"
                     }`}
                   >
                     {saving ? (

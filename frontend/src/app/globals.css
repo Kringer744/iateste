@@ -1,13 +1,39 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════
+   LUNOR-INSPIRED DESIGN SYSTEM
+   Monochrome minimal dark premium
+   ═══════════════════════════════════════════════════════════ */
 :root {
-  --background: #09090f; /* Deep black */
-  --foreground: #f8f4e8;
-  --primary: #E11D48;   /* Primary Red */
-  --secondary: #BE123C; /* Dark Red */
-  --accent: #FB7185;    /* Bright Red accent (rose-400) */
-  --card: rgba(15, 12, 5, 0.65); /* Dark glass effect */
-  --border: rgba(225, 29, 72, 0.15);
+  /* Surfaces — pure blacks with subtle elevation steps */
+  --background: #0A0A0A;        /* Outer canvas */
+  --surface: #141414;           /* Sidebar, base cards */
+  --surface-2: #1A1A1A;         /* Elevated / hover */
+  --surface-3: #232323;         /* Higher elevation / active */
+  --surface-4: #2A2A2A;         /* Highest (pills, selects) */
+
+  /* Typography */
+  --foreground: #FFFFFF;        /* Primary text, numbers, titles */
+  --muted: #A1A1AA;             /* Secondary text */
+  --muted-2: #71717A;            /* Tertiary / icons */
+  --muted-3: #52525B;           /* Disabled / hints */
+
+  /* Borders — hairline whites */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.10);
+  --border-focus: rgba(255, 255, 255, 0.22);
+
+  /* Legacy tokens (mapped to monochrome) */
+  --primary: #FFFFFF;
+  --secondary: #E5E7EB;
+  --accent: #A1A1AA;
+  --card: #141414;
+
+  /* Tiny accent colors — used ONLY for folder icons, status dots, charts */
+  --accent-blue: #3B82F6;
+  --accent-yellow: #EAB308;
+  --accent-green: #10B981;
+  --accent-rose: #F43F5E;
 }
 
 @theme inline {
@@ -16,12 +42,19 @@
   --color-primary: var(--primary);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
-  --color-glass-card: var(--card);
-  --color-glass-border: var(--border);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-4: var(--surface-4);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-border-subtle: var(--border);
 
-  --shadow-neon-primary: 0 0 20px rgba(225, 29, 72, 0.4);
-  --shadow-neon-secondary: 0 0 20px rgba(190, 18, 60, 0.4);
-  --shadow-neon-strong: 0 0 35px rgba(225, 29, 72, 0.5);
+  --shadow-neon-primary: none;
+  --shadow-neon-secondary: none;
+  --shadow-neon-strong: none;
+  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset;
+  --shadow-elevated: 0 8px 24px -4px rgba(0, 0, 0, 0.5);
 }
 
 body {
@@ -29,50 +62,364 @@ body {
   color: var(--foreground);
   font-family: 'Inter', system-ui, sans-serif;
   overflow-x: hidden;
-  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01";
 }
 
-/* Glassmorphism Utilities */
-.glass {
-  background: var(--card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+/* ═══════════════════════════════════════════════════════════
+   SURFACES (replaces old glass utilities)
+   Monochrome + subtle inner highlight
+   ═══════════════════════════════════════════════════════════ */
+.glass,
+.glass-morphism,
+.glass-premium {
+  background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 16px;
 }
 
-.glass-morphism {
-  background: rgba(225, 29, 72, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(225, 29, 72, 0.12);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+.surface-base {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.surface-elevated {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
 }
 
+.surface-hover {
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.surface-hover:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TYPOGRAPHY
+   ═══════════════════════════════════════════════════════════ */
+.text-gradient,
+.text-gradient-premium {
+  color: var(--foreground);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+}
+
+.text-display {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.text-stat {
+  font-size: 2.75rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--foreground);
+}
+
+.text-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: -0.01em;
+}
+
+.text-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--muted-2);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BACKGROUND — pure black, no ambient glow
+   ═══════════════════════════════════════════════════════════ */
 .bg-mesh {
   background-color: var(--background);
-  background-image:
-    radial-gradient(at 0% 0%, rgba(225, 29, 72, 0.1) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(190, 18, 60, 0.07) 0px, transparent 45%),
-    radial-gradient(at 100% 100%, rgba(225, 29, 72, 0.06) 0px, transparent 45%),
-    radial-gradient(at 0% 100%, rgba(190, 18, 60, 0.08) 0px, transparent 45%);
+  background-image: none;
 }
 
+.bg-mesh-dense {
+  background-color: var(--background);
+  background-image: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NEON / GOLD — now monochrome (backwards compat)
+   ═══════════════════════════════════════════════════════════ */
 .neon-border {
-  border: 1px solid var(--primary);
-  box-shadow: 0 0 10px rgba(225, 29, 72, 0.3);
+  border: 1px solid var(--border-strong);
+  box-shadow: none;
 }
 
-.neon-glow {
-  text-shadow: 0 0 10px rgba(225, 29, 72, 0.5);
+.neon-glow,
+.neon-glow-soft {
+  text-shadow: none;
 }
 
-.gold-tint {
-  background: rgba(225, 29, 72, 0.05);
+.ring-gold {
+  box-shadow: 0 0 0 1px var(--border-strong);
 }
+
+.gold-tint,
+.gold-tint-hover:hover,
+.bg-gradient-gold-soft {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.bg-gradient-gold {
+  background: var(--surface-3);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════════════════════════ */
+.card-premium {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: border-color 200ms ease, background 200ms ease;
+}
+
+.card-premium:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+.card-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════════ */
+.btn-gold,
+.btn-primary {
+  background: var(--foreground);
+  color: var(--background);
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px 20px;
+  transition: opacity 200ms ease, transform 200ms ease;
+  border: none;
+}
+
+.btn-gold:hover,
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-gold:active,
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-ghost-gold,
+.btn-ghost {
+  background: var(--surface-2);
+  color: var(--foreground);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 10px 20px;
+  transition: background 200ms ease, border-color 200ms ease;
+  font-weight: 500;
+}
+
+.btn-ghost-gold:hover,
+.btn-ghost:hover {
+  background: var(--surface-3);
+  border-color: var(--border-focus);
+}
+
+.btn-pill {
+  background: var(--surface-3);
+  color: var(--foreground);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-weight: 500;
+  transition: background 200ms ease;
+}
+
+.btn-pill:hover {
+  background: var(--surface-4);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAV ITEMS (sidebar)
+   ═══════════════════════════════════════════════════════════ */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--muted);
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.nav-item:hover {
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.nav-item-active {
+  background: var(--surface-2);
+  color: var(--foreground);
+  font-weight: 500;
+  border: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEARCH INPUT
+   ═══════════════════════════════════════════════════════════ */
+.search-input {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--foreground);
+  font-size: 14px;
+}
+
+.search-input::placeholder {
+  color: var(--muted-2);
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  color: var(--muted);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLLBAR — minimal
+   ═══════════════════════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS (kept minimal)
+   ═══════════════════════════════════════════════════════════ */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    transparent 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2.4s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.pulse-gold {
+  animation: pulse-subtle 2s infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.fade-in-up {
+  animation: fade-in-up 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHART PATTERNS (diagonal hatched fill like Lunor)
+   ═══════════════════════════════════════════════════════════ */
+.chart-hatch {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.04) 1px,
+    transparent 1px,
+    transparent 8px
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FORM ELEMENTS
+   ═══════════════════════════════════════════════════════════ */
+input, textarea, select {
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+}
+
+button:focus-visible {
+  outline: 1px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOLDER / BADGE ACCENTS (tiny colored accents like reference)
+   ═══════════════════════════════════════════════════════════ */
+.folder-blue { color: var(--accent-blue); }
+.folder-gray { color: var(--muted-2); }
+.folder-yellow { color: var(--accent-yellow); }
+.folder-green { color: var(--accent-green); }
+.folder-rose { color: var(--accent-rose); }

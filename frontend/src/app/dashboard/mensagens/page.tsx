@@ -11,7 +11,7 @@ import DashboardSidebar from "@/components/DashboardSidebar";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const textareaClass =
-  "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#E11D48]/40 focus:ring-1 focus:ring-[#E11D48]/20 focus:bg-slate-900/80 transition-all font-medium text-sm resize-none leading-relaxed";
+  "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 focus:ring-1 focus:ring-[#FFFFFF]/20 focus:bg-slate-900/80 transition-all font-medium text-sm resize-none leading-relaxed";
 
 // ─── Sample data for previews ───────────────────────────────────────────────
 const SAMPLE_DATA: Record<string, string> = {
@@ -107,7 +107,7 @@ function WhatsAppPreview({ template }: { template: string }) {
     <div className="bg-[#0b141a] rounded-2xl p-4 border border-white/5">
       {/* WhatsApp header bar */}
       <div className="flex items-center gap-2 pb-3 mb-3 border-b border-white/5">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#E11D48] to-[#E11D48]/60 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FFFFFF] to-[#FFFFFF]/60 flex items-center justify-center">
           <Send className="w-3.5 h-3.5 text-white" />
         </div>
         <div>
@@ -290,22 +290,22 @@ export default function MensagensPage() {
 
       <main className="flex-1 min-w-0 overflow-auto">
         {/* Decorative glow */}
-        <div className="fixed top-0 right-0 w-[600px] h-[400px] bg-[#E11D48]/3 rounded-full blur-[120px] pointer-events-none" />
+        <div className="fixed top-0 right-0 w-[600px] h-[400px] bg-[#FFFFFF]/3 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 p-8 lg:p-10 max-w-4xl mx-auto">
           {/* ── Header ───────────────────────────────────────────────── */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-1.5 h-5 bg-[#E11D48] rounded-full" />
-                <span className="text-[10px] font-black text-[#E11D48] uppercase tracking-[0.4em]">
+                <div className="w-1.5 h-5 bg-[#FFFFFF] rounded-full" />
+                <span className="text-[10px] font-black text-[#FFFFFF] uppercase tracking-[0.4em]">
                   Closer IA
                 </span>
               </div>
               <h1 className="text-4xl font-black tracking-tight">
                 <span
                   style={{
-                    background: "linear-gradient(135deg, #fff 0%, #E11D48 100%)",
+                    background: "linear-gradient(135deg, #fff 0%, #FFFFFF 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                   }}
@@ -329,7 +329,7 @@ export default function MensagensPage() {
                     ? "bg-emerald-500 text-white shadow-[0_0_25px_rgba(16,185,129,0.3)]"
                     : saveStatus === "error"
                     ? "bg-red-600 text-white"
-                    : "bg-[#E11D48] text-white shadow-[0_0_25px_rgba(225,29,72,0.3)] hover:shadow-[0_0_40px_rgba(225,29,72,0.4)]"
+                    : "bg-[#FFFFFF] text-white shadow-[0_0_25px_rgba(225,29,72,0.3)] hover:shadow-[0_0_40px_rgba(225,29,72,0.4)]"
                 }`}
               >
                 {saving ? (
@@ -394,7 +394,7 @@ export default function MensagensPage() {
           {loading ? (
             <div className="flex items-center justify-center py-32">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-8 h-8 text-[#E11D48] animate-spin" />
+                <Loader2 className="w-8 h-8 text-[#FFFFFF] animate-spin" />
                 <span className="text-xs text-slate-500">Carregando mensagens...</span>
               </div>
             </div>
@@ -462,8 +462,8 @@ export default function MensagensPage() {
                             onClick={() => togglePreview(field.key)}
                             className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-[11px] font-bold transition-all uppercase tracking-wider ${
                               isPreview
-                                ? "bg-[#E11D48]/10 border-[#E11D48]/30 text-[#E11D48]"
-                                : "bg-white/5 hover:bg-[#E11D48]/10 border-white/10 hover:border-[#E11D48]/30 text-slate-400 hover:text-[#E11D48]"
+                                ? "bg-[#FFFFFF]/10 border-[#FFFFFF]/30 text-[#FFFFFF]"
+                                : "bg-white/5 hover:bg-[#FFFFFF]/10 border-white/10 hover:border-[#FFFFFF]/30 text-slate-400 hover:text-[#FFFFFF]"
                             }`}
                           >
                             {isPreview ? (
@@ -489,7 +489,7 @@ export default function MensagensPage() {
                             key={v}
                             type="button"
                             onClick={() => insertVariable(field.key, v)}
-                            className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[11px] font-mono font-bold text-slate-400 hover:text-white hover:bg-[#E11D48]/10 hover:border-[#E11D48]/20 transition-all flex items-center gap-1"
+                            className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[11px] font-mono font-bold text-slate-400 hover:text-white hover:bg-[#FFFFFF]/10 hover:border-[#FFFFFF]/20 transition-all flex items-center gap-1"
                           >
                             {copiedVar === v ? (
                               <Check className="w-2.5 h-2.5 text-emerald-400" />

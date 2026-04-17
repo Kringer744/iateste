@@ -42,7 +42,7 @@ function formatCurrency(value: number): string {
   return `$${value.toFixed(2)}`;
 }
 
-const neon = "#E11D48";
+const neon = "#FFFFFF";
 
 // ─── Custom Tooltip ────────────────────────────────────────────────
 function ChartTooltip({ active, payload, label }: any) {
@@ -69,13 +69,13 @@ function KPICard({ label, value, icon: Icon, delay = 0 }: {
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-slate-900/50 border border-white/5 rounded-3xl p-7 relative overflow-hidden group hover:border-[#E11D48]/20 transition-all"
+      className="bg-slate-900/50 border border-white/5 rounded-3xl p-7 relative overflow-hidden group hover:border-[#FFFFFF]/20 transition-all"
     >
       <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
         <Icon className="w-16 h-16" />
       </div>
-      <div className="w-12 h-12 rounded-2xl bg-[#E11D48]/10 border border-[#E11D48]/20 flex items-center justify-center mb-5">
-        <Icon className="w-6 h-6 text-[#E11D48]" />
+      <div className="w-12 h-12 rounded-2xl bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 flex items-center justify-center mb-5">
+        <Icon className="w-6 h-6 text-[#FFFFFF]" />
       </div>
       <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">{label}</p>
       <h3 className="text-3xl font-black">{value}</h3>
@@ -203,18 +203,18 @@ export default function InsightsPage() {
     <div className="min-h-screen bg-[#020617] text-white flex">
       <DashboardSidebar activePage="insights" />
       <main className="flex-1 min-w-0 overflow-auto">
-        <div className="fixed top-0 right-0 w-[500px] h-[400px] bg-[#E11D48]/3 rounded-full blur-[120px] pointer-events-none" />
+        <div className="fixed top-0 right-0 w-[500px] h-[400px] bg-[#FFFFFF]/3 rounded-full blur-[120px] pointer-events-none" />
         <div className="relative z-10 p-8 lg:p-10 max-w-7xl mx-auto pb-20">
 
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-1.5 h-5 bg-[#E11D48] rounded-full" />
-                <span className="text-[10px] font-black text-[#E11D48] uppercase tracking-[0.4em]">Closer IA</span>
+                <div className="w-1.5 h-5 bg-[#FFFFFF] rounded-full" />
+                <span className="text-[10px] font-black text-[#FFFFFF] uppercase tracking-[0.4em]">Closer IA</span>
                 <StatusBadge connected={connected} reconnecting={reconnecting} />
               </div>
-              <h1 className="text-4xl font-black tracking-tight" style={{ background: "linear-gradient(135deg,#fff 0%,#E11D48 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <h1 className="text-4xl font-black tracking-tight" style={{ background: "linear-gradient(135deg,#fff 0%,#FFFFFF 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 Inteligencia Estrategica
               </h1>
               <p className="text-slate-500 mt-2 text-sm italic">Analise profunda com dados em tempo real, graficos e metricas de IA.</p>
@@ -222,7 +222,7 @@ export default function InsightsPage() {
             <div className="flex p-1.5 bg-slate-900/60 border border-white/8 rounded-2xl">
               {["hoje", "7 dias", "30 dias"].map((r) => (
                 <button key={r} onClick={() => setSelectedRange(r)}
-                  className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${selectedRange === r ? "bg-[#E11D48] text-black" : "text-slate-500 hover:text-white"}`}>
+                  className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${selectedRange === r ? "bg-[#FFFFFF] text-black" : "text-slate-500 hover:text-white"}`}>
                   {r}
                 </button>
               ))}
@@ -231,7 +231,7 @@ export default function InsightsPage() {
 
           {loading ? (
             <div className="flex items-center justify-center py-40">
-              <Zap className="w-10 h-10 text-[#E11D48] animate-pulse" />
+              <Zap className="w-10 h-10 text-[#FFFFFF] animate-pulse" />
             </div>
           ) : (
             <>
@@ -244,7 +244,7 @@ export default function InsightsPage() {
                   {[
                     { label: "Ativas Agora", value: rtData.conversas_ativas, icon: Activity, color: "text-emerald-400" },
                     { label: "Pausadas", value: rtData.conversas_pausadas, icon: AlertTriangle, color: "text-amber-400" },
-                    { label: "Chamadas IA", value: rtData.ia.chamadas, icon: Brain, color: "text-[#E11D48]" },
+                    { label: "Chamadas IA", value: rtData.ia.chamadas, icon: Brain, color: "text-[#FFFFFF]" },
                     { label: "Tokens Hoje", value: rtData.ia.tokens.toLocaleString(), icon: Zap, color: "text-purple-400" },
                     { label: "Custo Hoje", value: formatCurrency(rtData.ia.custo_usd), icon: DollarSign, color: "text-green-400" },
                     { label: "Circuit Breaker", value: rtData.circuit_breaker, icon: rtData.circuit_breaker === "CLOSED" ? CheckCircle : Shield, color: rtData.circuit_breaker === "CLOSED" ? "text-emerald-400" : "text-red-400" },
@@ -277,7 +277,7 @@ export default function InsightsPage() {
                   className="bg-slate-900/50 border border-white/5 rounded-3xl p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <TrendingUp className="w-5 h-5 text-[#E11D48]" />
+                    <TrendingUp className="w-5 h-5 text-[#FFFFFF]" />
                     <h2 className="text-lg font-black">Conversas & Leads</h2>
                   </div>
                   <div className="h-[280px]">
@@ -339,7 +339,7 @@ export default function InsightsPage() {
                     className="bg-slate-900/50 border border-white/5 rounded-3xl p-8"
                   >
                     <div className="flex items-center gap-3 mb-8">
-                      <Building2 className="w-6 h-6 text-[#E11D48]" />
+                      <Building2 className="w-6 h-6 text-[#FFFFFF]" />
                       <h2 className="text-xl font-black">Performance por Unidade</h2>
                     </div>
                     <div className="space-y-6">
@@ -351,7 +351,7 @@ export default function InsightsPage() {
                           <div key={u.id} className="group">
                             <div className="flex items-center justify-between mb-2.5 px-1">
                               <div className="flex items-center gap-3">
-                                <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-[10px] font-black text-slate-500 group-hover:bg-[#E11D48]/20 group-hover:text-[#E11D48] transition-all">
+                                <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-[10px] font-black text-slate-500 group-hover:bg-[#FFFFFF]/20 group-hover:text-[#FFFFFF] transition-all">
                                   {String(i + 1).padStart(2, "0")}
                                 </div>
                                 <span className="font-bold text-sm">{u.nome}</span>
@@ -363,7 +363,7 @@ export default function InsightsPage() {
                             </div>
                             <div className="h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/[0.03]">
                               <motion.div initial={{ width: 0 }} animate={{ width }} transition={{ duration: 1.5, delay: 0.4 + i * 0.1, ease: "circOut" }}
-                                className="h-full bg-gradient-to-r from-blue-600 to-[#E11D48] rounded-full" />
+                                className="h-full bg-gradient-to-r from-blue-600 to-[#FFFFFF] rounded-full" />
                             </div>
                           </div>
                         );
@@ -379,11 +379,11 @@ export default function InsightsPage() {
                 <div className="lg:col-span-4 space-y-6">
                   <motion.div
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                    className="bg-[#E11D48]/5 border border-[#E11D48]/20 rounded-3xl p-8"
+                    className="bg-[#FFFFFF]/5 border border-[#FFFFFF]/20 rounded-3xl p-8"
                   >
                     <div className="flex items-center justify-between mb-6">
                       <h2 className="text-lg font-black uppercase tracking-widest">Funil de Conversao</h2>
-                      <Users className="w-5 h-5 text-[#E11D48] animate-pulse" />
+                      <Users className="w-5 h-5 text-[#FFFFFF] animate-pulse" />
                     </div>
                     {stages.length > 0 ? (
                       <FunnelChart stages={stages} />

@@ -13,14 +13,14 @@ import DashboardSidebar from "@/components/DashboardSidebar";
 
 // ─── Componentes auxiliares fora do componente principal ───────────────────────
 // IMPORTANTE: devem ficar FORA para evitar remount a cada keystroke
-const inputClass = "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#E11D48]/40 focus:bg-slate-900/80 transition-all font-medium text-sm";
+const inputClass = "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 focus:bg-slate-900/80 transition-all font-medium text-sm";
 const textareaClass = `${inputClass} resize-none leading-relaxed`;
 
 function Field({ label, icon: Icon, children }: { label: string; icon?: any; children: React.ReactNode }) {
   return (
     <div className="space-y-3">
       <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
-        {Icon && <Icon className="w-3.5 h-3.5 text-[#E11D48]/50" />} {label}
+        {Icon && <Icon className="w-3.5 h-3.5 text-[#FFFFFF]/50" />} {label}
       </label>
       {children}
     </div>
@@ -39,7 +39,7 @@ function TabBtn({
       onClick={() => setActiveTab(id)}
       className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
         activeTab === id
-          ? "bg-[#E11D48]/15 text-[#E11D48] border border-[#E11D48]/25"
+          ? "bg-[#FFFFFF]/15 text-[#FFFFFF] border border-[#FFFFFF]/25"
           : "text-slate-500 hover:text-slate-300 hover:bg-white/5 border border-transparent"
       }`}
     >
@@ -288,18 +288,18 @@ export default function UnitsPage() {
       {/* Main content */}
       <main className="flex-1 min-w-0 overflow-auto">
         {/* Decorative background */}
-        <div className="fixed top-0 right-0 w-[600px] h-[400px] bg-[#E11D48]/3 rounded-full blur-[120px] pointer-events-none" />
+        <div className="fixed top-0 right-0 w-[600px] h-[400px] bg-[#FFFFFF]/3 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 p-8 lg:p-10 max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-1.5 h-5 bg-[#E11D48] rounded-full" />
-                <span className="text-[10px] font-black text-[#E11D48] uppercase tracking-[0.4em]">Closer IA</span>
+                <div className="w-1.5 h-5 bg-[#FFFFFF] rounded-full" />
+                <span className="text-[10px] font-black text-[#FFFFFF] uppercase tracking-[0.4em]">Closer IA</span>
               </div>
               <h1 className="text-4xl font-black tracking-tight">
-                <span style={{ background: "linear-gradient(135deg, #fff 0%, #E11D48 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                <span style={{ background: "linear-gradient(135deg, #fff 0%, #FFFFFF 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                   Gestão de Unidades
                 </span>
               </h1>
@@ -312,7 +312,7 @@ export default function UnitsPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleOpenModal()}
-              className="flex items-center gap-3 bg-[#E11D48] text-black px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-[0_0_25px_rgba(225,29,72,0.3)] hover:shadow-[0_0_40px_rgba(225,29,72,0.4)] transition-all min-w-[200px] justify-center"
+              className="flex items-center gap-3 bg-[#FFFFFF] text-black px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-[0_0_25px_rgba(225,29,72,0.3)] hover:shadow-[0_0_40px_rgba(225,29,72,0.4)] transition-all min-w-[200px] justify-center"
             >
               <Plus className="w-5 h-5" />
               Nova Unidade
@@ -324,17 +324,17 @@ export default function UnitsPage() {
             <div className="flex items-center justify-center py-40">
               <div className="flex flex-col items-center gap-5">
                 <div className="relative w-16 h-16">
-                  <div className="absolute inset-0 rounded-full border-2 border-[#E11D48]/10 animate-ping" />
-                  <div className="absolute inset-0 rounded-full border-2 border-t-[#E11D48] animate-spin" />
-                  <Building2 className="absolute inset-0 m-auto w-7 h-7 text-[#E11D48]" />
+                  <div className="absolute inset-0 rounded-full border-2 border-[#FFFFFF]/10 animate-ping" />
+                  <div className="absolute inset-0 rounded-full border-2 border-t-[#FFFFFF] animate-spin" />
+                  <Building2 className="absolute inset-0 m-auto w-7 h-7 text-[#FFFFFF]" />
                 </div>
                 <p className="text-slate-500 text-sm font-medium tracking-widest animate-pulse uppercase">Carregando filiais...</p>
               </div>
             </div>
           ) : units.length === 0 ? (
             <div className="text-center py-40 rounded-[3rem] border border-dashed border-white/5 bg-white/[0.01]">
-              <div className="w-20 h-20 bg-[#E11D48]/5 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-[#E11D48]/10">
-                <Building2 className="w-10 h-10 text-[#E11D48]/30" />
+              <div className="w-20 h-20 bg-[#FFFFFF]/5 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-[#FFFFFF]/10">
+                <Building2 className="w-10 h-10 text-[#FFFFFF]/30" />
               </div>
               <p className="text-slate-400 font-black uppercase tracking-widest">Sem unidades ativas</p>
               <p className="text-slate-600 text-sm mt-2">Adicione sua primeira unidade para começar a operar.</p>
@@ -349,21 +349,21 @@ export default function UnitsPage() {
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="relative bg-slate-900/50 border border-white/5 hover:border-[#E11D48]/25 rounded-3xl overflow-hidden group transition-all duration-400"
+                    className="relative bg-slate-900/50 border border-white/5 hover:border-[#FFFFFF]/25 rounded-3xl overflow-hidden group transition-all duration-400"
                     style={{ backdropFilter: "blur(20px)" }}
                   >
                     {/* Glow top border on hover */}
-                    <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E11D48]/0 to-transparent group-hover:via-[#E11D48]/30 transition-all duration-500" />
+                    <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#FFFFFF]/0 to-transparent group-hover:via-[#FFFFFF]/30 transition-all duration-500" />
 
                     <div className="p-6">
                       <div className="flex justify-between items-start mb-6">
-                        <div className="w-12 h-12 rounded-2xl bg-[#E11D48]/10 border border-[#E11D48]/20 flex items-center justify-center text-[#E11D48] group-hover:scale-110 transition-transform duration-400">
+                        <div className="w-12 h-12 rounded-2xl bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 flex items-center justify-center text-[#FFFFFF] group-hover:scale-110 transition-transform duration-400">
                           <Building2 className="w-6 h-6" />
                         </div>
                         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleOpenModal(unit)}
-                            className="p-2.5 bg-white/5 hover:bg-[#E11D48]/15 rounded-xl text-slate-400 hover:text-[#E11D48] transition-all border border-white/5 hover:border-[#E11D48]/20"
+                            className="p-2.5 bg-white/5 hover:bg-[#FFFFFF]/15 rounded-xl text-slate-400 hover:text-[#FFFFFF] transition-all border border-white/5 hover:border-[#FFFFFF]/20"
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
@@ -376,11 +376,11 @@ export default function UnitsPage() {
                         </div>
                       </div>
 
-                      <h3 className="text-xl font-black group-hover:text-[#E11D48] transition-colors uppercase tracking-tight leading-tight mb-1">
+                      <h3 className="text-xl font-black group-hover:text-[#FFFFFF] transition-colors uppercase tracking-tight leading-tight mb-1">
                         {unit.nome}
                       </h3>
                       <div className="flex items-center gap-2 mb-5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#E11D48] shadow-[0_0_6px_#E11D48]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#FFFFFF] shadow-[0_0_6px_#FFFFFF]" />
                         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.25em]">
                           {unit.nome_abreviado || "Unidade"}
                         </p>
@@ -389,19 +389,19 @@ export default function UnitsPage() {
                       <div className="space-y-3 pt-5 border-t border-white/5">
                         {(unit.cidade || unit.estado) && (
                           <div className="flex items-center gap-3 text-xs text-slate-400">
-                            <MapPin className="w-3.5 h-3.5 text-[#E11D48]/40 shrink-0" />
+                            <MapPin className="w-3.5 h-3.5 text-[#FFFFFF]/40 shrink-0" />
                             <span className="truncate">{[unit.bairro, unit.cidade, unit.estado].filter(Boolean).join(", ")}</span>
                           </div>
                         )}
                         {unit.whatsapp && (
                           <div className="flex items-center gap-3 text-xs text-slate-400">
-                            <Phone className="w-3.5 h-3.5 text-[#E11D48]/40 shrink-0" />
+                            <Phone className="w-3.5 h-3.5 text-[#FFFFFF]/40 shrink-0" />
                             <span className="font-bold tracking-wider">{unit.whatsapp}</span>
                           </div>
                         )}
                         {unit.instagram && (
                           <div className="flex items-center gap-3 text-xs text-slate-400">
-                            <Instagram className="w-3.5 h-3.5 text-[#E11D48]/40 shrink-0" />
+                            <Instagram className="w-3.5 h-3.5 text-[#FFFFFF]/40 shrink-0" />
                             <span>@{unit.instagram}</span>
                           </div>
                         )}
@@ -424,7 +424,7 @@ export default function UnitsPage() {
 
                     <button
                       onClick={() => handleOpenModal(unit)}
-                      className="w-full px-6 py-4 bg-white/[0.02] hover:bg-[#E11D48]/5 border-t border-white/5 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 hover:text-[#E11D48] transition-all flex items-center justify-center gap-2 group/btn"
+                      className="w-full px-6 py-4 bg-white/[0.02] hover:bg-[#FFFFFF]/5 border-t border-white/5 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 hover:text-[#FFFFFF] transition-all flex items-center justify-center gap-2 group/btn"
                     >
                       <Eye className="w-4 h-4" />
                       Editar Configurações
@@ -457,10 +457,10 @@ export default function UnitsPage() {
             >
               {/* Modal Header */}
               <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-slate-900/30 relative flex-shrink-0">
-                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#E11D48]/30 to-transparent" />
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#FFFFFF]/30 to-transparent" />
                 <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-[#E11D48]/10 flex items-center justify-center border border-[#E11D48]/20">
-                    {editingUnit ? <Settings2 className="w-7 h-7 text-[#E11D48]" /> : <Plus className="w-7 h-7 text-[#E11D48]" />}
+                  <div className="w-14 h-14 rounded-2xl bg-[#FFFFFF]/10 flex items-center justify-center border border-[#FFFFFF]/20">
+                    {editingUnit ? <Settings2 className="w-7 h-7 text-[#FFFFFF]" /> : <Plus className="w-7 h-7 text-[#FFFFFF]" />}
                   </div>
                   <div>
                     <h2 className="text-2xl font-black tracking-tight">
@@ -494,7 +494,7 @@ export default function UnitsPage() {
                 {loadingUnit ? (
                   <div className="flex items-center justify-center py-20">
                     <div className="flex flex-col items-center gap-4">
-                      <Loader2 className="w-8 h-8 text-[#E11D48] animate-spin" />
+                      <Loader2 className="w-8 h-8 text-[#FFFFFF] animate-spin" />
                       <p className="text-slate-500 text-sm">Carregando dados da unidade...</p>
                     </div>
                   </div>
@@ -556,7 +556,7 @@ export default function UnitsPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <Field label="WhatsApp Business" icon={Phone}>
                           <div className="relative">
-                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#E11D48]/40" />
+                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
                             <input type="text" value={formData.whatsapp}
                               onChange={e => setFormData({ ...formData, whatsapp: e.target.value })}
                               className={`${inputClass} pl-12`} placeholder="(11) 9..." />
@@ -564,7 +564,7 @@ export default function UnitsPage() {
                         </Field>
                         <Field label="Instagram @usuario" icon={Instagram}>
                           <div className="relative">
-                            <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#E11D48]/40" />
+                            <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
                             <input type="text" value={formData.instagram}
                               onChange={e => setFormData({ ...formData, instagram: e.target.value })}
                               className={`${inputClass} pl-12`} placeholder="barbearia-centro" />
@@ -572,7 +572,7 @@ export default function UnitsPage() {
                         </Field>
                         <Field label="Website (URL)" icon={Globe}>
                           <div className="relative">
-                            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#E11D48]/40" />
+                            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
                             <input type="text" value={formData.site}
                               onChange={e => setFormData({ ...formData, site: e.target.value })}
                               className={`${inputClass} pl-12`} placeholder="https://..." />
@@ -580,7 +580,7 @@ export default function UnitsPage() {
                         </Field>
                         <Field label="Link de Reserva / Booking" icon={Sparkles}>
                           <div className="relative">
-                            <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#E11D48]/40" />
+                            <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
                             <input type="text" value={formData.link_matricula}
                               onChange={e => setFormData({ ...formData, link_matricula: e.target.value })}
                               className={`${inputClass} pl-12`} placeholder="https://..." />
@@ -609,20 +609,20 @@ export default function UnitsPage() {
                           <Field label="Foto da Estrutura / Cardápio (Imagem)" icon={ImagePlus}>
                             <div className="flex flex-col md:flex-row gap-6 items-start">
                               <div className="flex-1 w-full">
-                                <label className={`flex flex-col items-center justify-center w-full h-44 bg-slate-900/40 border-2 border-dashed ${uploadingField === "foto_grade" ? "border-[#E11D48]/50 animate-pulse" : "border-white/5 hover:border-[#E11D48]/30"} rounded-[2rem] ${uploadingField === "foto_grade" ? "cursor-wait pointer-events-none" : "cursor-pointer"} transition-all hover:bg-slate-900/60 overflow-hidden group`}>
+                                <label className={`flex flex-col items-center justify-center w-full h-44 bg-slate-900/40 border-2 border-dashed ${uploadingField === "foto_grade" ? "border-[#FFFFFF]/50 animate-pulse" : "border-white/5 hover:border-[#FFFFFF]/30"} rounded-[2rem] ${uploadingField === "foto_grade" ? "cursor-wait pointer-events-none" : "cursor-pointer"} transition-all hover:bg-slate-900/60 overflow-hidden group`}>
                                   {uploadingField === "foto_grade" ? (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6 w-full px-6">
-                                      <Loader2 className="w-10 h-10 text-[#E11D48] animate-spin mb-3" />
-                                      <p className="text-xs font-bold text-[#E11D48] uppercase tracking-widest mb-2">Enviando imagem...</p>
+                                      <Loader2 className="w-10 h-10 text-[#FFFFFF] animate-spin mb-3" />
+                                      <p className="text-xs font-bold text-[#FFFFFF] uppercase tracking-widest mb-2">Enviando imagem...</p>
                                       <div className="w-full max-w-[180px] bg-slate-800 rounded-full h-2 overflow-hidden">
-                                        <div className="h-full bg-gradient-to-r from-[#E11D48] to-[#a855f7] rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
+                                        <div className="h-full bg-gradient-to-r from-[#FFFFFF] to-[#a855f7] rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
                                       </div>
-                                      <p className="text-[10px] text-[#E11D48]/70 mt-1.5 font-mono">{uploadProgress}%</p>
+                                      <p className="text-[10px] text-[#FFFFFF]/70 mt-1.5 font-mono">{uploadProgress}%</p>
                                     </div>
                                   ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                      <div className="w-12 h-12 rounded-2xl bg-[#E11D48]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                        <Upload className="w-6 h-6 text-[#E11D48]" />
+                                      <div className="w-12 h-12 rounded-2xl bg-[#FFFFFF]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                        <Upload className="w-6 h-6 text-[#FFFFFF]" />
                                       </div>
                                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Clique para subir imagem</p>
                                       <p className="text-[10px] text-slate-600 mt-1 uppercase tracking-wider">PNG, JPG ou WEBP (Max 5MB)</p>
@@ -634,7 +634,7 @@ export default function UnitsPage() {
                               
                               {formData.foto_grade && (
                                 <div className="flex flex-col items-center gap-3">
-                                  <div className="w-44 h-44 rounded-[2rem] overflow-hidden border border-[#E11D48]/20 bg-slate-900 relative group/preview">
+                                  <div className="w-44 h-44 rounded-[2rem] overflow-hidden border border-[#FFFFFF]/20 bg-slate-900 relative group/preview">
                                     <img
                                       src={formData.foto_grade}
                                       alt="Preview Grade"
@@ -655,7 +655,7 @@ export default function UnitsPage() {
                                     type="button"
                                     onClick={handleExtrairGrade}
                                     disabled={extractingGrade}
-                                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all bg-gradient-to-r from-[#E11D48]/20 to-[#a855f7]/20 hover:from-[#E11D48]/30 hover:to-[#a855f7]/30 text-white border border-[#E11D48]/30 hover:border-[#a855f7]/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all bg-gradient-to-r from-[#FFFFFF]/20 to-[#a855f7]/20 hover:from-[#FFFFFF]/30 hover:to-[#a855f7]/30 text-white border border-[#FFFFFF]/30 hover:border-[#a855f7]/40 disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Usa IA para ler a imagem e preencher automaticamente o campo Serviços & Comodidades"
                                   >
                                     {extractingGrade ? (
@@ -681,25 +681,25 @@ export default function UnitsPage() {
                             <div className="flex flex-col md:flex-row gap-6 items-start">
                               <div className="flex-1 w-full flex flex-col gap-4">
                                 <div className="relative">
-                                  <Video className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#E11D48]/40" />
+                                  <Video className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FFFFFF]/40" />
                                   <input type="text" value={formData.link_tour_virtual}
                                     onChange={e => setFormData({ ...formData, link_tour_virtual: e.target.value })}
                                     className={`${inputClass} pl-12`} placeholder="Cole o link do vídeo (YouTube, Vimeo ou upload direto)" />
                                 </div>
-                                <label className={`flex flex-col items-center justify-center w-full ${uploadingField === "link_tour_virtual" ? "h-28" : "h-24"} bg-slate-900/40 border-2 border-dashed ${uploadingField === "link_tour_virtual" ? "border-[#E11D48]/50 animate-pulse" : "border-white/5 hover:border-[#E11D48]/30"} rounded-[1.5rem] ${uploadingField === "link_tour_virtual" ? "cursor-wait pointer-events-none" : "cursor-pointer"} transition-all hover:bg-slate-900/60 overflow-hidden group`}>
+                                <label className={`flex flex-col items-center justify-center w-full ${uploadingField === "link_tour_virtual" ? "h-28" : "h-24"} bg-slate-900/40 border-2 border-dashed ${uploadingField === "link_tour_virtual" ? "border-[#FFFFFF]/50 animate-pulse" : "border-white/5 hover:border-[#FFFFFF]/30"} rounded-[1.5rem] ${uploadingField === "link_tour_virtual" ? "cursor-wait pointer-events-none" : "cursor-pointer"} transition-all hover:bg-slate-900/60 overflow-hidden group`}>
                                   {uploadingField === "link_tour_virtual" ? (
                                     <div className="flex flex-col items-center justify-center py-2 w-full px-6">
-                                      <Loader2 className="w-7 h-7 text-[#E11D48] animate-spin mb-2" />
-                                      <p className="text-[10px] font-bold text-[#E11D48] uppercase tracking-widest mb-1.5">Enviando vídeo...</p>
+                                      <Loader2 className="w-7 h-7 text-[#FFFFFF] animate-spin mb-2" />
+                                      <p className="text-[10px] font-bold text-[#FFFFFF] uppercase tracking-widest mb-1.5">Enviando vídeo...</p>
                                       <div className="w-full max-w-[240px] bg-slate-800 rounded-full h-2 overflow-hidden">
-                                        <div className="h-full bg-gradient-to-r from-[#E11D48] to-[#a855f7] rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
+                                        <div className="h-full bg-gradient-to-r from-[#FFFFFF] to-[#a855f7] rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
                                       </div>
-                                      <p className="text-[10px] text-[#E11D48]/70 mt-1 font-mono">{uploadProgress}%</p>
+                                      <p className="text-[10px] text-[#FFFFFF]/70 mt-1 font-mono">{uploadProgress}%</p>
                                     </div>
                                   ) : (
                                     <div className="flex flex-col items-center justify-center py-2">
-                                      <div className="w-8 h-8 rounded-xl bg-[#E11D48]/10 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-                                        <Upload className="w-4 h-4 text-[#E11D48]" />
+                                      <div className="w-8 h-8 rounded-xl bg-[#FFFFFF]/10 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                                        <Upload className="w-4 h-4 text-[#FFFFFF]" />
                                       </div>
                                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ou suba um vídeo curto</p>
                                       <p className="text-[9px] text-slate-600 mt-0.5 uppercase tracking-wider">MP4 ou MOV (Max 100MB)</p>
@@ -710,9 +710,9 @@ export default function UnitsPage() {
                               </div>
                               
                               {formData.link_tour_virtual && (
-                                <div className="w-44 h-44 rounded-[2rem] overflow-hidden border border-[#E11D48]/20 bg-slate-900 relative group/preview">
+                                <div className="w-44 h-44 rounded-[2rem] overflow-hidden border border-[#FFFFFF]/20 bg-slate-900 relative group/preview">
                                   <div className="w-full h-full flex items-center justify-center bg-black/40">
-                                    <Video className="w-12 h-12 text-[#E11D48]/40" />
+                                    <Video className="w-12 h-12 text-[#FFFFFF]/40" />
                                   </div>
                                   <button
                                     type="button"
@@ -738,21 +738,21 @@ export default function UnitsPage() {
                     {activeTab === "extra" && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <Field label="Tarifas & Acomodações (JSON)" icon={ListChecks}>
-                          <textarea rows={6} className={`${textareaClass} font-mono text-xs text-[#E11D48]/80`}
+                          <textarea rows={6} className={`${textareaClass} font-mono text-xs text-[#FFFFFF]/80`}
                             value={typeof formData.planos === "object" ? JSON.stringify(formData.planos, null, 2) : formData.planos}
                             onChange={e => { try { setFormData({ ...formData, planos: JSON.parse(e.target.value) }); } catch { setFormData({ ...formData, planos: e.target.value }); } }}
                             placeholder={'{"Standard": 350.00, "Superior": 480.00, "Suite": 780.00}'}
                           />
                         </Field>
                         <Field label="Formas de Pagamento" icon={CreditCard}>
-                          <textarea rows={6} className={`${textareaClass} font-mono text-xs text-[#E11D48]/80`}
+                          <textarea rows={6} className={`${textareaClass} font-mono text-xs text-[#FFFFFF]/80`}
                             value={typeof formData.formas_pagamento === "object" ? JSON.stringify(formData.formas_pagamento, null, 2) : formData.formas_pagamento}
                             onChange={e => { try { setFormData({ ...formData, formas_pagamento: JSON.parse(e.target.value) }); } catch { setFormData({ ...formData, formas_pagamento: e.target.value }); } }}
                             placeholder={'{"Cartão": true, "Pix": true}'}
                           />
                         </Field>
                         <Field label="Infraestrutura" icon={Shield}>
-                          <textarea rows={6} className={`${textareaClass} font-mono text-xs text-[#E11D48]/80`}
+                          <textarea rows={6} className={`${textareaClass} font-mono text-xs text-[#FFFFFF]/80`}
                             value={typeof formData.infraestrutura === "object" ? JSON.stringify(formData.infraestrutura, null, 2) : formData.infraestrutura}
                             onChange={e => { try { setFormData({ ...formData, infraestrutura: JSON.parse(e.target.value) }); } catch { setFormData({ ...formData, infraestrutura: e.target.value }); } }}
                           />
@@ -824,7 +824,7 @@ export default function UnitsPage() {
                   form="unitForm"
                   type="submit"
                   disabled={saving || loadingUnit}
-                  className="bg-[#E11D48] text-black px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center gap-3 transition-all shadow-[0_0_25px_rgba(225,29,72,0.25)] disabled:opacity-50"
+                  className="bg-[#FFFFFF] text-black px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center gap-3 transition-all shadow-[0_0_25px_rgba(225,29,72,0.25)] disabled:opacity-50"
                 >
                   {saving ? <><Loader2 className="w-5 h-5 animate-spin" /> Salvando...</>
                     : success ? <><CheckCircle2 className="w-5 h-5" /> Salvo!</>

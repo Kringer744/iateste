@@ -12,7 +12,7 @@ import DashboardSidebar from "@/components/DashboardSidebar";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const inputClass =
-  "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#E11D48]/40 focus:bg-slate-900/80 transition-all font-medium text-sm";
+  "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 focus:bg-slate-900/80 transition-all font-medium text-sm";
 const textareaClass = `${inputClass} resize-none leading-relaxed`;
 
 const TIPO_LABELS: Record<string, { label: string; color: string }> = {
@@ -185,22 +185,22 @@ export default function ClientesPage() {
       <DashboardSidebar activePage="clientes" />
 
       <main className="flex-1 min-w-0 overflow-auto">
-        <div className="fixed top-0 right-0 w-[600px] h-[400px] bg-[#E11D48]/3 rounded-full blur-[120px] pointer-events-none" />
+        <div className="fixed top-0 right-0 w-[600px] h-[400px] bg-[#FFFFFF]/3 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 p-8 lg:p-10 max-w-7xl mx-auto">
           {/* ── Header ───────────────────────────────────────────────── */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-1.5 h-5 bg-[#E11D48] rounded-full" />
-                <span className="text-[10px] font-black text-[#E11D48] uppercase tracking-[0.4em]">
+                <div className="w-1.5 h-5 bg-[#FFFFFF] rounded-full" />
+                <span className="text-[10px] font-black text-[#FFFFFF] uppercase tracking-[0.4em]">
                   Closer IA
                 </span>
               </div>
               <h1 className="text-4xl font-black tracking-tight">
                 <span
                   style={{
-                    background: "linear-gradient(135deg, #fff 0%, #E11D48 100%)",
+                    background: "linear-gradient(135deg, #fff 0%, #FFFFFF 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                   }}
@@ -221,7 +221,7 @@ export default function ClientesPage() {
                 placeholder="Buscar por nome ou telefone..."
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                className="w-full bg-slate-900/60 border border-white/8 rounded-2xl pl-11 pr-5 py-3.5 text-white placeholder-slate-600 focus:outline-none focus:border-[#E11D48]/40 text-sm"
+                className="w-full bg-slate-900/60 border border-white/8 rounded-2xl pl-11 pr-5 py-3.5 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 text-sm"
               />
             </div>
           </div>
@@ -229,7 +229,7 @@ export default function ClientesPage() {
           {/* ── Loading state ────────────────────────────────────────── */}
           {loading ? (
             <div className="flex items-center justify-center py-32">
-              <Loader2 className="w-8 h-8 text-[#E11D48] animate-spin" />
+              <Loader2 className="w-8 h-8 text-[#FFFFFF] animate-spin" />
             </div>
           ) : filteredClientes.length === 0 ? (
             <motion.div
@@ -267,7 +267,7 @@ export default function ClientesPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.03 }}
-                    className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden hover:border-[#E11D48]/20 transition-all"
+                    className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden hover:border-[#FFFFFF]/20 transition-all"
                   >
                     {/* Client row */}
                     <div
@@ -275,8 +275,8 @@ export default function ClientesPage() {
                       onClick={() => toggleExpand(c.telefone)}
                     >
                       {/* Avatar */}
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E11D48]/20 to-[#E11D48]/5 border border-[#E11D48]/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-[#E11D48] font-black text-lg">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FFFFFF]/20 to-[#FFFFFF]/5 border border-[#FFFFFF]/20 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[#FFFFFF] font-black text-lg">
                           {c.nome.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -336,7 +336,7 @@ export default function ClientesPage() {
                                   e.stopPropagation();
                                   openModal(c.telefone, c.nome);
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-[#E11D48]/10 hover:bg-[#E11D48]/20 border border-[#E11D48]/20 rounded-xl text-xs font-bold text-[#E11D48] transition-all"
+                                className="flex items-center gap-2 px-4 py-2 bg-[#FFFFFF]/10 hover:bg-[#FFFFFF]/20 border border-[#FFFFFF]/20 rounded-xl text-xs font-bold text-[#FFFFFF] transition-all"
                               >
                                 <Plus className="w-3.5 h-3.5" />
                                 Nova Nota
@@ -345,7 +345,7 @@ export default function ClientesPage() {
 
                             {isLoadingNotas ? (
                               <div className="flex items-center justify-center py-8">
-                                <Loader2 className="w-5 h-5 text-[#E11D48] animate-spin" />
+                                <Loader2 className="w-5 h-5 text-[#FFFFFF] animate-spin" />
                               </div>
                             ) : clienteNotas.length === 0 ? (
                               <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -386,7 +386,7 @@ export default function ClientesPage() {
                                               e.stopPropagation();
                                               openModal(c.telefone, c.nome, nota);
                                             }}
-                                            className="p-2 hover:bg-white/5 rounded-lg text-slate-500 hover:text-[#E11D48] transition-all"
+                                            className="p-2 hover:bg-white/5 rounded-lg text-slate-500 hover:text-[#FFFFFF] transition-all"
                                           >
                                             <Pencil className="w-3.5 h-3.5" />
                                           </button>
@@ -448,7 +448,7 @@ export default function ClientesPage() {
               {/* Modal header */}
               <div className="flex items-center justify-between px-8 py-6 border-b border-white/5">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E11D48] to-[#BE123C] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FFFFFF] to-[#E5E7EB] flex items-center justify-center">
                     <StickyNote className="w-5 h-5 text-black" />
                   </div>
                   <div>
@@ -474,7 +474,7 @@ export default function ClientesPage() {
                 {/* Tipo */}
                 <div className="space-y-3">
                   <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
-                    <Tag className="w-3.5 h-3.5 text-[#E11D48]/50" /> Tipo
+                    <Tag className="w-3.5 h-3.5 text-[#FFFFFF]/50" /> Tipo
                   </label>
                   <div className="flex gap-3">
                     {Object.entries(TIPO_LABELS).map(([key, { label, color }]) => (
@@ -497,7 +497,7 @@ export default function ClientesPage() {
                 {/* Conteudo */}
                 <div className="space-y-3">
                   <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
-                    <StickyNote className="w-3.5 h-3.5 text-[#E11D48]/50" /> Conteudo
+                    <StickyNote className="w-3.5 h-3.5 text-[#FFFFFF]/50" /> Conteudo
                   </label>
                   <textarea
                     className={textareaClass}
@@ -533,7 +533,7 @@ export default function ClientesPage() {
                     className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-sm font-black uppercase tracking-wider transition-all ${
                       success
                         ? "bg-emerald-500 text-white"
-                        : "bg-[#E11D48] text-black shadow-[0_0_25px_rgba(225,29,72,0.3)] hover:shadow-[0_0_40px_rgba(225,29,72,0.4)]"
+                        : "bg-[#FFFFFF] text-black shadow-[0_0_25px_rgba(225,29,72,0.3)] hover:shadow-[0_0_40px_rgba(225,29,72,0.4)]"
                     }`}
                   >
                     {saving ? (

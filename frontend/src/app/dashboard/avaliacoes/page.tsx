@@ -53,7 +53,7 @@ function StarRating({ rating, size = 16 }: { rating: number; size?: number }) {
           size={size}
           className={
             i <= rating
-              ? "text-[#E11D48] fill-[#E11D48]"
+              ? "text-[#FFFFFF] fill-[#FFFFFF]"
               : "text-gray-600"
           }
         />
@@ -153,7 +153,7 @@ export default function AvaliacoesPage() {
         >
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-sm text-white hover:border-[#E11D48]/40 transition-all backdrop-blur-xl"
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-sm text-white hover:border-[#FFFFFF]/40 transition-all backdrop-blur-xl"
           >
             <span className={selectedBarbeiro ? "text-white" : "text-gray-500"}>
               {selectedBarbeiro ? selectedBarberName : "Selecione um barbeiro"}
@@ -184,7 +184,7 @@ export default function AvaliacoesPage() {
                     }}
                     className={`w-full text-left px-4 py-3 text-sm transition-all hover:bg-white/5 ${
                       selectedBarbeiro === b.id
-                        ? "text-[#E11D48] bg-[#E11D48]/5"
+                        ? "text-[#FFFFFF] bg-[#FFFFFF]/5"
                         : "text-gray-300"
                     }`}
                   >
@@ -204,7 +204,7 @@ export default function AvaliacoesPage() {
         {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-[#E11D48]/30 border-t-[#E11D48] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#FFFFFF]/30 border-t-[#FFFFFF] rounded-full animate-spin" />
           </div>
         )}
 
@@ -223,7 +223,7 @@ export default function AvaliacoesPage() {
               >
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-5xl font-bold text-[#E11D48]">
+                    <p className="text-5xl font-bold text-[#FFFFFF]">
                       {mediaData.media.toFixed(1)}
                     </p>
                     <div className="mt-2">
@@ -269,7 +269,7 @@ export default function AvaliacoesPage() {
                         {star}{" "}
                         <Star
                           size={12}
-                          className="text-[#E11D48] fill-[#E11D48]"
+                          className="text-[#FFFFFF] fill-[#FFFFFF]"
                         />
                       </span>
                       <div className="flex-1 h-2.5 bg-white/5 rounded-full overflow-hidden">
@@ -280,7 +280,7 @@ export default function AvaliacoesPage() {
                             duration: 0.8,
                             delay: 0.2 + star * 0.05,
                           }}
-                          className="h-full rounded-full bg-gradient-to-r from-[#E11D48] to-[#BE123C]"
+                          className="h-full rounded-full bg-gradient-to-r from-[#FFFFFF] to-[#E5E7EB]"
                         />
                       </div>
                       <span className="text-xs text-gray-500 w-12 text-right">
@@ -320,12 +320,12 @@ export default function AvaliacoesPage() {
                     initial="hidden"
                     animate="visible"
                     custom={idx + 3}
-                    className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 backdrop-blur-xl hover:border-[#E11D48]/20 transition-all"
+                    className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 backdrop-blur-xl hover:border-[#FFFFFF]/20 transition-all"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E11D48]/20 to-[#BE123C]/10 border border-[#E11D48]/20 flex items-center justify-center flex-shrink-0">
-                          <User size={18} className="text-[#E11D48]" />
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FFFFFF]/20 to-[#E5E7EB]/10 border border-[#FFFFFF]/20 flex items-center justify-center flex-shrink-0">
+                          <User size={18} className="text-[#FFFFFF]" />
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-white">
@@ -344,7 +344,7 @@ export default function AvaliacoesPage() {
                           )}
                         </div>
                       </div>
-                      <span className="text-lg font-bold text-[#E11D48] flex-shrink-0">
+                      <span className="text-lg font-bold text-[#FFFFFF] flex-shrink-0">
                         {av.nota}.0
                       </span>
                     </div>

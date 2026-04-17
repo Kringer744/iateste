@@ -154,11 +154,11 @@ export default function ServicosPage() {
         <header className="flex-shrink-0 bg-[#09090f]/80 backdrop-blur-xl border-b border-white/5 px-8 py-6 flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <Scissors className="w-5 h-5 text-[#E11D48]" />
+              <Scissors className="w-5 h-5 text-[#FFFFFF]" />
               <h1
                 className="text-xl font-black"
                 style={{
-                  background: "linear-gradient(135deg,#fff 0%,#E11D48 100%)",
+                  background: "linear-gradient(135deg,#fff 0%,#FFFFFF 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
@@ -180,7 +180,7 @@ export default function ServicosPage() {
                 placeholder="Buscar serviço..."
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#E11D48]/40 transition-colors w-56"
+                className="pl-10 pr-4 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FFFFFF]/40 transition-colors w-56"
               />
             </div>
 
@@ -188,7 +188,7 @@ export default function ServicosPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={openCreate}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#E11D48] to-[#BE123C] text-black font-bold text-sm rounded-xl shadow-lg shadow-[#E11D48]/20 hover:shadow-[#E11D48]/40 transition-shadow"
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#FFFFFF] to-[#E5E7EB] text-black font-bold text-sm rounded-xl shadow-lg shadow-[#FFFFFF]/20 hover:shadow-[#FFFFFF]/40 transition-shadow"
             >
               <Plus className="w-4 h-4" />
               Novo Serviço
@@ -200,7 +200,7 @@ export default function ServicosPage() {
         <div className="flex-1 overflow-y-auto p-8">
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <Loader2 className="w-8 h-8 text-[#E11D48] animate-spin" />
+              <Loader2 className="w-8 h-8 text-[#FFFFFF] animate-spin" />
             </div>
           ) : filtered.length === 0 ? (
             <motion.div
@@ -235,7 +235,7 @@ export default function ServicosPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
                     transition={{ delay: i * 0.03 }}
-                    className="grid grid-cols-12 gap-4 items-center px-6 py-4 bg-white/[0.03] border border-white/10 rounded-2xl hover:border-[#E11D48]/20 transition-all group"
+                    className="grid grid-cols-12 gap-4 items-center px-6 py-4 bg-white/[0.03] border border-white/10 rounded-2xl hover:border-[#FFFFFF]/20 transition-all group"
                   >
                     {/* Nome */}
                     <div className="col-span-3">
@@ -257,8 +257,8 @@ export default function ServicosPage() {
 
                     {/* Preco */}
                     <div className="col-span-2 flex items-center justify-center gap-1.5">
-                      <DollarSign className="w-3.5 h-3.5 text-[#E11D48]" />
-                      <span className="text-sm font-bold text-[#E11D48]">
+                      <DollarSign className="w-3.5 h-3.5 text-[#FFFFFF]" />
+                      <span className="text-sm font-bold text-[#FFFFFF]">
                         {formatPreco(servico.preco)}
                       </span>
                     </div>
@@ -280,7 +280,7 @@ export default function ServicosPage() {
                     <div className="col-span-1 flex items-center justify-center gap-2">
                       <button
                         onClick={() => openEdit(servico)}
-                        className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-[#E11D48] transition-colors"
+                        className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-[#FFFFFF] transition-colors"
                         title="Editar"
                       >
                         <Pencil className="w-4 h-4" />
@@ -351,7 +351,7 @@ export default function ServicosPage() {
                     value={form.nome}
                     onChange={(e) => setForm({ ...form, nome: e.target.value })}
                     placeholder="Ex: Corte Masculino"
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#E11D48]/40 transition-colors"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FFFFFF]/40 transition-colors"
                   />
                 </div>
 
@@ -365,7 +365,7 @@ export default function ServicosPage() {
                     onChange={(e) => setForm({ ...form, descricao: e.target.value })}
                     placeholder="Descreva o serviço..."
                     rows={3}
-                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#E11D48]/40 transition-colors resize-none"
+                    className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FFFFFF]/40 transition-colors resize-none"
                   />
                 </div>
 
@@ -382,7 +382,7 @@ export default function ServicosPage() {
                       onChange={(e) =>
                         setForm({ ...form, duracao_minutos: parseInt(e.target.value) || 0 })
                       }
-                      className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#E11D48]/40 transition-colors"
+                      className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FFFFFF]/40 transition-colors"
                     />
                   </div>
                   <div>
@@ -397,7 +397,7 @@ export default function ServicosPage() {
                       onChange={(e) =>
                         setForm({ ...form, preco: parseFloat(e.target.value) || 0 })
                       }
-                      className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#E11D48]/40 transition-colors"
+                      className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FFFFFF]/40 transition-colors"
                     />
                   </div>
                 </div>
@@ -416,7 +416,7 @@ export default function ServicosPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#E11D48] to-[#BE123C] text-black font-bold text-sm rounded-xl shadow-lg shadow-[#E11D48]/20 hover:shadow-[#E11D48]/40 transition-shadow disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#FFFFFF] to-[#E5E7EB] text-black font-bold text-sm rounded-xl shadow-lg shadow-[#FFFFFF]/20 hover:shadow-[#FFFFFF]/40 transition-shadow disabled:opacity-50"
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   {editingId ? "Salvar Alterações" : "Criar Serviço"}

@@ -186,7 +186,7 @@ export default function IntegrationsPage() {
     finally { setSyncingId(null); }
   };
 
-  const inputClass = "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#E11D48]/40 transition-all font-medium text-sm";
+  const inputClass = "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 transition-all font-medium text-sm";
   const tabs = [
     { id: "chatwoot", label: "Chatwoot", icon: MessageSquare },
     { id: "evo", label: "EVO W12", icon: Zap },
@@ -197,17 +197,17 @@ export default function IntegrationsPage() {
     <div className="min-h-screen bg-[#020617] text-white flex">
       <DashboardSidebar activePage="integrations" />
       <main className="flex-1 min-w-0 overflow-auto">
-        <div className="fixed top-0 right-0 w-[500px] h-[400px] bg-[#E11D48]/3 rounded-full blur-[120px] pointer-events-none" />
+        <div className="fixed top-0 right-0 w-[500px] h-[400px] bg-[#FFFFFF]/3 rounded-full blur-[120px] pointer-events-none" />
         <div className="relative z-10 p-8 lg:p-10 max-w-6xl mx-auto pb-20">
 
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-1.5 h-5 bg-[#E11D48] rounded-full" />
-                <span className="text-[10px] font-black text-[#E11D48] uppercase tracking-[0.4em]">Closer IA</span>
+                <div className="w-1.5 h-5 bg-[#FFFFFF] rounded-full" />
+                <span className="text-[10px] font-black text-[#FFFFFF] uppercase tracking-[0.4em]">Closer IA</span>
               </div>
-              <h1 className="text-4xl font-black tracking-tight" style={{ background: "linear-gradient(135deg,#fff 0%,#E11D48 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <h1 className="text-4xl font-black tracking-tight" style={{ background: "linear-gradient(135deg,#fff 0%,#FFFFFF 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 Closer Connect
               </h1>
               <p className="text-slate-500 mt-2 text-sm italic">Gerencie as pontes entre seus canais de atendimento e o EVO.</p>
@@ -215,7 +215,7 @@ export default function IntegrationsPage() {
             {!isAdminMaster && activeTab !== "evo" && (
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 onClick={handleSave} disabled={saving}
-                className="bg-[#E11D48] text-black px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center gap-3 shadow-[0_0_25px_rgba(225,29,72,0.3)] disabled:opacity-50">
+                className="bg-[#FFFFFF] text-black px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center gap-3 shadow-[0_0_25px_rgba(225,29,72,0.3)] disabled:opacity-50">
                 {saving ? <><Loader2 className="w-5 h-5 animate-spin" />Salvando...</>
                   : success ? <><CheckCircle2 className="w-5 h-5" />Sincronizado!</>
                   : <><Save className="w-5 h-5" />Salvar Configuração</>}
@@ -236,7 +236,7 @@ export default function IntegrationsPage() {
 
               return (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl font-black uppercase tracking-widest text-[11px] border transition-all ${activeTab === tab.id ? "bg-[#E11D48]/15 text-[#E11D48] border-[#E11D48]/25" : "text-slate-500 border-white/5 hover:text-white hover:bg-white/5"}`}>
+                  className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl font-black uppercase tracking-widest text-[11px] border transition-all ${activeTab === tab.id ? "bg-[#FFFFFF]/15 text-[#FFFFFF] border-[#FFFFFF]/25" : "text-slate-500 border-white/5 hover:text-white hover:bg-white/5"}`}>
                   <tab.icon className="w-4 h-4" /> {tab.label}
                   {tab.id === "evo" && evoUnits.filter(u => u.configurado && u.ativo).length > 0 && (
                     <span className="bg-emerald-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded-full ml-1">
@@ -264,7 +264,7 @@ export default function IntegrationsPage() {
               </p>
             </div>
           ) : loading ? (
-            <div className="flex items-center justify-center py-40"><Loader2 className="w-8 h-8 text-[#E11D48] animate-spin" /></div>
+            <div className="flex items-center justify-center py-40"><Loader2 className="w-8 h-8 text-[#FFFFFF] animate-spin" /></div>
           ) : (
             <AnimatePresence mode="wait">
 
@@ -274,7 +274,7 @@ export default function IntegrationsPage() {
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h3 className="text-xl font-black uppercase flex items-center gap-3">
-                        <Zap className="w-5 h-5 text-[#E11D48]" /> EVO W12 — Por Unidade
+                        <Zap className="w-5 h-5 text-[#FFFFFF]" /> EVO W12 — Por Unidade
                       </h3>
                       <p className="text-xs text-slate-500 mt-1">Cada unidade tem seu próprio subdomínio e chave secreta EVO.</p>
                     </div>
@@ -282,7 +282,7 @@ export default function IntegrationsPage() {
 
                   {evoLoading ? (
                     <div className="flex items-center justify-center py-24">
-                      <Loader2 className="w-7 h-7 text-[#E11D48] animate-spin" />
+                      <Loader2 className="w-7 h-7 text-[#FFFFFF] animate-spin" />
                     </div>
                   ) : evoUnits.length === 0 ? (
                     <div className="text-center py-24 rounded-3xl border border-dashed border-white/5 bg-white/[0.01]">
@@ -298,12 +298,12 @@ export default function IntegrationsPage() {
                           initial={{ opacity: 0, y: 16 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.05 }}
-                          className="bg-slate-900/50 border border-white/5 hover:border-[#E11D48]/20 rounded-3xl overflow-hidden group transition-all duration-300"
+                          className="bg-slate-900/50 border border-white/5 hover:border-[#FFFFFF]/20 rounded-3xl overflow-hidden group transition-all duration-300"
                         >
                           <div className="p-6">
                             <div className="flex items-start justify-between mb-4">
-                              <div className="w-12 h-12 rounded-2xl bg-[#E11D48]/10 border border-[#E11D48]/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <Zap className="w-6 h-6 text-[#E11D48]" />
+                              <div className="w-12 h-12 rounded-2xl bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <Zap className="w-6 h-6 text-[#FFFFFF]" />
                               </div>
                               {unit.configurado ? (
                                 unit.ativo
@@ -319,18 +319,18 @@ export default function IntegrationsPage() {
                                 </span>
                               )}
                             </div>
-                            <h3 className="text-base font-black uppercase tracking-tight group-hover:text-[#E11D48] transition-colors mb-1 leading-tight">
+                            <h3 className="text-base font-black uppercase tracking-tight group-hover:text-[#FFFFFF] transition-colors mb-1 leading-tight">
                               {unit.unidade_nome}
                             </h3>
                             <div className="mt-4 space-y-2 pt-4 border-t border-white/5">
                               <div className="flex items-center gap-2 text-xs text-slate-500">
-                                <Globe className="w-3.5 h-3.5 text-[#E11D48]/40 shrink-0" />
+                                <Globe className="w-3.5 h-3.5 text-[#FFFFFF]/40 shrink-0" />
                                 {unit.config.dns
                                   ? <span className="font-mono text-slate-300">{unit.config.dns}.w12app.com.br</span>
                                   : <span className="italic text-slate-600">Subdomínio não definido</span>}
                               </div>
                               <div className="flex items-center gap-2 text-xs text-slate-500">
-                                <ShieldCheck className="w-3.5 h-3.5 text-[#E11D48]/40 shrink-0" />
+                                <ShieldCheck className="w-3.5 h-3.5 text-[#FFFFFF]/40 shrink-0" />
                                 {unit.config.secret_key
                                   ? <span className="font-mono">{"•".repeat(12)}</span>
                                   : <span className="italic text-slate-600">Chave não definida</span>}
@@ -338,7 +338,7 @@ export default function IntegrationsPage() {
                             </div>
                           </div>
                           <button onClick={() => openEvoModal(unit)}
-                            className="w-full px-6 py-4 bg-white/[0.02] hover:bg-[#E11D48]/5 border-t border-white/5 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 hover:text-[#E11D48] transition-all flex items-center justify-center gap-2">
+                            className="w-full px-6 py-4 bg-white/[0.02] hover:bg-[#FFFFFF]/5 border-t border-white/5 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 hover:text-[#FFFFFF] transition-all flex items-center justify-center gap-2">
                             <Settings2 className="w-4 h-4" />
                             {unit.configurado ? "Editar Configuração" : "Configurar Agora"}
                           </button>
@@ -347,9 +347,9 @@ export default function IntegrationsPage() {
                     </div>
                   )}
 
-                  <div className="mt-8 p-5 bg-[#E11D48]/5 border border-[#E11D48]/10 rounded-2xl flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-[#E11D48]/10 flex items-center justify-center animate-pulse flex-shrink-0">
-                      <Zap className="w-5 h-5 text-[#E11D48]" />
+                  <div className="mt-8 p-5 bg-[#FFFFFF]/5 border border-[#FFFFFF]/10 rounded-2xl flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-[#FFFFFF]/10 flex items-center justify-center animate-pulse flex-shrink-0">
+                      <Zap className="w-5 h-5 text-[#FFFFFF]" />
                     </div>
                     <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 italic">
                       Cada unidade usa seu próprio subdomínio EVO. O bot roteia automaticamente para o CRM correto.
@@ -457,8 +457,8 @@ export default function IntegrationsPage() {
                   </div>
 
                   {/* ── Form Card ── */}
-                  <div className="bg-slate-900/50 border border-white/5 rounded-3xl p-10 hover:border-[#E11D48]/15 transition-all relative overflow-hidden">
-                    <div className="absolute -top-20 -right-20 w-60 h-60 bg-[#E11D48]/5 blur-[100px] rounded-full pointer-events-none" />
+                  <div className="bg-slate-900/50 border border-white/5 rounded-3xl p-10 hover:border-[#FFFFFF]/15 transition-all relative overflow-hidden">
+                    <div className="absolute -top-20 -right-20 w-60 h-60 bg-[#FFFFFF]/5 blur-[100px] rounded-full pointer-events-none" />
 
                     <form onSubmit={handleSave} className="space-y-10 relative z-10">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
@@ -471,7 +471,7 @@ export default function IntegrationsPage() {
                         <div className="flex items-center gap-4 bg-slate-900/60 px-5 py-3 rounded-2xl border border-white/5">
                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Integração Ativa</span>
                           <button type="button" onClick={toggleAtivo}
-                            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all ${currentConfig.ativo ? "bg-[#E11D48]" : "bg-slate-700"}`}>
+                            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all ${currentConfig.ativo ? "bg-[#FFFFFF]" : "bg-slate-700"}`}>
                             <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-all shadow ${currentConfig.ativo ? "translate-x-6" : "translate-x-1"}`} />
                           </button>
                         </div>
@@ -482,7 +482,7 @@ export default function IntegrationsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                           <div className="space-y-3">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                              <Globe className="w-3 h-3 text-[#E11D48]" />URL Host
+                              <Globe className="w-3 h-3 text-[#FFFFFF]" />URL Host
                               {currentConfig.config.url && currentConfig.id && <span className="text-emerald-400/60 ml-auto">Salvo</span>}
                             </label>
                             <input type="text" value={currentConfig.config.url || ""} onChange={e => updateField("url", e.target.value)}
@@ -491,7 +491,7 @@ export default function IntegrationsPage() {
                           </div>
                           <div className="space-y-3">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                              <Hash className="w-3 h-3 text-[#E11D48]" />Account ID
+                              <Hash className="w-3 h-3 text-[#FFFFFF]" />Account ID
                               {currentConfig.config.account_id && currentConfig.id && <span className="text-emerald-400/60 ml-auto">Salvo</span>}
                             </label>
                             <input type="text" value={currentConfig.config.account_id || ""} onChange={e => updateField("account_id", e.target.value)}
@@ -500,7 +500,7 @@ export default function IntegrationsPage() {
                           </div>
                           <div className="md:col-span-2 space-y-3">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                              <ShieldCheck className="w-3 h-3 text-[#E11D48]" />Private Access Token
+                              <ShieldCheck className="w-3 h-3 text-[#FFFFFF]" />Private Access Token
                               {currentConfig.config.access_token && currentConfig.id && <span className="text-emerald-400/60 ml-auto">Salvo</span>}
                             </label>
                             <div className="relative">
@@ -518,7 +518,7 @@ export default function IntegrationsPage() {
                           </div>
                           <div className="md:col-span-2 space-y-3">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                              <KeyRound className="w-3 h-3 text-[#E11D48]" />Segredo do Webhook
+                              <KeyRound className="w-3 h-3 text-[#FFFFFF]" />Segredo do Webhook
                               {currentConfig.config.webhook_secret && currentConfig.id && <span className="text-emerald-400/60 ml-auto">Salvo</span>}
                             </label>
                             <div className="relative">
@@ -544,7 +544,7 @@ export default function IntegrationsPage() {
                             </p>
                           </div>
                           <button type="button" onClick={toggleChatwootAI} disabled={togglingAi}
-                            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all disabled:opacity-60 ${chatwootAiActive ? "bg-[#E11D48]" : "bg-slate-700"}`}>
+                            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all disabled:opacity-60 ${chatwootAiActive ? "bg-[#FFFFFF]" : "bg-slate-700"}`}>
                             <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-all shadow ${chatwootAiActive ? "translate-x-6" : "translate-x-1"}`} />
                           </button>
                         </div>
@@ -555,7 +555,7 @@ export default function IntegrationsPage() {
                         <div className="grid grid-cols-1 gap-8">
                           <div className="space-y-3">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                              <Globe className="w-3 h-3 text-[#E11D48]" />Endpoint API
+                              <Globe className="w-3 h-3 text-[#FFFFFF]" />Endpoint API
                               {currentConfig.config.url && currentConfig.id && <span className="text-emerald-400/60 ml-auto">Salvo</span>}
                             </label>
                             <input type="text" value={currentConfig.config.url || ""} onChange={e => updateField("url", e.target.value)}
@@ -564,7 +564,7 @@ export default function IntegrationsPage() {
                           </div>
                           <div className="space-y-3">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                              <ShieldCheck className="w-3 h-3 text-[#E11D48]" />Instance Secure Token
+                              <ShieldCheck className="w-3 h-3 text-[#FFFFFF]" />Instance Secure Token
                               {currentConfig.config.token && currentConfig.id && <span className="text-emerald-400/60 ml-auto">Salvo</span>}
                             </label>
                             <div className="relative">
@@ -583,9 +583,9 @@ export default function IntegrationsPage() {
                         </div>
                       )}
 
-                      <div className="p-5 bg-[#E11D48]/5 border border-[#E11D48]/10 rounded-2xl flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-[#E11D48]/10 flex items-center justify-center animate-pulse flex-shrink-0">
-                          <Zap className="w-5 h-5 text-[#E11D48]" />
+                      <div className="p-5 bg-[#FFFFFF]/5 border border-[#FFFFFF]/10 rounded-2xl flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-[#FFFFFF]/10 flex items-center justify-center animate-pulse flex-shrink-0">
+                          <Zap className="w-5 h-5 text-[#FFFFFF]" />
                         </div>
                         <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 italic">
                           Conexão Segura: Tokens criptografados end-to-end e validados via Circuit Breaker em tempo real.
@@ -615,10 +615,10 @@ export default function IntegrationsPage() {
               className="bg-[#080f1e] border border-white/10 rounded-[2.5rem] w-full max-w-lg overflow-hidden relative shadow-2xl"
             >
               <div className="px-8 py-7 border-b border-white/5 flex items-center justify-between bg-slate-900/30 relative">
-                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#E11D48]/30 to-transparent" />
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#FFFFFF]/30 to-transparent" />
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[#E11D48]/10 flex items-center justify-center border border-[#E11D48]/20">
-                    <Zap className="w-6 h-6 text-[#E11D48]" />
+                  <div className="w-12 h-12 rounded-2xl bg-[#FFFFFF]/10 flex items-center justify-center border border-[#FFFFFF]/20">
+                    <Zap className="w-6 h-6 text-[#FFFFFF]" />
                   </div>
                   <div>
                     <h2 className="text-lg font-black tracking-tight">EVO W12</h2>
@@ -642,7 +642,7 @@ export default function IntegrationsPage() {
                     </p>
                   </div>
                   <button type="button" onClick={() => setEvoForm({ ...evoForm, ativo: !evoForm.ativo })}
-                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all ${evoForm.ativo ? "bg-[#E11D48]" : "bg-slate-700"}`}>
+                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all ${evoForm.ativo ? "bg-[#FFFFFF]" : "bg-slate-700"}`}>
                     <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-all shadow ${evoForm.ativo ? "translate-x-6" : "translate-x-1"}`} />
                   </button>
                 </div>
@@ -650,7 +650,7 @@ export default function IntegrationsPage() {
                 {evoModal.unit.configurado && (
                   <button type="button" onClick={() => handleEvoSync(evoModal.unit!.unidade_id)}
                     disabled={syncingId !== null}
-                    className="w-full py-4 bg-[#E11D48]/5 border border-[#E11D48]/20 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#E11D48] hover:bg-[#E11D48]/10 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+                    className="w-full py-4 bg-[#FFFFFF]/5 border border-[#FFFFFF]/20 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#FFFFFF] hover:bg-[#FFFFFF]/10 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
                     {syncingId === evoModal.unit.unidade_id
                       ? <><Loader2 className="w-4 h-4 animate-spin" /> Sincronizando...</>
                       : <><Zap className="w-4 h-4" /> Forçar Sincronização de Planos</>}
@@ -659,30 +659,30 @@ export default function IntegrationsPage() {
 
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                    <Globe className="w-3 h-3 text-[#E11D48]" /> Subdomínio (DNS)
+                    <Globe className="w-3 h-3 text-[#FFFFFF]" /> Subdomínio (DNS)
                   </label>
                   <div className="relative">
                     <input type="text" value={evoForm.dns}
                       onChange={e => setEvoForm({ ...evoForm, dns: e.target.value })}
-                      className="w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#E11D48]/40 transition-all font-medium text-sm pr-40"
+                      className="w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 transition-all font-medium text-sm pr-40"
                       placeholder="minha-unidade" />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-mono">.w12app.com.br</span>
                   </div>
                   {evoForm.dns && (
-                    <p className="text-[10px] text-[#E11D48]/60 font-mono pl-1">→ {evoForm.dns}.w12app.com.br</p>
+                    <p className="text-[10px] text-[#FFFFFF]/60 font-mono pl-1">→ {evoForm.dns}.w12app.com.br</p>
                   )}
                 </div>
 
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                    <ShieldCheck className="w-3 h-3 text-[#E11D48]" /> EVO Secret Key
+                    <ShieldCheck className="w-3 h-3 text-[#FFFFFF]" /> EVO Secret Key
                   </label>
                   <div className="relative">
                     <input
                       type={showTokens["evo_secret"] ? "text" : "password"}
                       value={evoForm.secret_key}
                       onChange={e => setEvoForm({ ...evoForm, secret_key: e.target.value })}
-                      className="w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#E11D48]/40 transition-all font-mono text-sm pr-14"
+                      className="w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 transition-all font-mono text-sm pr-14"
                       placeholder="••••••••••••••••••" />
                     <button type="button" onClick={() => toggleTokenVisibility("evo_secret")}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors p-1">
@@ -693,11 +693,11 @@ export default function IntegrationsPage() {
 
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                    <Building2 className="w-3 h-3 text-[#E11D48]" /> ID Branch (Evo)
+                    <Building2 className="w-3 h-3 text-[#FFFFFF]" /> ID Branch (Evo)
                   </label>
                   <input type="text" value={evoForm.idBranch}
                     onChange={e => setEvoForm({ ...evoForm, idBranch: e.target.value })}
-                    className="w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#E11D48]/40 transition-all font-medium text-sm"
+                    className="w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 transition-all font-medium text-sm"
                     placeholder="Ex: 1" />
                   <p className="text-[9px] text-slate-600 pl-1 uppercase tracking-tight">Obrigatório para contas Multiunidade.</p>
                 </div>
@@ -710,7 +710,7 @@ export default function IntegrationsPage() {
                 </button>
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   type="button" disabled={evoSaving} onClick={handleEvoSave}
-                  className="bg-[#E11D48] text-black px-10 py-3 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(225,29,72,0.25)] disabled:opacity-50">
+                  className="bg-[#FFFFFF] text-black px-10 py-3 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(225,29,72,0.25)] disabled:opacity-50">
                   {evoSaving
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Salvando...</>
                     : evoSuccess

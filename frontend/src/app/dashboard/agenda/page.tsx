@@ -50,13 +50,13 @@ const DIAS_SEMANA = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"];
 const DIAS_SEMANA_FULL = ["Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado", "Domingo"];
 
 const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string; border: string }> = {
-  confirmado: { bg: "bg-[#E11D48]/15", text: "text-[#E11D48]", label: "Confirmado", border: "border-[#E11D48]/30" },
+  confirmado: { bg: "bg-[#FFFFFF]/15", text: "text-[#FFFFFF]", label: "Confirmado", border: "border-[#FFFFFF]/30" },
   concluido: { bg: "bg-emerald-500/15", text: "text-emerald-400", label: "Concluido", border: "border-emerald-500/30" },
   cancelado: { bg: "bg-red-500/15", text: "text-red-400", label: "Cancelado", border: "border-red-500/30" },
 };
 
 const STATUS_BAR_COLOR: Record<string, string> = {
-  confirmado: "bg-[#E11D48]",
+  confirmado: "bg-[#FFFFFF]",
   concluido: "bg-emerald-500",
   cancelado: "bg-red-500",
 };
@@ -359,9 +359,9 @@ export default function AgendaPage() {
               ) : (
                 <button
                   onClick={() => openModalAtTime(hour)}
-                  className="w-full h-full min-h-[56px] rounded-xl border border-dashed border-white/5 hover:border-[#E11D48]/30 hover:bg-[#E11D48]/5 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"
+                  className="w-full h-full min-h-[56px] rounded-xl border border-dashed border-white/5 hover:border-[#FFFFFF]/30 hover:bg-[#FFFFFF]/5 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"
                 >
-                  <Plus className="w-4 h-4 text-[#E11D48]/50" />
+                  <Plus className="w-4 h-4 text-[#FFFFFF]/50" />
                 </button>
               )}
             </div>
@@ -382,10 +382,10 @@ export default function AgendaPage() {
             const isToday = formatDate(d) === formatDate(new Date());
             return (
               <div key={i} className="text-center py-2">
-                <p className={`text-[10px] uppercase font-bold tracking-wider ${isToday ? "text-[#E11D48]" : "text-gray-600"}`}>
+                <p className={`text-[10px] uppercase font-bold tracking-wider ${isToday ? "text-[#FFFFFF]" : "text-gray-600"}`}>
                   {DIAS_SEMANA[i]}
                 </p>
-                <p className={`text-lg font-bold ${isToday ? "text-[#E11D48]" : "text-white"}`}>
+                <p className={`text-lg font-bold ${isToday ? "text-[#FFFFFF]" : "text-white"}`}>
                   {d.getDate()}
                 </p>
               </div>
@@ -451,7 +451,7 @@ export default function AgendaPage() {
           >
             <div>
               <h1 className="text-3xl font-black tracking-tight">
-                <span className="text-[#E11D48]">Agenda</span>
+                <span className="text-[#FFFFFF]">Agenda</span>
               </h1>
               <p className="text-sm text-gray-500 mt-1">Gerencie agendamentos e horarios dos barbeiros</p>
             </div>
@@ -461,7 +461,7 @@ export default function AgendaPage() {
                 setModalData({ barbeiro_id: "", servico_id: "", data_hora: "", cliente_nome: "", cliente_telefone: "" });
                 setShowModal(true);
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#E11D48] text-black font-bold text-sm hover:bg-[#BE123C] transition-all shadow-lg shadow-[#E11D48]/20"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FFFFFF] text-black font-bold text-sm hover:bg-[#E5E7EB] transition-all shadow-lg shadow-[#FFFFFF]/20"
             >
               <Plus className="w-4 h-4" />
               Novo Agendamento
@@ -486,7 +486,7 @@ export default function AgendaPage() {
                 </button>
                 <button
                   onClick={goToday}
-                  className="px-4 py-2 rounded-xl text-sm font-bold bg-[#E11D48]/10 text-[#E11D48] border border-[#E11D48]/20 hover:bg-[#E11D48]/20 transition-all"
+                  className="px-4 py-2 rounded-xl text-sm font-bold bg-[#FFFFFF]/10 text-[#FFFFFF] border border-[#FFFFFF]/20 hover:bg-[#FFFFFF]/20 transition-all"
                 >
                   Hoje
                 </button>
@@ -510,7 +510,7 @@ export default function AgendaPage() {
                       onClick={() => setView(v)}
                       className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
                         view === v
-                          ? "bg-[#E11D48] text-black shadow-lg shadow-[#E11D48]/20"
+                          ? "bg-[#FFFFFF] text-black shadow-lg shadow-[#FFFFFF]/20"
                           : "text-gray-500 hover:text-white"
                       }`}
                     >
@@ -523,7 +523,7 @@ export default function AgendaPage() {
                 <select
                   value={filteredBarbeiro}
                   onChange={(e) => setFilteredBarbeiro(e.target.value ? Number(e.target.value) : "")}
-                  className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#E11D48]/50 transition-all appearance-none cursor-pointer"
+                  className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50 transition-all appearance-none cursor-pointer"
                 >
                   <option value="" className="bg-[#1a1a2e]">Todos os barbeiros</option>
                   {barbeiros.map((b) => (
@@ -543,7 +543,7 @@ export default function AgendaPage() {
           >
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-8 border-2 border-[#E11D48] border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-[#FFFFFF] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : (
               <AnimatePresence mode="wait">
@@ -571,8 +571,8 @@ export default function AgendaPage() {
               onClick={() => setShowHorarios(!showHorarios)}
               className="flex items-center gap-3 w-full text-left"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#E11D48]/10 border border-[#E11D48]/20 flex items-center justify-center">
-                <Settings2 className="w-5 h-5 text-[#E11D48]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 flex items-center justify-center">
+                <Settings2 className="w-5 h-5 text-[#FFFFFF]" />
               </div>
               <div className="flex-1">
                 <h2 className="text-lg font-bold text-white">Horarios Disponiveis</h2>
@@ -595,7 +595,7 @@ export default function AgendaPage() {
                     <select
                       value={horarioBarbeiro}
                       onChange={(e) => setHorarioBarbeiro(e.target.value ? Number(e.target.value) : "")}
-                      className="bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#E11D48]/50 transition-all w-full sm:w-auto"
+                      className="bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50 transition-all w-full sm:w-auto"
                     >
                       <option value="" className="bg-[#1a1a2e]">Selecione um barbeiro</option>
                       {barbeiros.map((b) => (
@@ -608,7 +608,7 @@ export default function AgendaPage() {
                         {/* Existing schedule */}
                         {loadingHorarios ? (
                           <div className="flex items-center justify-center py-8">
-                            <div className="w-6 h-6 border-2 border-[#E11D48] border-t-transparent rounded-full animate-spin" />
+                            <div className="w-6 h-6 border-2 border-[#FFFFFF] border-t-transparent rounded-full animate-spin" />
                           </div>
                         ) : (
                           <div className="space-y-2">
@@ -627,10 +627,10 @@ export default function AgendaPage() {
                                   {blocos.map((b) => (
                                     <div
                                       key={b.id}
-                                      className="flex items-center gap-2 bg-[#E11D48]/10 border border-[#E11D48]/20 rounded-lg px-3 py-1.5"
+                                      className="flex items-center gap-2 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-lg px-3 py-1.5"
                                     >
-                                      <Clock className="w-3 h-3 text-[#E11D48]" />
-                                      <span className="text-xs font-semibold text-[#E11D48]">
+                                      <Clock className="w-3 h-3 text-[#FFFFFF]" />
+                                      <span className="text-xs font-semibold text-[#FFFFFF]">
                                         {b.hora_inicio} - {b.hora_fim}
                                       </span>
                                       <button
@@ -654,7 +654,7 @@ export default function AgendaPage() {
                             <select
                               value={newHorario.dia_semana}
                               onChange={(e) => setNewHorario({ ...newHorario, dia_semana: Number(e.target.value) })}
-                              className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#E11D48]/50"
+                              className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50"
                             >
                               {DIAS_SEMANA.map((d, i) => (
                                 <option key={i} value={i} className="bg-[#1a1a2e]">{DIAS_SEMANA_FULL[i]}</option>
@@ -667,7 +667,7 @@ export default function AgendaPage() {
                               type="time"
                               value={newHorario.hora_inicio}
                               onChange={(e) => setNewHorario({ ...newHorario, hora_inicio: e.target.value })}
-                              className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#E11D48]/50"
+                              className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50"
                             />
                           </div>
                           <div>
@@ -676,13 +676,13 @@ export default function AgendaPage() {
                               type="time"
                               value={newHorario.hora_fim}
                               onChange={(e) => setNewHorario({ ...newHorario, hora_fim: e.target.value })}
-                              className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#E11D48]/50"
+                              className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50"
                             />
                           </div>
                           <button
                             onClick={handleAddHorario}
                             disabled={savingHorario}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E11D48] text-black font-bold text-sm hover:bg-[#BE123C] transition-all disabled:opacity-50 shadow-lg shadow-[#E11D48]/20"
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFFFFF] text-black font-bold text-sm hover:bg-[#E5E7EB] transition-all disabled:opacity-50 shadow-lg shadow-[#FFFFFF]/20"
                           >
                             {savingHorario ? (
                               <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -724,8 +724,8 @@ export default function AgendaPage() {
                 {/* Modal header */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#E11D48]/10 border border-[#E11D48]/20 flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-[#E11D48]" />
+                    <div className="w-10 h-10 rounded-xl bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-[#FFFFFF]" />
                     </div>
                     <h3 className="text-lg font-bold text-white">Novo Agendamento</h3>
                   </div>
@@ -748,7 +748,7 @@ export default function AgendaPage() {
                         value={modalData.cliente_nome}
                         onChange={(e) => setModalData({ ...modalData, cliente_nome: e.target.value })}
                         placeholder="Nome completo"
-                        className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#E11D48]/50 transition-all"
+                        className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FFFFFF]/50 transition-all"
                       />
                     </div>
                   </div>
@@ -763,7 +763,7 @@ export default function AgendaPage() {
                         value={modalData.cliente_telefone}
                         onChange={(e) => setModalData({ ...modalData, cliente_telefone: e.target.value })}
                         placeholder="(00) 00000-0000"
-                        className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#E11D48]/50 transition-all"
+                        className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FFFFFF]/50 transition-all"
                       />
                     </div>
                   </div>
@@ -774,7 +774,7 @@ export default function AgendaPage() {
                     <select
                       value={modalData.barbeiro_id}
                       onChange={(e) => setModalData({ ...modalData, barbeiro_id: e.target.value })}
-                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#E11D48]/50 transition-all"
+                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50 transition-all"
                     >
                       <option value="" className="bg-[#1a1a2e]">Selecione o barbeiro</option>
                       {barbeiros.map((b) => (
@@ -789,7 +789,7 @@ export default function AgendaPage() {
                     <select
                       value={modalData.servico_id}
                       onChange={(e) => setModalData({ ...modalData, servico_id: e.target.value })}
-                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#E11D48]/50 transition-all"
+                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50 transition-all"
                     >
                       <option value="" className="bg-[#1a1a2e]">Selecione o servico</option>
                       {servicos.map((s) => (
@@ -807,7 +807,7 @@ export default function AgendaPage() {
                       type="datetime-local"
                       value={modalData.data_hora}
                       onChange={(e) => setModalData({ ...modalData, data_hora: e.target.value })}
-                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#E11D48]/50 transition-all"
+                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50 transition-all"
                     />
                   </div>
                 </div>
@@ -823,7 +823,7 @@ export default function AgendaPage() {
                   <button
                     onClick={handleCreateAgendamento}
                     disabled={saving || !modalData.cliente_nome || !modalData.barbeiro_id || !modalData.servico_id || !modalData.data_hora}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#E11D48] text-black hover:bg-[#BE123C] transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#E11D48]/20 flex items-center justify-center gap-2"
+                    className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#FFFFFF] text-black hover:bg-[#E5E7EB] transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FFFFFF]/20 flex items-center justify-center gap-2"
                   >
                     {saving ? (
                       <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />

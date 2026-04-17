@@ -195,7 +195,7 @@ function TemplateModal({ open, initial, unidades, onClose, onSave }: TemplateMod
                 <input
                   value={nome} onChange={e => setNome(e.target.value)}
                   placeholder="Ex: Lembrete inicial, Oferta especial..."
-                  className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#E11D48]/50"
+                  className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FFFFFF]/50"
                 />
               </div>
 
@@ -203,13 +203,13 @@ function TemplateModal({ open, initial, unidades, onClose, onSave }: TemplateMod
               <div>
                 <label className="block text-xs text-slate-400 mb-1.5">
                   Mensagem template
-                  <span className="ml-2 text-slate-600">— use <code className="text-[#E11D48]/80">{"{{nome}}"}</code> e <code className="text-[#E11D48]/80">{"{{unidade}}"}</code></span>
+                  <span className="ml-2 text-slate-600">— use <code className="text-[#FFFFFF]/80">{"{{nome}}"}</code> e <code className="text-[#FFFFFF]/80">{"{{unidade}}"}</code></span>
                 </label>
                 <textarea
                   value={mensagem} onChange={e => setMensagem(e.target.value)}
                   rows={4}
                   placeholder={"Oi {{nome}}! 👋 Vimos que você se interessou pela academia {{unidade}}..."}
-                  className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#E11D48]/50 resize-none"
+                  className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FFFFFF]/50 resize-none"
                 />
                 <p className="text-xs text-slate-600 mt-1">A IA reescreve a mensagem em tom natural adaptado ao perfil do lead.</p>
               </div>
@@ -225,11 +225,11 @@ function TemplateModal({ open, initial, unidades, onClose, onSave }: TemplateMod
                 <div className="flex gap-2">
                   <input
                     type="number" min={1} value={delayVal} onChange={e => setDelayVal(Number(e.target.value))}
-                    className="w-24 bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#E11D48]/50"
+                    className="w-24 bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFFFFF]/50"
                   />
                   <select
                     value={delayUnit} onChange={e => setDelayUnit(e.target.value as any)}
-                    className="flex-1 bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#E11D48]/50"
+                    className="flex-1 bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFFFFF]/50"
                   >
                     <option value="minutos">minutos</option>
                     <option value="horas">horas</option>
@@ -244,14 +244,14 @@ function TemplateModal({ open, initial, unidades, onClose, onSave }: TemplateMod
                   <label className="block text-xs text-slate-400 mb-1.5">Posição na sequência</label>
                   <input
                     type="number" min={1} value={ordem} onChange={e => setOrdem(Number(e.target.value))}
-                    className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#E11D48]/50"
+                    className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFFFFF]/50"
                   />
                 </div>
                 <div>
                   <label className="block text-xs text-slate-400 mb-1.5">Unidade (global se vazio)</label>
                   <select
                     value={unidadeId} onChange={e => setUnidadeId(e.target.value === "" ? "" : Number(e.target.value))}
-                    className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#E11D48]/50"
+                    className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFFFFF]/50"
                   >
                     <option value="">Todas as unidades</option>
                     {unidades.map(u => <option key={u.id} value={u.id}>{u.nome}</option>)}
@@ -264,7 +264,7 @@ function TemplateModal({ open, initial, unidades, onClose, onSave }: TemplateMod
                 <span className="text-sm text-slate-300">Ativar template</span>
                 <button onClick={() => setAtivo(!ativo)} className="transition-colors">
                   {ativo
-                    ? <ToggleRight className="w-6 h-6 text-[#E11D48]" />
+                    ? <ToggleRight className="w-6 h-6 text-[#FFFFFF]" />
                     : <ToggleLeft className="w-6 h-6 text-slate-600" />}
                 </button>
               </div>
@@ -276,7 +276,7 @@ function TemplateModal({ open, initial, unidades, onClose, onSave }: TemplateMod
               </button>
               <button
                 onClick={handleSave} disabled={saving || !nome.trim() || !mensagem.trim()}
-                className="flex-1 py-2.5 rounded-xl bg-[#E11D48] text-slate-950 font-semibold text-sm hover:bg-[#E11D48]/90 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl bg-[#FFFFFF] text-slate-950 font-semibold text-sm hover:bg-[#FFFFFF]/90 transition-colors disabled:opacity-50"
               >
                 {saving ? "Salvando..." : "Salvar"}
               </button>
@@ -390,8 +390,8 @@ export default function FollowupsPage() {
         <header className="flex-shrink-0 border-b border-white/5 bg-slate-950/80 backdrop-blur-md px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#E11D48]/10 border border-[#E11D48]/20 flex items-center justify-center">
-                <Send className="w-4 h-4 text-[#E11D48]" />
+              <div className="w-8 h-8 rounded-lg bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 flex items-center justify-center">
+                <Send className="w-4 h-4 text-[#FFFFFF]" />
               </div>
               <div>
                 <h1 className="text-lg font-semibold text-white leading-none">Follow-ups</h1>
@@ -408,7 +408,7 @@ export default function FollowupsPage() {
                 onClick={() => { setActiveTab(id); setOffset(0); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
                   activeTab === id
-                    ? "bg-[#E11D48] text-slate-950"
+                    ? "bg-[#FFFFFF] text-slate-950"
                     : "text-slate-400 hover:text-white"
                 }`}
               >
@@ -432,7 +432,7 @@ export default function FollowupsPage() {
                 </div>
                 <button
                   onClick={openCreate}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] text-slate-950 rounded-xl text-sm font-semibold hover:bg-[#E11D48]/90 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#FFFFFF] text-slate-950 rounded-xl text-sm font-semibold hover:bg-[#FFFFFF]/90 transition-colors"
                 >
                   <Plus className="w-4 h-4" /> Novo template
                 </button>
@@ -449,7 +449,7 @@ export default function FollowupsPage() {
                   </div>
                   <p className="text-slate-400 font-medium">Nenhum template ainda</p>
                   <p className="text-slate-600 text-sm mt-1">Crie o primeiro passo da sequência automática</p>
-                  <button onClick={openCreate} className="mt-4 flex items-center gap-2 px-4 py-2 bg-slate-800 border border-white/10 rounded-xl text-sm text-slate-300 hover:border-[#E11D48]/30 hover:text-white transition-colors">
+                  <button onClick={openCreate} className="mt-4 flex items-center gap-2 px-4 py-2 bg-slate-800 border border-white/10 rounded-xl text-sm text-slate-300 hover:border-[#FFFFFF]/30 hover:text-white transition-colors">
                     <Plus className="w-4 h-4" /> Criar template
                   </button>
                 </div>
@@ -508,10 +508,10 @@ export default function FollowupsPage() {
                             <div className="flex flex-col items-center gap-2 ml-2 flex-shrink-0">
                               <button onClick={() => toggleAtivo(t)} className="transition-colors" title={t.ativo ? "Desativar" : "Ativar"}>
                                 {t.ativo
-                                  ? <ToggleRight className="w-5 h-5 text-[#E11D48]" />
+                                  ? <ToggleRight className="w-5 h-5 text-[#FFFFFF]" />
                                   : <ToggleLeft className="w-5 h-5 text-slate-600" />}
                               </button>
-                              <button onClick={() => openEdit(t)} className="text-slate-600 hover:text-[#E11D48] transition-colors" title="Editar">
+                              <button onClick={() => openEdit(t)} className="text-slate-600 hover:text-[#FFFFFF] transition-colors" title="Editar">
                                 <Pencil className="w-4 h-4" />
                               </button>
                               <button onClick={() => deleteTemplate(t.id)} className="text-slate-600 hover:text-red-400 transition-colors" title="Remover">
@@ -557,7 +557,7 @@ export default function FollowupsPage() {
                 <select
                   value={filterStatus}
                   onChange={e => { setFilterStatus(e.target.value); setOffset(0); }}
-                  className="bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-[#E11D48]/50"
+                  className="bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-[#FFFFFF]/50"
                 >
                   <option value="">Todos os status</option>
                   <option value="pendente">Pendente</option>
@@ -568,7 +568,7 @@ export default function FollowupsPage() {
                 <select
                   value={filterUnidade}
                   onChange={e => { setFilterUnidade(e.target.value === "" ? "" : Number(e.target.value)); setOffset(0); }}
-                  className="bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-[#E11D48]/50"
+                  className="bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-[#FFFFFF]/50"
                 >
                   <option value="">Todas as unidades</option>
                   {unidades.map(u => <option key={u.id} value={u.id}>{u.nome}</option>)}
@@ -635,7 +635,7 @@ export default function FollowupsPage() {
                               <td className="px-4 py-3">
                                 <button
                                   onClick={() => setExpandedMsg(h)}
-                                  className="text-slate-600 hover:text-[#E11D48] transition-colors"
+                                  className="text-slate-600 hover:text-[#FFFFFF] transition-colors"
                                   title="Ver mensagem enviada pela IA"
                                 >
                                   <Eye className="w-4 h-4" />
@@ -710,7 +710,7 @@ export default function FollowupsPage() {
                 <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{expandedMsg.mensagem}</p>
               </div>
               <p className="text-xs text-slate-600 mt-3 flex items-center gap-1">
-                <Zap className="w-3 h-3 text-[#E11D48]" />
+                <Zap className="w-3 h-3 text-[#FFFFFF]" />
                 Reescrita pela IA com base no template + temperatura do lead
               </p>
             </motion.div>

@@ -72,35 +72,35 @@ export default function FAQPage() {
     fetchData();
   };
 
-  const inputClass = "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#E11D48]/40 transition-all font-medium text-sm";
+  const inputClass = "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 transition-all font-medium text-sm";
 
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
       <DashboardSidebar activePage="faq" />
       <main className="flex-1 min-w-0 overflow-auto">
-        <div className="fixed top-0 right-0 w-[500px] h-[400px] bg-[#E11D48]/3 rounded-full blur-[120px] pointer-events-none" />
+        <div className="fixed top-0 right-0 w-[500px] h-[400px] bg-[#FFFFFF]/3 rounded-full blur-[120px] pointer-events-none" />
         <div className="relative z-10 p-8 lg:p-10 max-w-6xl mx-auto pb-20">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-1.5 h-5 bg-[#E11D48] rounded-full" />
-                <span className="text-[10px] font-black text-[#E11D48] uppercase tracking-[0.4em]">Closer IA</span>
+                <div className="w-1.5 h-5 bg-[#FFFFFF] rounded-full" />
+                <span className="text-[10px] font-black text-[#FFFFFF] uppercase tracking-[0.4em]">Closer IA</span>
               </div>
-              <h1 className="text-4xl font-black tracking-tight" style={{ background: "linear-gradient(135deg,#fff 0%,#E11D48 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <h1 className="text-4xl font-black tracking-tight" style={{ background: "linear-gradient(135deg,#fff 0%,#FFFFFF 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 Base de Conhecimento
               </h1>
               <p className="text-slate-500 mt-2 text-sm italic">Treine o cérebro do seu agente com dados específicos da operação.</p>
             </div>
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleOpenModal()}
-              className="flex items-center gap-3 bg-[#E11D48] text-black px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-[0_0_25px_rgba(225,29,72,0.3)]">
+              className="flex items-center gap-3 bg-[#FFFFFF] text-black px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-[0_0_25px_rgba(225,29,72,0.3)]">
               <Plus className="w-5 h-5" /> Novo Registro
             </motion.button>
           </div>
 
           {/* List - Compact Table Layout */}
           {loading ? (
-            <div className="flex items-center justify-center py-40"><Loader2 className="w-8 h-8 text-[#E11D48] animate-spin" /></div>
+            <div className="flex items-center justify-center py-40"><Loader2 className="w-8 h-8 text-[#FFFFFF] animate-spin" /></div>
           ) : faqs.length === 0 ? (
             <div className="text-center py-40 rounded-[3rem] border border-dashed border-white/5">
               <Brain className="w-16 h-16 text-slate-700 mx-auto mb-6" />
@@ -131,7 +131,7 @@ export default function FAQPage() {
                         >
                           <td className="px-8 py-6 vertical-top">
                             {faq.todas_unidades ? (
-                              <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-tighter bg-[#E11D48]/10 text-[#E11D48] px-2.5 py-1 rounded-lg border border-[#E11D48]/20 w-fit">
+                              <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-tighter bg-[#FFFFFF]/10 text-[#FFFFFF] px-2.5 py-1 rounded-lg border border-[#FFFFFF]/20 w-fit">
                                 <Globe className="w-3 h-3" /> Global
                               </div>
                             ) : (
@@ -142,7 +142,7 @@ export default function FAQPage() {
                           </td>
                           <td className="px-8 py-6">
                             <div className="max-w-2xl">
-                              <h3 className="text-sm font-bold text-white group-hover:text-[#E11D48] transition-colors mb-1.5 line-clamp-1">
+                              <h3 className="text-sm font-bold text-white group-hover:text-[#FFFFFF] transition-colors mb-1.5 line-clamp-1">
                                 {faq.pergunta}
                               </h3>
                               <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed italic">
@@ -159,7 +159,7 @@ export default function FAQPage() {
                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button 
                                 onClick={() => handleOpenModal(faq)} 
-                                className="p-2 bg-white/5 hover:bg-[#E11D48]/20 text-slate-500 hover:text-[#E11D48] rounded-xl transition-all border border-white/5 hover:border-[#E11D48]/30"
+                                className="p-2 bg-white/5 hover:bg-[#FFFFFF]/20 text-slate-500 hover:text-[#FFFFFF] rounded-xl transition-all border border-white/5 hover:border-[#FFFFFF]/30"
                                 title="Editar"
                               >
                                 <Edit2 className="w-4 h-4" />
@@ -194,8 +194,8 @@ export default function FAQPage() {
               className="bg-[#080f1e] border border-white/10 rounded-[2.5rem] w-full max-w-2xl overflow-hidden relative shadow-2xl flex flex-col">
               <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-slate-900/30 flex-shrink-0">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[#E11D48]/10 flex items-center justify-center border border-[#E11D48]/20">
-                    {editingFaq ? <Edit2 className="w-6 h-6 text-[#E11D48]" /> : <Plus className="w-6 h-6 text-[#E11D48]" />}
+                  <div className="w-12 h-12 rounded-2xl bg-[#FFFFFF]/10 flex items-center justify-center border border-[#FFFFFF]/20">
+                    {editingFaq ? <Edit2 className="w-6 h-6 text-[#FFFFFF]" /> : <Plus className="w-6 h-6 text-[#FFFFFF]" />}
                   </div>
                   <div>
                     <h2 className="text-xl font-black">{editingFaq ? "Editar Conhecimento" : "Novo Conhecimento"}</h2>
@@ -224,7 +224,7 @@ export default function FAQPage() {
                     <div className="flex p-1.5 bg-slate-900/50 border border-white/8 rounded-2xl">
                       {["Global", "Unidade"].map(opt => (
                         <button key={opt} type="button" onClick={() => setFormData({ ...formData, todas_unidades: opt === "Global", unidade_id: null })}
-                          className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${(opt === "Global") === formData.todas_unidades ? "bg-[#E11D48] text-black" : "text-slate-500 hover:text-white"}`}>
+                          className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${(opt === "Global") === formData.todas_unidades ? "bg-[#FFFFFF] text-black" : "text-slate-500 hover:text-white"}`}>
                           {opt}
                         </button>
                       ))}
@@ -251,7 +251,7 @@ export default function FAQPage() {
                     Cancelar
                   </button>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={saving}
-                    className="flex-[2] bg-[#E11D48] text-black py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 disabled:opacity-50">
+                    className="flex-[2] bg-[#FFFFFF] text-black py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 disabled:opacity-50">
                     {saving ? <><Loader2 className="w-5 h-5 animate-spin" />Salvando...</>
                       : success ? <><CheckCircle2 className="w-5 h-5" />Salvo!</>
                       : <><Save className="w-5 h-5" />{editingFaq ? "Salvar Alterações" : "Ativar Conhecimento"}</>}
