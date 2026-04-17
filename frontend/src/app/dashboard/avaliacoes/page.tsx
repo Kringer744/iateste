@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Star, ChevronDown, User, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import AppSidebar from "@/components/AppSidebar";
+import DashboardSidebar from "@/components/DashboardSidebar";
 
 // ─── Types ────────────────────────────────────────────────────────
 interface Barbeiro {
@@ -126,7 +126,7 @@ export default function AvaliacoesPage() {
 
   return (
     <div className="flex min-h-screen bg-[#09090f]">
-      <AppSidebar activePage="avaliacoes" />
+      <DashboardSidebar activePage="avaliacoes" />
 
       <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
         {/* Header */}

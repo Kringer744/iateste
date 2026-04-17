@@ -7,7 +7,7 @@ import {
   Users, Wifi, WifiOff, AlertTriangle, CheckCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
-import AppSidebar from "@/components/AppSidebar";
+import DashboardSidebar from "@/components/DashboardSidebar";
 import {
   AreaChart, Area, LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -201,7 +201,7 @@ export default function InsightsPage() {
 
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
-      <AppSidebar activePage="insights" />
+      <DashboardSidebar activePage="insights" />
       <main className="flex-1 min-w-0 overflow-auto">
         <div className="fixed top-0 right-0 w-[500px] h-[400px] bg-[#FFFFFF]/3 rounded-full blur-[120px] pointer-events-none" />
         <div className="relative z-10 p-8 lg:p-10 max-w-7xl mx-auto pb-20">

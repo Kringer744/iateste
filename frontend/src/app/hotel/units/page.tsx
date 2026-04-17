@@ -1,3 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
-export { default } from "@/app/dashboard/units/page";
+import HotelPlaceholder from "@/components/HotelPlaceholder";
+
+export default function Page() {
+  return <HotelPlaceholder activePage="units" titulo="Unidades" descricao="Gerencie múltiplas unidades do hotel ou da rede." />;
+}

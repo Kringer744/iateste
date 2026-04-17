@@ -7,7 +7,7 @@ import {
   CheckCircle2, Phone, User, Star, AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import AppSidebar from "@/components/AppSidebar";
+import DashboardSidebar from "@/components/DashboardSidebar";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const inputClass =
@@ -128,7 +128,7 @@ export default function BarbeirosPage() {
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#09090f] text-white flex">
-      <AppSidebar activePage="barbeiros" />
+      <DashboardSidebar activePage="barbeiros" />
 
       <main className="flex-1 min-w-0 overflow-auto">
         {/* Decorative glow */}

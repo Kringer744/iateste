@@ -10,7 +10,7 @@ import {
   Activity, Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import AppSidebar from "@/components/AppSidebar";
+import DashboardSidebar from "@/components/DashboardSidebar";
 
 function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
@@ -169,7 +169,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex">
-      <AppSidebar activePage="dashboard" />
+      <DashboardSidebar activePage="dashboard" />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}

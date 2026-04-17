@@ -8,7 +8,7 @@ import {
   Trash2, Save, AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import AppSidebar from "@/components/AppSidebar";
+import DashboardSidebar from "@/components/DashboardSidebar";
 
 /* ─── Types ─── */
 interface Barbeiro {
@@ -702,7 +702,7 @@ export default function AgendaPage() {
   /* ─── Main Render ─── */
   return (
     <div className="flex min-h-screen bg-[#0A0A0A] text-white">
-      <AppSidebar activePage="agenda" />
+      <DashboardSidebar activePage="agenda" />
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8 pt-16 lg:pt-8">

@@ -1,3 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
-export { default } from "@/app/dashboard/logs/page";
+import HotelPlaceholder from "@/components/HotelPlaceholder";
+
+export default function Page() {
+  return <HotelPlaceholder activePage="logs" titulo="Logs" descricao="Auditoria de ações do sistema e das mensagens automáticas." />;
+}

@@ -7,7 +7,7 @@ import {
   CalendarCheck, Bell, Clock, Star, ThumbsUp, Copy, Check, Send
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import AppSidebar from "@/components/AppSidebar";
+import DashboardSidebar from "@/components/DashboardSidebar";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const textareaClass =
@@ -286,7 +286,7 @@ export default function MensagensPage() {
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#09090f] text-white flex">
-      <AppSidebar activePage="mensagens" />
+      <DashboardSidebar activePage="mensagens" />
 
       <main className="flex-1 min-w-0 overflow-auto">
         {/* Decorative glow */}
