@@ -605,118 +605,97 @@ export default function PersonalityPage() {
     <div className="min-h-screen bg-[#0A0A0A] text-white flex overflow-hidden" style={{ height: "100vh" }}>
       <DashboardSidebar activePage="personality" />
 
-      {/* ── MAIN LAYOUT ───────────────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* ── MAIN LAYOUT (single column, top bar + editor) ───────────── */}
+      <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* ══ LEFT PANEL — Personality List ══════════════════════════ */}
-        <div className="w-72 flex-shrink-0 flex flex-col border-r border-white/[0.06] bg-[#0F0F0F]">
-
-          {/* List Header */}
-          <div className="p-4 border-b border-white/[0.06] flex-shrink-0">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-[#141414] border border-white/[0.06] flex items-center justify-center">
-                <Brain className="w-4 h-4 text-white" strokeWidth={1.75} />
-              </div>
-              <div>
-                <h1 className="text-sm font-medium text-white tracking-tight">Personalidades IA</h1>
-                <p className="text-xs text-zinc-500 tracking-tight mt-0.5">
-                  <span className="text-zinc-300 tabular-nums">{personalities.length}</span> configurada{personalities.length === 1 ? "" : "s"}
-                </p>
-              </div>
+        {/* ══ TOP BAR — Personalities switcher ═══════════════════════ */}
+        <div className="flex-shrink-0 border-b border-white/[0.06] bg-[#0A0A0A]">
+          {/* Header row */}
+          <div className="flex items-center justify-between gap-4 px-6 pt-6 pb-4">
+            <div>
+              <h1 className="text-2xl font-semibold text-white tracking-tight">Personalidades IA</h1>
+              <p className="text-sm text-zinc-500 tracking-tight mt-1">
+                <span className="text-zinc-300 tabular-nums">{personalities.length}</span> personalidade{personalities.length === 1 ? "" : "s"} configurada{personalities.length === 1 ? "" : "s"} · escolha ou crie uma para editar
+              </p>
             </div>
-
-            {/* Search */}
-            <div className="relative mb-2.5">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Buscar personalidade"
-                className="w-full bg-[#141414] border border-white/[0.06] rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/20 transition-colors tracking-tight"
-              />
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Buscar…"
+                  className="w-56 bg-[#141414] border border-white/[0.06] rounded-xl pl-9 pr-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/20 transition-colors tracking-tight"
+                />
+              </div>
+              <button
+                onClick={startNew}
+                className="flex items-center gap-2 bg-white hover:bg-zinc-200 text-black px-4 py-2 rounded-xl text-sm font-medium tracking-tight transition-colors"
+              >
+                <Plus className="w-4 h-4" strokeWidth={1.75} />
+                Nova personalidade
+              </button>
             </div>
-
-            {/* New button */}
-            <button
-              onClick={startNew}
-              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm tracking-tight transition-colors border ${
-                selected === "new"
-                  ? "bg-white text-black border-white"
-                  : "bg-[#141414] text-white border-white/[0.06] hover:border-white/[0.12] hover:bg-[#1A1A1A]"
-              }`}
-            >
-              <Plus className="w-4 h-4" strokeWidth={1.75} />
-              Nova personalidade
-            </button>
           </div>
 
-          {/* List */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar py-2">
+          {/* Horizontal chip rail */}
+          <div className="px-6 pb-4">
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="relative w-8 h-8">
-                  <div className="absolute inset-0 rounded-full border border-t-[#FFFFFF] border-white/5 animate-spin" />
-                </div>
-                <p className="text-[10px] text-slate-600 tracking-tight">Carregando...</p>
+              <div className="flex items-center gap-2 text-xs text-zinc-500 py-2">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" strokeWidth={1.75} /> Carregando personalidades…
               </div>
             ) : filteredList.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-14 gap-3 px-4 text-center">
-                <div className="w-10 h-10 rounded-xl bg-[#141414] border border-white/[0.06] flex items-center justify-center">
-                  <Brain className="w-4 h-4 text-zinc-600" strokeWidth={1.5} />
-                </div>
-                <p className="text-sm text-zinc-400 tracking-tight">Nenhuma personalidade{search ? " encontrada" : " criada"}</p>
+              <div className="flex items-center gap-2 text-xs text-zinc-500 py-2">
+                <Brain className="w-3.5 h-3.5" strokeWidth={1.75} /> Nenhuma personalidade{search ? " encontrada" : " criada"} ainda
               </div>
             ) : (
-              <div className="p-2 space-y-1">
+              <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1 -mb-1">
                 <AnimatePresence mode="popLayout">
-                  {filteredList.map((p, i) => (
-                    <motion.div
-                      key={p.id}
-                      layout
-                      initial={{ opacity: 0, x: -4 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.03, duration: 0.2 }}
-                      onClick={() => selectPersonality(p)}
-                      className={`rounded-xl cursor-pointer transition-colors group border ${
-                        selected === p.id
-                          ? "bg-[#1A1A1A] border-white/[0.1]"
-                          : "bg-transparent border-transparent hover:bg-white/[0.03] hover:border-white/[0.06]"
-                      }`}
-                    >
-                      <div className="p-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            <div className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center text-base bg-[#141414] border border-white/[0.06]">
-                              {getEmojiList(p.emoji_tipo)[0] || "✨"}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-white tracking-tight truncate">
-                                {p.nome_ia || "Sem nome"}
-                              </p>
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${p.ativo ? "bg-emerald-400" : "bg-zinc-600"}`} />
-                                <span className="text-[11px] text-zinc-500 truncate tracking-tight">{MODELS.find(m => m.id === p.model_name)?.label || p.model_name}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            onClick={e => { e.stopPropagation(); handleDelete(p.id); }}
-                            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-white/[0.06] text-zinc-500 hover:text-red-400 transition-all flex-shrink-0"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" strokeWidth={1.75} />
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                  {filteredList.map((p, i) => {
+                    const isActive = selected === p.id;
+                    return (
+                      <motion.button
+                        key={p.id}
+                        layout
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.03, duration: 0.18 }}
+                        onClick={() => selectPersonality(p)}
+                        className={`group flex-shrink-0 flex items-center gap-2.5 pl-2.5 pr-3 py-2 rounded-xl border transition-colors ${
+                          isActive
+                            ? "bg-[#1A1A1A] border-white/[0.12]"
+                            : "bg-[#141414] border-white/[0.06] hover:border-white/[0.1] hover:bg-[#1A1A1A]"
+                        }`}
+                      >
+                        <span className="w-7 h-7 rounded-lg flex items-center justify-center text-sm bg-[#0F0F0F] border border-white/[0.06]">
+                          {getEmojiList(p.emoji_tipo)[0] || "✨"}
+                        </span>
+                        <span className="flex flex-col items-start leading-tight">
+                          <span className="text-xs font-medium text-white tracking-tight whitespace-nowrap">
+                            {p.nome_ia || "Sem nome"}
+                          </span>
+                          <span className="flex items-center gap-1 text-[10px] text-zinc-500 tracking-tight">
+                            <span className={`w-1 h-1 rounded-full ${p.ativo ? "bg-emerald-400" : "bg-zinc-600"}`} />
+                            <span className="whitespace-nowrap">{MODELS.find(m => m.id === p.model_name)?.label || p.model_name}</span>
+                          </span>
+                        </span>
+                        <span
+                          onClick={e => { e.stopPropagation(); handleDelete(p.id); }}
+                          className="ml-1 p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-white/[0.06] text-zinc-500 hover:text-red-400 transition-all"
+                        >
+                          <Trash2 className="w-3 h-3" strokeWidth={1.75} />
+                        </span>
+                      </motion.button>
+                    );
+                  })}
                 </AnimatePresence>
               </div>
             )}
           </div>
         </div>
 
-        {/* ══ RIGHT PANEL — Editor ════════════════════════════════════ */}
+        {/* ══ EDITOR PANEL (full width) ═══════════════════════════════ */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <AnimatePresence mode="wait">
             {selected === null ? (
