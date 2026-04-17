@@ -339,62 +339,78 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-[1fr_220px] gap-8 items-center">
-                {/* Step list with deltas */}
-                <div className="space-y-1">
-                  {funnelSteps.map((step, i) => {
-                    const top = funnelSteps[0]?.count || 1;
-                    const convFromTop = top > 0 ? Math.round((step.count / top) * 100) : 0;
-                    return (
-                      <div key={step.label}>
-                        <div className="flex items-center justify-between py-2.5 group">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <span className="w-5 h-5 rounded-md bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center text-[10px] text-zinc-400 tabular-nums font-medium">
-                              {i + 1}
-                            </span>
-                            <span className="text-[13px] text-zinc-200 tracking-tight truncate">{step.label}</span>
-                          </div>
-                          <div className="flex items-baseline gap-2 tabular-nums">
-                            <span className="text-[15px] font-medium text-white tracking-tight">{step.count}</span>
-                            <span className="text-[11px] text-zinc-500 w-9 text-right">{convFromTop}%</span>
-                          </div>
-                        </div>
+              {/* Horizontal pipeline — stages flow left→right */}
+              {(() => {
+                const top = funnelSteps[0]?.count || 1;
+                const totalConv = top > 0 ? Math.round(((funnelSteps[funnelSteps.length - 1]?.count || 0) / top) * 100) : 0;
+                return (
+                  <div className="space-y-5">
+                    {/* Overall conversion strip */}
+                    <div className="flex items-baseline justify-between">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-semibold text-white tracking-tight tabular-nums">{totalConv}%</span>
+                        <span className="text-[12px] text-zinc-500 tracking-tight">conversão ponta a ponta</span>
                       </div>
-                    );
-                  })}
-                </div>
+                      <span className="text-[11px] text-zinc-500 tabular-nums">
+                        {funnelSteps[0]?.count || 0} → {funnelSteps[funnelSteps.length - 1]?.count || 0}
+                      </span>
+                    </div>
 
-                {/* SVG funnel shape */}
-                <div className="hidden lg:block">
-                  <svg viewBox="0 0 220 220" className="w-full h-[220px]">
-                    {funnelSteps.map((step, i) => {
-                      const top = funnelSteps[0]?.count || 1;
-                      const tierH = 220 / funnelSteps.length;
-                      const y = i * tierH;
-                      const wTop = top > 0 ? (step.count / top) * 220 : 0;
-                      const next = funnelSteps[i + 1]?.count ?? step.count * 0.6;
-                      const wBot = top > 0 ? (next / top) * 220 : 0;
-                      const x1 = (220 - wTop) / 2;
-                      const x2 = x1 + wTop;
-                      const x3 = (220 - wBot) / 2 + wBot;
-                      const x4 = (220 - wBot) / 2;
-                      const opacity = 0.95 - i * 0.14;
-                      return (
-                        <motion.polygon
-                          key={i}
-                          initial={{ opacity: 0, scaleY: 0.6 }}
-                          animate={{ opacity: 1, scaleY: 1 }}
-                          transition={{ delay: 0.2 + i * 0.08, duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-                          style={{ transformOrigin: `110px ${y + tierH / 2}px` }}
-                          points={`${x1},${y + 2} ${x2},${y + 2} ${x3},${y + tierH - 2} ${x4},${y + tierH - 2}`}
-                          fill="white"
-                          fillOpacity={opacity}
-                        />
-                      );
-                    })}
-                  </svg>
-                </div>
-              </div>
+                    {/* Segmented bar — proportional widths */}
+                    <div className="relative h-2 flex gap-[2px] rounded-full overflow-hidden bg-white/[0.03]">
+                      {funnelSteps.map((step, i) => {
+                        const width = top > 0 ? (step.count / top) * 100 : 0;
+                        const opacity = 1 - i * 0.15;
+                        return (
+                          <motion.div
+                            key={i}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${width / funnelSteps.length}%` }}
+                            transition={{ delay: 0.15 + i * 0.06, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                            className="h-full bg-white rounded-full"
+                            style={{ opacity }}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    {/* Stage cards row */}
+                    <div className="grid grid-cols-5 gap-2">
+                      {funnelSteps.map((step, i) => {
+                        const convFromTop = top > 0 ? Math.round((step.count / top) * 100) : 0;
+                        const isFinal = i === funnelSteps.length - 1;
+                        return (
+                          <motion.div
+                            key={step.label}
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.25 + i * 0.05 }}
+                            className="relative bg-[#0F0F0F] border border-white/[0.04] hover:border-white/[0.08] rounded-xl p-3 transition-colors group"
+                          >
+                            {/* Step number chip */}
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="w-5 h-5 rounded-md bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center text-[10px] text-zinc-500 tabular-nums font-medium">
+                                {i + 1}
+                              </span>
+                              <span className={`text-[10px] tabular-nums ${isFinal ? "text-white" : "text-zinc-600"}`}>
+                                {convFromTop}%
+                              </span>
+                            </div>
+                            {/* Count */}
+                            <p className="text-2xl font-semibold text-white tracking-tight tabular-nums leading-none">
+                              {step.count}
+                            </p>
+                            {/* Label */}
+                            <p className="text-[11px] text-zinc-500 mt-2 tracking-tight leading-tight line-clamp-2 min-h-[26px]">
+                              {step.label}
+                            </p>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </motion.div>
 
             {/* Activity feed — vertical timeline */}
