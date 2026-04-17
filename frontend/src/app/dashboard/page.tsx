@@ -321,7 +321,7 @@ export default function DashboardPage() {
 
           {/* ═══ FUNNEL + ACTIVITY FEED ═══ */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
-            {/* Funnel — horizontal bars with value anchored */}
+            {/* Funnel — trapezoidal SVG with conversion deltas */}
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -331,48 +331,83 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-[15px] font-medium text-white tracking-tight">Funil de vendas</h2>
-                  <p className="text-[13px] text-zinc-500 mt-0.5 tracking-tight">Evolução dos leads em tempo real</p>
+                  <p className="text-[13px] text-zinc-500 mt-0.5 tracking-tight">Conversão por etapa</p>
                 </div>
                 <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 bg-[#1A1A1A] border border-white/[0.06] px-2.5 py-1 rounded-full">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Ao vivo
                 </div>
               </div>
-              <div className="space-y-4">
-                {funnelSteps.map((step, i) => {
-                  const pct = Math.min(100, (step.count / funnelMax) * 100);
-                  const decay = 1 - i * 0.12; // visual funnel taper
-                  const visualPct = pct * decay;
-                  return (
-                    <div key={step.label} className="group">
-                      <div className="flex justify-between items-baseline mb-1.5">
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-4 h-4 rounded bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center text-[10px] text-zinc-500 tabular-nums font-medium">
-                            {i + 1}
-                          </span>
-                          <span className="text-[13px] text-zinc-300 tracking-tight">{step.label}</span>
+
+              <div className="grid grid-cols-[1fr_220px] gap-8 items-center">
+                {/* Step list with deltas */}
+                <div className="space-y-1">
+                  {funnelSteps.map((step, i) => {
+                    const top = funnelSteps[0]?.count || 1;
+                    const prev = funnelSteps[i - 1]?.count || 0;
+                    const convFromTop = top > 0 ? Math.round((step.count / top) * 100) : 0;
+                    const dropVsPrev = i > 0 && prev > 0 ? Math.round(((prev - step.count) / prev) * 100) : 0;
+                    return (
+                      <div key={step.label}>
+                        <div className="flex items-center justify-between py-2.5 group">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="w-5 h-5 rounded-md bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center text-[10px] text-zinc-400 tabular-nums font-medium">
+                              {i + 1}
+                            </span>
+                            <span className="text-[13px] text-zinc-200 tracking-tight truncate">{step.label}</span>
+                          </div>
+                          <div className="flex items-baseline gap-2 tabular-nums">
+                            <span className="text-[15px] font-medium text-white tracking-tight">{step.count}</span>
+                            <span className="text-[11px] text-zinc-500 w-9 text-right">{convFromTop}%</span>
+                          </div>
                         </div>
-                        <span className="text-[13px] text-zinc-500 tracking-tight tabular-nums">
-                          <span className="text-white font-medium">{step.count}</span>
-                          <span className="text-zinc-700 mx-1.5">·</span>
-                          {Math.round(pct)}%
-                        </span>
+                        {i < funnelSteps.length - 1 && (
+                          <div className="flex items-center gap-2 pl-8 -my-0.5">
+                            <span className="block w-px h-3 bg-white/[0.06]" />
+                            <span className="text-[10px] text-zinc-600 tracking-tight tabular-nums">
+                              {dropVsPrev > 0 ? `−${dropVsPrev}% de drop` : "mantido"}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <div className="h-[6px] bg-white/[0.04] rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${visualPct}%` }}
-                          transition={{ duration: 1, delay: 0.2 + i * 0.08, ease: [0.4, 0, 0.2, 1] }}
-                          className="h-full bg-white rounded-full"
+                    );
+                  })}
+                </div>
+
+                {/* SVG funnel shape */}
+                <div className="hidden lg:block">
+                  <svg viewBox="0 0 220 220" className="w-full h-[220px]">
+                    {funnelSteps.map((step, i) => {
+                      const top = funnelSteps[0]?.count || 1;
+                      const tierH = 220 / funnelSteps.length;
+                      const y = i * tierH;
+                      const wTop = top > 0 ? (step.count / top) * 220 : 0;
+                      const next = funnelSteps[i + 1]?.count ?? step.count * 0.6;
+                      const wBot = top > 0 ? (next / top) * 220 : 0;
+                      const x1 = (220 - wTop) / 2;
+                      const x2 = x1 + wTop;
+                      const x3 = (220 - wBot) / 2 + wBot;
+                      const x4 = (220 - wBot) / 2;
+                      const opacity = 0.95 - i * 0.14;
+                      return (
+                        <motion.polygon
+                          key={i}
+                          initial={{ opacity: 0, scaleY: 0.6 }}
+                          animate={{ opacity: 1, scaleY: 1 }}
+                          transition={{ delay: 0.2 + i * 0.08, duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
+                          style={{ transformOrigin: `110px ${y + tierH / 2}px` }}
+                          points={`${x1},${y + 2} ${x2},${y + 2} ${x3},${y + tierH - 2} ${x4},${y + tierH - 2}`}
+                          fill="white"
+                          fillOpacity={opacity}
                         />
-                      </div>
-                    </div>
-                  );
-                })}
+                      );
+                    })}
+                  </svg>
+                </div>
               </div>
             </motion.div>
 
-            {/* Activity feed */}
+            {/* Activity feed — vertical timeline */}
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -382,40 +417,71 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <h2 className="text-[15px] font-medium text-white tracking-tight">Atividade recente</h2>
-                  <p className="text-[13px] text-zinc-500 mt-0.5 tracking-tight">Últimos eventos</p>
+                  <p className="text-[13px] text-zinc-500 mt-0.5 tracking-tight">Linha do tempo</p>
                 </div>
                 <Activity className="w-4 h-4 text-zinc-500" strokeWidth={1.75} />
               </div>
-              <div className="flex-1 space-y-3">
+              <div className="flex-1">
                 {conversations.length === 0 && !loading ? (
                   <div className="flex-1 flex flex-col items-center justify-center py-8 text-center">
                     <MessageSquare className="w-7 h-7 text-zinc-700 mb-2" strokeWidth={1.5} />
                     <p className="text-sm text-zinc-500 tracking-tight">Sem eventos recentes</p>
                   </div>
                 ) : (
-                  conversations.slice(0, 4).map((conv: any, i) => (
-                    <motion.a
-                      key={conv.conversation_id || i}
-                      href={`/dashboard/conversas?id=${conv.conversation_id}`}
-                      initial={{ opacity: 0, x: 4 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 + i * 0.05 }}
-                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/[0.03] transition-colors border border-transparent hover:border-white/[0.06] group"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center text-xs font-medium text-zinc-300 flex-shrink-0">
-                        {conv.contato_nome?.charAt(0)?.toUpperCase() || "?"}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-medium text-white truncate tracking-tight">
-                          {conv.contato_nome || "Anônimo"}
-                        </p>
-                        <p className="text-xs text-zinc-500 truncate tracking-tight mt-0.5">
-                          {conv.intencao_de_compra ? "Oportunidade detectada" : "Nova conversa"}
-                        </p>
-                      </div>
-                      <ArrowUpRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-white transition-colors flex-shrink-0 mt-0.5" strokeWidth={1.75} />
-                    </motion.a>
-                  ))
+                  <div className="relative">
+                    {/* Rail */}
+                    <span className="absolute left-[15px] top-1 bottom-1 w-px bg-white/[0.06]" />
+                    {conversations.slice(0, 4).map((conv: any, i) => {
+                      const isOpp = !!conv.intencao_de_compra;
+                      const isQualified = (conv.score_lead || 0) >= 4;
+                      const isEngaged = (conv.total_mensagens_cliente || 0) > 5;
+                      const isPaused = !!conv.pausada;
+                      const event = isPaused
+                        ? { label: "IA pausada", dot: "bg-zinc-400" }
+                        : isOpp
+                        ? { label: "Oportunidade detectada", dot: "bg-white" }
+                        : isQualified
+                        ? { label: "Lead qualificado", dot: "bg-white" }
+                        : isEngaged
+                        ? { label: "Conversa engajada", dot: "bg-zinc-300" }
+                        : { label: "Nova conversa", dot: "bg-zinc-500" };
+                      const ts = conv.updated_at || conv.ultima_mensagem_at || conv.created_at;
+                      const relTime = (() => {
+                        if (!ts) return "agora";
+                        const diff = (Date.now() - new Date(ts).getTime()) / 1000;
+                        if (diff < 60) return "agora";
+                        if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+                        if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+                        return `${Math.floor(diff / 86400)}d`;
+                      })();
+                      return (
+                        <motion.a
+                          key={conv.conversation_id || i}
+                          href={`/dashboard/conversas?id=${conv.conversation_id}`}
+                          initial={{ opacity: 0, x: 4 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.2 + i * 0.05 }}
+                          className="relative flex items-start gap-3 py-3 pl-0 group"
+                        >
+                          {/* Dot over rail */}
+                          <span className="relative z-10 flex-shrink-0 mt-1.5 w-[7px] h-[7px] ml-[12px] rounded-full ring-4 ring-[#141414]">
+                            <span className={`absolute inset-0 rounded-full ${event.dot}`} />
+                          </span>
+                          <div className="flex-1 min-w-0 ml-2">
+                            <div className="flex items-baseline justify-between gap-2">
+                              <p className="text-[13px] font-medium text-white truncate tracking-tight">
+                                {conv.contato_nome || "Anônimo"}
+                              </p>
+                              <span className="text-[11px] text-zinc-600 tabular-nums flex-shrink-0">{relTime}</span>
+                            </div>
+                            <p className="text-xs text-zinc-500 truncate tracking-tight mt-0.5 group-hover:text-zinc-400 transition-colors">
+                              {event.label}
+                            </p>
+                          </div>
+                        </motion.a>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             </motion.div>

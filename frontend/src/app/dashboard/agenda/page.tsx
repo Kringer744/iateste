@@ -278,7 +278,7 @@ export default function AgendaPage() {
             <p className={`text-sm font-semibold text-white truncate ${isCancelled ? "line-through text-gray-500" : ""}`}>
               {apt.cliente_nome}
             </p>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${st.bg} ${st.text} border ${st.border}`}>
+            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap tracking-tight ${st.bg} ${st.text} border ${st.border}`}>
               {st.label}
             </span>
           </div>
@@ -382,10 +382,10 @@ export default function AgendaPage() {
             const isToday = formatDate(d) === formatDate(new Date());
             return (
               <div key={i} className="text-center py-2">
-                <p className={`text-[10px] uppercase font-bold tracking-wider ${isToday ? "text-[#FFFFFF]" : "text-gray-600"}`}>
+                <p className={`text-[11px] tracking-tight ${isToday ? "text-white" : "text-zinc-500"}`}>
                   {DIAS_SEMANA[i]}
                 </p>
-                <p className={`text-lg font-bold ${isToday ? "text-[#FFFFFF]" : "text-white"}`}>
+                <p className={`text-[15px] font-medium tabular-nums mt-0.5 ${isToday ? "text-white" : "text-zinc-300"}`}>
                   {d.getDate()}
                 </p>
               </div>
@@ -437,23 +437,17 @@ export default function AgendaPage() {
 
   /* ─── Main Render ─── */
   return (
-    <div className="flex min-h-screen bg-[#09090f] text-white">
+    <div className="flex min-h-screen bg-[#0A0A0A] text-white">
       <DashboardSidebar activePage="agenda" />
 
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16 lg:pt-8">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8 pt-16 lg:pt-8">
 
           {/* ──── Header ──── */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
-          >
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-black tracking-tight">
-                <span className="text-[#FFFFFF]">Agenda</span>
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">Gerencie agendamentos e horarios dos barbeiros</p>
+              <h1 className="text-2xl font-semibold tracking-tight text-white">Agenda</h1>
+              <p className="text-sm text-zinc-500 mt-1">Gerencie agendamentos e horários dos barbeiros.</p>
             </div>
 
             <button
@@ -461,57 +455,52 @@ export default function AgendaPage() {
                 setModalData({ barbeiro_id: "", servico_id: "", data_hora: "", cliente_nome: "", cliente_telefone: "" });
                 setShowModal(true);
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FFFFFF] text-black font-bold text-sm hover:bg-[#E5E7EB] transition-all shadow-lg shadow-[#FFFFFF]/20"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-black text-sm font-medium hover:bg-zinc-200 transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              Novo Agendamento
+              <Plus className="w-4 h-4" strokeWidth={1.75} />
+              Novo agendamento
             </button>
-          </motion.div>
+          </div>
 
           {/* ──── Controls Bar ──── */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 mb-6 backdrop-blur-sm"
-          >
-            <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="rounded-2xl border border-white/[0.06] bg-[#141414] p-3 mb-4">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
               {/* Date navigation */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={goPrev}
-                  className="p-2 rounded-xl hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+                  className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4" strokeWidth={1.75} />
                 </button>
                 <button
                   onClick={goToday}
-                  className="px-4 py-2 rounded-xl text-sm font-bold bg-[#FFFFFF]/10 text-[#FFFFFF] border border-[#FFFFFF]/20 hover:bg-[#FFFFFF]/20 transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#1E1E1E] text-white border border-white/[0.06] hover:bg-[#232323] transition-colors"
                 >
                   Hoje
                 </button>
                 <button
                   onClick={goNext}
-                  className="p-2 rounded-xl hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+                  className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
                 </button>
-                <p className="text-sm font-semibold text-gray-300 ml-2 capitalize hidden sm:block">
+                <p className="text-sm text-zinc-300 ml-2 capitalize hidden sm:block tracking-tight">
                   {dayLabel(selectedDate)}
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 sm:ml-auto">
+              <div className="flex items-center gap-2 sm:ml-auto">
                 {/* View toggle */}
-                <div className="flex items-center bg-white/[0.05] rounded-xl p-0.5 border border-white/10">
+                <div className="flex items-center bg-[#1A1A1A] rounded-lg p-1 border border-white/[0.06]">
                   {(["dia", "semana"] as const).map((v) => (
                     <button
                       key={v}
                       onClick={() => setView(v)}
-                      className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                      className={`px-3 py-1 rounded-md text-xs transition-colors ${
                         view === v
-                          ? "bg-[#FFFFFF] text-black shadow-lg shadow-[#FFFFFF]/20"
-                          : "text-gray-500 hover:text-white"
+                          ? "bg-[#1E1E1E] text-white"
+                          : "text-zinc-500 hover:text-zinc-300"
                       }`}
                     >
                       {v === "dia" ? "Dia" : "Semana"}
@@ -523,62 +512,52 @@ export default function AgendaPage() {
                 <select
                   value={filteredBarbeiro}
                   onChange={(e) => setFilteredBarbeiro(e.target.value ? Number(e.target.value) : "")}
-                  className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50 transition-all appearance-none cursor-pointer"
+                  className="bg-[#1A1A1A] border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-zinc-300 focus:outline-none focus:border-white/15 transition-colors appearance-none cursor-pointer"
                 >
-                  <option value="" className="bg-[#1a1a2e]">Todos os barbeiros</option>
+                  <option value="" className="bg-[#1A1A1A]">Todos os barbeiros</option>
                   {barbeiros.map((b) => (
-                    <option key={b.id} value={b.id} className="bg-[#1a1a2e]">{b.nome}</option>
+                    <option key={b.id} value={b.id} className="bg-[#1A1A1A]">{b.nome}</option>
                   ))}
                 </select>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* ──── Calendar View ──── */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 sm:p-6 mb-8 backdrop-blur-sm"
-          >
+          <div className="rounded-2xl border border-white/[0.06] bg-[#141414] p-4 sm:p-5 mb-4">
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-8 border-2 border-[#FFFFFF] border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
               </div>
             ) : (
               <AnimatePresence mode="wait">
                 <motion.div
                   key={`${view}-${formatDate(selectedDate)}`}
-                  initial={{ opacity: 0, x: 10 }}
+                  initial={{ opacity: 0, x: 6 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
+                  exit={{ opacity: 0, x: -6 }}
                   transition={{ duration: 0.15 }}
                 >
                   {view === "dia" ? <DayView /> : <WeekView />}
                 </motion.div>
               </AnimatePresence>
             )}
-          </motion.div>
+          </div>
 
-          {/* ──── Horarios Disponiveis Section ──── */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-sm"
-          >
+          {/* ──── Horários Disponíveis Section ──── */}
+          <div className="rounded-2xl border border-white/[0.06] bg-[#141414] p-4 sm:p-5">
             <button
               onClick={() => setShowHorarios(!showHorarios)}
               className="flex items-center gap-3 w-full text-left"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 flex items-center justify-center">
-                <Settings2 className="w-5 h-5 text-[#FFFFFF]" />
+              <div className="w-9 h-9 rounded-lg bg-[#1E1E1E] border border-white/[0.06] flex items-center justify-center flex-shrink-0">
+                <Settings2 className="w-4 h-4 text-zinc-400" strokeWidth={1.75} />
               </div>
               <div className="flex-1">
-                <h2 className="text-lg font-bold text-white">Horarios Disponiveis</h2>
-                <p className="text-xs text-gray-500">Configure os horarios de cada barbeiro por dia da semana</p>
+                <h2 className="text-sm font-medium text-white tracking-tight">Horários disponíveis</h2>
+                <p className="text-xs text-zinc-500 mt-0.5">Configure os horários de cada barbeiro por dia da semana.</p>
               </div>
-              <ChevronRight className={`w-5 h-5 text-gray-500 transition-transform ${showHorarios ? "rotate-90" : ""}`} />
+              <ChevronRight className={`w-4 h-4 text-zinc-500 transition-transform ${showHorarios ? "rotate-90" : ""}`} strokeWidth={1.75} />
             </button>
 
             <AnimatePresence>
@@ -595,11 +574,11 @@ export default function AgendaPage() {
                     <select
                       value={horarioBarbeiro}
                       onChange={(e) => setHorarioBarbeiro(e.target.value ? Number(e.target.value) : "")}
-                      className="bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50 transition-all w-full sm:w-auto"
+                      className="bg-[#1A1A1A] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm text-zinc-200 focus:outline-none focus:border-white/15 transition-colors w-full sm:w-auto"
                     >
-                      <option value="" className="bg-[#1a1a2e]">Selecione um barbeiro</option>
+                      <option value="" className="bg-[#141414]">Selecione um barbeiro</option>
                       {barbeiros.map((b) => (
-                        <option key={b.id} value={b.id} className="bg-[#1a1a2e]">{b.nome}</option>
+                        <option key={b.id} value={b.id} className="bg-[#141414]">{b.nome}</option>
                       ))}
                     </select>
 
@@ -623,21 +602,21 @@ export default function AgendaPage() {
                               if (blocos.length === 0) return null;
                               return (
                                 <div key={idx} className="flex flex-wrap items-center gap-2">
-                                  <span className="w-12 text-xs font-bold uppercase text-gray-500">{dia}</span>
+                                  <span className="w-12 text-xs text-zinc-500 tracking-tight">{dia}</span>
                                   {blocos.map((b) => (
                                     <div
                                       key={b.id}
-                                      className="flex items-center gap-2 bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 rounded-lg px-3 py-1.5"
+                                      className="flex items-center gap-2 bg-[#1A1A1A] border border-white/[0.06] rounded-lg px-3 py-1.5"
                                     >
-                                      <Clock className="w-3 h-3 text-[#FFFFFF]" />
-                                      <span className="text-xs font-semibold text-[#FFFFFF]">
-                                        {b.hora_inicio} - {b.hora_fim}
+                                      <Clock className="w-3 h-3 text-zinc-400" strokeWidth={1.75} />
+                                      <span className="text-xs text-zinc-200 tabular-nums">
+                                        {b.hora_inicio} – {b.hora_fim}
                                       </span>
                                       <button
                                         onClick={() => handleDeleteHorario(b.id)}
-                                        className="p-0.5 rounded hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-all ml-1"
+                                        className="p-0.5 rounded hover:bg-white/[0.06] text-zinc-600 hover:text-zinc-300 transition-colors ml-1"
                                       >
-                                        <Trash2 className="w-3 h-3" />
+                                        <Trash2 className="w-3 h-3" strokeWidth={1.75} />
                                       </button>
                                     </div>
                                   ))}
@@ -648,46 +627,46 @@ export default function AgendaPage() {
                         )}
 
                         {/* Add new block */}
-                        <div className="flex flex-wrap items-end gap-3 pt-4 border-t border-white/5">
+                        <div className="flex flex-wrap items-end gap-3 pt-5 border-t border-white/[0.06]">
                           <div>
-                            <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1">Dia</label>
+                            <label className="text-xs text-zinc-500 block mb-2 tracking-tight">Dia</label>
                             <select
                               value={newHorario.dia_semana}
                               onChange={(e) => setNewHorario({ ...newHorario, dia_semana: Number(e.target.value) })}
-                              className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50"
+                              className="bg-[#1A1A1A] border border-white/[0.06] rounded-xl px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-white/15 transition-colors"
                             >
                               {DIAS_SEMANA.map((d, i) => (
-                                <option key={i} value={i} className="bg-[#1a1a2e]">{DIAS_SEMANA_FULL[i]}</option>
+                                <option key={i} value={i} className="bg-[#141414]">{DIAS_SEMANA_FULL[i]}</option>
                               ))}
                             </select>
                           </div>
                           <div>
-                            <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1">Inicio</label>
+                            <label className="text-xs text-zinc-500 block mb-2 tracking-tight">Início</label>
                             <input
                               type="time"
                               value={newHorario.hora_inicio}
                               onChange={(e) => setNewHorario({ ...newHorario, hora_inicio: e.target.value })}
-                              className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50"
+                              className="bg-[#1A1A1A] border border-white/[0.06] rounded-xl px-3 py-2 text-sm text-zinc-200 tabular-nums focus:outline-none focus:border-white/15 transition-colors"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1">Fim</label>
+                            <label className="text-xs text-zinc-500 block mb-2 tracking-tight">Fim</label>
                             <input
                               type="time"
                               value={newHorario.hora_fim}
                               onChange={(e) => setNewHorario({ ...newHorario, hora_fim: e.target.value })}
-                              className="bg-white/[0.05] border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50"
+                              className="bg-[#1A1A1A] border border-white/[0.06] rounded-xl px-3 py-2 text-sm text-zinc-200 tabular-nums focus:outline-none focus:border-white/15 transition-colors"
                             />
                           </div>
                           <button
                             onClick={handleAddHorario}
                             disabled={savingHorario}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFFFFF] text-black font-bold text-sm hover:bg-[#E5E7EB] transition-all disabled:opacity-50 shadow-lg shadow-[#FFFFFF]/20"
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-black text-sm font-medium hover:bg-zinc-200 transition-colors disabled:opacity-50"
                           >
                             {savingHorario ? (
                               <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
                             ) : (
-                              <Save className="w-4 h-4" />
+                              <Save className="w-4 h-4" strokeWidth={1.75} />
                             )}
                             Adicionar
                           </button>
@@ -698,7 +677,7 @@ export default function AgendaPage() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
         </div>
       </main>
 
@@ -720,81 +699,81 @@ export default function AgendaPage() {
               transition={{ type: "spring", duration: 0.3 }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4"
             >
-              <div className="bg-[#12121e] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+              <div className="bg-[#141414] border border-white/[0.06] rounded-2xl p-6 w-full max-w-md shadow-2xl">
                 {/* Modal header */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#FFFFFF]/10 border border-[#FFFFFF]/20 flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-[#FFFFFF]" />
+                    <div className="w-9 h-9 rounded-xl bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center">
+                      <Calendar className="w-4 h-4 text-zinc-300" strokeWidth={1.75} />
                     </div>
-                    <h3 className="text-lg font-bold text-white">Novo Agendamento</h3>
+                    <h3 className="text-base font-medium text-white tracking-tight">Novo agendamento</h3>
                   </div>
                   <button
                     onClick={() => setShowModal(false)}
-                    className="p-2 rounded-xl hover:bg-white/10 text-gray-500 hover:text-white transition-all"
+                    className="p-2 rounded-xl hover:bg-white/[0.04] text-zinc-500 hover:text-white transition-colors"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" strokeWidth={1.75} />
                   </button>
                 </div>
 
                 <div className="space-y-4">
                   {/* Cliente nome */}
                   <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1.5">Nome do Cliente</label>
+                    <label className="block text-xs text-zinc-400 mb-2 tracking-tight">Nome do cliente</label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" strokeWidth={1.75} />
                       <input
                         type="text"
                         value={modalData.cliente_nome}
                         onChange={(e) => setModalData({ ...modalData, cliente_nome: e.target.value })}
                         placeholder="Nome completo"
-                        className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FFFFFF]/50 transition-all"
+                        className="w-full bg-transparent border border-white/[0.06] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/15 transition-colors"
                       />
                     </div>
                   </div>
 
                   {/* Cliente telefone */}
                   <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1.5">Telefone</label>
+                    <label className="block text-xs text-zinc-400 mb-2 tracking-tight">Telefone</label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" strokeWidth={1.75} />
                       <input
                         type="tel"
                         value={modalData.cliente_telefone}
                         onChange={(e) => setModalData({ ...modalData, cliente_telefone: e.target.value })}
                         placeholder="(00) 00000-0000"
-                        className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FFFFFF]/50 transition-all"
+                        className="w-full bg-transparent border border-white/[0.06] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/15 transition-colors tabular-nums"
                       />
                     </div>
                   </div>
 
                   {/* Barbeiro */}
                   <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1.5">Barbeiro</label>
+                    <label className="block text-xs text-zinc-400 mb-2 tracking-tight">Barbeiro</label>
                     <select
                       value={modalData.barbeiro_id}
                       onChange={(e) => setModalData({ ...modalData, barbeiro_id: e.target.value })}
-                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50 transition-all"
+                      className="w-full bg-transparent border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm text-zinc-200 focus:outline-none focus:border-white/15 transition-colors"
                     >
-                      <option value="" className="bg-[#1a1a2e]">Selecione o barbeiro</option>
+                      <option value="" className="bg-[#141414]">Selecione o barbeiro</option>
                       {barbeiros.map((b) => (
-                        <option key={b.id} value={b.id} className="bg-[#1a1a2e]">{b.nome}</option>
+                        <option key={b.id} value={b.id} className="bg-[#141414]">{b.nome}</option>
                       ))}
                     </select>
                   </div>
 
                   {/* Servico */}
                   <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1.5">Servico</label>
+                    <label className="block text-xs text-zinc-400 mb-2 tracking-tight">Serviço</label>
                     <select
                       value={modalData.servico_id}
                       onChange={(e) => setModalData({ ...modalData, servico_id: e.target.value })}
-                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50 transition-all"
+                      className="w-full bg-transparent border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm text-zinc-200 focus:outline-none focus:border-white/15 transition-colors"
                     >
-                      <option value="" className="bg-[#1a1a2e]">Selecione o servico</option>
+                      <option value="" className="bg-[#141414]">Selecione o serviço</option>
                       {servicos.map((s) => (
-                        <option key={s.id} value={s.id} className="bg-[#1a1a2e]">
-                          {s.nome} - R$ {s.preco?.toFixed(2)} ({s.duracao_minutos}min)
+                        <option key={s.id} value={s.id} className="bg-[#141414]">
+                          {s.nome} · R$ {s.preco?.toFixed(2)} · {s.duracao_minutos}min
                         </option>
                       ))}
                     </select>
@@ -802,33 +781,33 @@ export default function AgendaPage() {
 
                   {/* Data/Hora */}
                   <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1.5">Data e Hora</label>
+                    <label className="block text-xs text-zinc-400 mb-2 tracking-tight">Data e hora</label>
                     <input
                       type="datetime-local"
                       value={modalData.data_hora}
                       onChange={(e) => setModalData({ ...modalData, data_hora: e.target.value })}
-                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-[#FFFFFF]/50 transition-all"
+                      className="w-full bg-transparent border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm text-zinc-200 tabular-nums focus:outline-none focus:border-white/15 transition-colors"
                     />
                   </div>
                 </div>
 
                 {/* Modal actions */}
-                <div className="flex items-center gap-3 mt-6">
+                <div className="flex items-center gap-2 mt-6">
                   <button
                     onClick={() => setShowModal(false)}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-white/10 transition-all"
+                    className="flex-1 py-2.5 rounded-xl text-sm text-zinc-400 hover:text-white hover:bg-white/[0.04] border border-white/[0.06] transition-colors"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleCreateAgendamento}
                     disabled={saving || !modalData.cliente_nome || !modalData.barbeiro_id || !modalData.servico_id || !modalData.data_hora}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#FFFFFF] text-black hover:bg-[#E5E7EB] transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FFFFFF]/20 flex items-center justify-center gap-2"
+                    className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-white text-black hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {saving ? (
                       <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <Check className="w-4 h-4" />
+                      <Check className="w-4 h-4" strokeWidth={1.75} />
                     )}
                     Agendar
                   </button>
