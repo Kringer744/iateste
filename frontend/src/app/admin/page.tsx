@@ -207,8 +207,18 @@ export default function AdminPage() {
 
       {/* Main */}
       <main className="flex-1 p-8 lg:p-12 overflow-y-auto">
-        <h1 className="text-3xl font-bold mb-2">Painel de Gestão</h1>
-        <p className="text-gray-400 mb-10 text-sm">Gerencie empresas e convites de acesso.</p>
+        <div className="flex items-start justify-between mb-10 gap-4 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Painel de Gestão</h1>
+            <p className="text-gray-400 text-sm">Gerencie empresas e convites de acesso.</p>
+          </div>
+          <a
+            href="/admin/features"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium transition-colors"
+          >
+            ⚙️ Features por empresa
+          </a>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 

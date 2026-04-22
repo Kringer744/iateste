@@ -11,6 +11,12 @@ from src.core.security import verify_password, get_password_hash, create_access_
 from src.core.redis_client import redis_client
 from src.services.db_queries import buscar_usuario_por_email, criar_usuario
 from src.services.email_service import enviar_convite
+from src.api.deps.features import (
+    get_features_for_empresa,
+    set_features_for_empresa,
+    apply_preset,
+    PRESETS,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -44,6 +50,15 @@ class AtualizarEmpresaRequest(BaseModel):
 class ConviteRequest(BaseModel):
     email: str
     empresa_id: int
+
+
+class FeaturesUpdateRequest(BaseModel):
+    """Mapa de feature_key -> ativo. Ex: {"agenda": true, "reservas": false}"""
+    features: dict[str, bool]
+
+
+class PresetApplyRequest(BaseModel):
+    preset: str  # "barbearia" | "hotel" | "clinica"
 
 class RegisterRequest(BaseModel):
     token: str
@@ -151,12 +166,14 @@ async def read_users_me(token_payload: dict = Depends(get_current_user_token)):
     user = await buscar_usuario_por_email(token_payload.get("sub"))
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    features = sorted(await get_features_for_empresa(user['empresa_id']))
     return {
         "id": user['id'],
         "nome": user['nome'],
         "email": user['email'],
         "perfil": user['perfil'],
         "empresa_id": user['empresa_id'],
+        "features": features,
     }
 
 
@@ -360,6 +377,75 @@ async def toggle_usuario(
     acao = "ativado" if novo_status else "desativado"
     logger.info(f"👤 Usuário '{row['nome']}' (id={usuario_id}) {acao}")
     return {"ativo": novo_status, "message": f"Usuário {acao} com sucesso"}
+
+
+@router.get("/empresas/{empresa_id}/features")
+async def listar_features_empresa(
+    empresa_id: int,
+    token_payload: dict = Depends(get_current_user_token),
+):
+    """Lista as features ativas da empresa. admin_master ve qualquer; demais, so a propria."""
+    perfil = token_payload.get("perfil")
+    if perfil != "admin_master" and token_payload.get("empresa_id") != empresa_id:
+        raise HTTPException(status_code=403, detail="Sem permissao")
+    import src.core.database as _database
+    rows = await _database.db_pool.fetch(
+        """
+        SELECT f.key, f.nome, f.descricao, f.categoria,
+               COALESCE(ef.ativo, FALSE) AS ativo
+        FROM features f
+        LEFT JOIN empresa_features ef
+          ON ef.feature_key = f.key AND ef.empresa_id = $1
+        ORDER BY f.categoria, f.nome
+        """,
+        empresa_id,
+    )
+    return [dict(r) for r in rows]
+
+
+@router.put("/empresas/{empresa_id}/features")
+async def atualizar_features_empresa(
+    empresa_id: int,
+    body: FeaturesUpdateRequest,
+    token_payload: dict = Depends(get_current_user_token),
+):
+    """Atualiza features de uma empresa. Apenas admin_master."""
+    if token_payload.get("perfil") != "admin_master":
+        raise HTTPException(status_code=403, detail="Apenas admin_master")
+    if not body.features:
+        raise HTTPException(status_code=400, detail="Nenhuma feature fornecida")
+    await set_features_for_empresa(empresa_id, body.features)
+    ativas = sorted(await get_features_for_empresa(empresa_id))
+    logger.info(f"⚙️ Features atualizadas empresa_id={empresa_id}: {ativas}")
+    return {"empresa_id": empresa_id, "features": ativas}
+
+
+@router.post("/empresas/{empresa_id}/features/preset")
+async def aplicar_preset_empresa(
+    empresa_id: int,
+    body: PresetApplyRequest,
+    token_payload: dict = Depends(get_current_user_token),
+):
+    """Aplica um preset (barbearia, hotel, clinica) na empresa. Apenas admin_master."""
+    if token_payload.get("perfil") != "admin_master":
+        raise HTTPException(status_code=403, detail="Apenas admin_master")
+    if body.preset not in PRESETS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Preset invalido. Disponiveis: {sorted(PRESETS.keys())}",
+        )
+    await apply_preset(empresa_id, body.preset)
+    ativas = sorted(await get_features_for_empresa(empresa_id))
+    logger.info(f"🎛️ Preset '{body.preset}' aplicado empresa_id={empresa_id}: {ativas}")
+    return {"empresa_id": empresa_id, "preset": body.preset, "features": ativas}
+
+
+@router.get("/presets")
+async def listar_presets(token_payload: dict = Depends(get_current_user_token)):
+    """Lista presets disponiveis. Apenas admin_master."""
+    if token_payload.get("perfil") != "admin_master":
+        raise HTTPException(status_code=403, detail="Apenas admin_master")
+    return {nome: sorted(list(keys)) for nome, keys in PRESETS.items()}
 
 
 @router.delete("/usuarios/{usuario_id}")

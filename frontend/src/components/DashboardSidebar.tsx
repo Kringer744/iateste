@@ -1,45 +1,60 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   LayoutDashboard, Brain, Network, Settings, LogOut,
   MessageSquare, Menu, X, Calendar, Users, Star,
-  Scissors, UserCheck, ChevronsUpDown, Search, Sparkles
+  Scissors, UserCheck, ChevronsUpDown, Search, Sparkles,
+  CalendarCheck, BedDouble
 } from "lucide-react";
+import { useFeatures } from "@/contexts/FeaturesContext";
+import { hasFeature } from "@/lib/features";
 
 interface SidebarProps {
   activePage?: string;
 }
 
-const navItemsRaw = [
+// Catalogo completo de itens. Cada um opcionalmente declara `feature` + labels
+// por preset (para customizar vocabulario sem duplicar a entrada).
+type NavItem = {
+  label: string;
+  icon: typeof LayoutDashboard;
+  href: string;
+  id: string;
+  feature?: string;
+  labelsByPreset?: Record<string, string>;
+};
+
+const NAV_CATALOG: NavItem[] = [
   { label: "Visão Geral", icon: LayoutDashboard, href: "/dashboard", id: "dashboard" },
   { label: "Conversas", icon: MessageSquare, href: "/dashboard/conversas", id: "conversas" },
-  { label: "Agenda", icon: Calendar, href: "/dashboard/agenda", id: "agenda" },
-  { label: "Barbeiros", icon: Users, href: "/dashboard/barbeiros", id: "barbeiros" },
+  { label: "Agenda", icon: Calendar, href: "/dashboard/agenda", id: "agenda", feature: "agenda" },
+  {
+    label: "Profissionais", icon: Users, href: "/dashboard/barbeiros", id: "barbeiros",
+    feature: "profissionais",
+    labelsByPreset: { barbearia: "Barbeiros", clinica: "Profissionais", hotel: "Equipe" },
+  },
   { label: "Personalidade IA", icon: Brain, href: "/dashboard/personality", id: "personality" },
-  { label: "Serviços", icon: Scissors, href: "/dashboard/servicos", id: "servicos" },
-  { label: "Avaliações", icon: Star, href: "/dashboard/avaliacoes", id: "avaliacoes" },
-  { label: "Clientes", icon: UserCheck, href: "/dashboard/clientes", id: "clientes" },
+  { label: "Serviços", icon: Scissors, href: "/dashboard/servicos", id: "servicos", feature: "servicos" },
+  { label: "Avaliações", icon: Star, href: "/dashboard/avaliacoes", id: "avaliacoes", feature: "avaliacoes" },
+  { label: "Clientes", icon: UserCheck, href: "/dashboard/clientes", id: "clientes", feature: "clientes" },
+  { label: "Reservas", icon: CalendarCheck, href: "/dashboard/reservas", id: "reservas", feature: "reservas" },
+  { label: "Quartos", icon: BedDouble, href: "/dashboard/quartos", id: "quartos", feature: "quartos" },
   { label: "Mensagens", icon: MessageSquare, href: "/dashboard/mensagens", id: "mensagens" },
   { label: "Integrações", icon: Network, href: "/dashboard/integrations", id: "integrations" },
 ];
 
-const navItems = navItemsRaw.filter((item, index, all) => (
-  all.findIndex((candidate) => candidate.id === item.id && candidate.href === item.href) === index
-));
-
 export default function DashboardSidebar({ activePage = "dashboard" }: SidebarProps) {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const { me: user, features, preset } = useFeatures();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    fetch("/api-backend/auth/me", { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(setUser)
-      .catch(() => {});
-  }, []);
+  // Filtra itens conforme features da empresa e aplica label do preset.
+  const navItems = NAV_CATALOG
+    .filter((item) => !item.feature || hasFeature(features, item.feature))
+    .map((item) => ({
+      ...item,
+      label: item.labelsByPreset?.[preset] ?? item.label,
+    }));
 
   const handleLogout = () => {
     localStorage.removeItem("token");

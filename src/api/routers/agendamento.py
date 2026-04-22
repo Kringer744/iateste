@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from src.core.database import get_db_pool
 from src.core.security import get_current_user_token as get_current_user
+from src.api.deps.features import require_feature
 from src.services.agendamento_service import (
     listar_barbeiros, buscar_barbeiro_por_nome,
     listar_servicos, buscar_servico_por_nome,
@@ -89,12 +90,12 @@ class AvaliacaoCreate(BaseModel):
 #  BARBEIROS
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/barbeiros")
+@router.get("/barbeiros", dependencies=[Depends(require_feature("profissionais"))])
 async def api_listar_barbeiros(user=Depends(get_current_user)):
     db = await get_db_pool()
     return await listar_barbeiros(db, user['empresa_id'])
 
-@router.post("/barbeiros")
+@router.post("/barbeiros", dependencies=[Depends(require_feature("profissionais"))])
 async def api_criar_barbeiro(body: BarbeiroCreate, user=Depends(get_current_user)):
     db = await get_db_pool()
     row = await db.fetchrow("""
@@ -104,7 +105,7 @@ async def api_criar_barbeiro(body: BarbeiroCreate, user=Depends(get_current_user
     """, user['empresa_id'], body.unidade_id, body.nome, body.telefone, body.especialidades, body.foto_url)
     return dict(row)
 
-@router.put("/barbeiros/{barbeiro_id}")
+@router.put("/barbeiros/{barbeiro_id}", dependencies=[Depends(require_feature("profissionais"))])
 async def api_atualizar_barbeiro(barbeiro_id: int, body: BarbeiroUpdate, user=Depends(get_current_user)):
     db = await get_db_pool()
     updates = {k: v for k, v in body.dict().items() if v is not None}
@@ -118,7 +119,7 @@ async def api_atualizar_barbeiro(barbeiro_id: int, body: BarbeiroUpdate, user=De
     )
     return {"ok": True}
 
-@router.delete("/barbeiros/{barbeiro_id}")
+@router.delete("/barbeiros/{barbeiro_id}", dependencies=[Depends(require_feature("profissionais"))])
 async def api_desativar_barbeiro(barbeiro_id: int, user=Depends(get_current_user)):
     db = await get_db_pool()
     await db.execute(
@@ -132,12 +133,12 @@ async def api_desativar_barbeiro(barbeiro_id: int, user=Depends(get_current_user
 #  SERVIÇOS
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/servicos")
+@router.get("/servicos", dependencies=[Depends(require_feature("servicos"))])
 async def api_listar_servicos(user=Depends(get_current_user)):
     db = await get_db_pool()
     return await listar_servicos(db, user['empresa_id'])
 
-@router.post("/servicos")
+@router.post("/servicos", dependencies=[Depends(require_feature("servicos"))])
 async def api_criar_servico(body: ServicoCreate, user=Depends(get_current_user)):
     db = await get_db_pool()
     row = await db.fetchrow("""
@@ -147,7 +148,7 @@ async def api_criar_servico(body: ServicoCreate, user=Depends(get_current_user))
     """, user['empresa_id'], body.nome, body.descricao, body.duracao_minutos, body.preco)
     return dict(row)
 
-@router.put("/servicos/{servico_id}")
+@router.put("/servicos/{servico_id}", dependencies=[Depends(require_feature("servicos"))])
 async def api_atualizar_servico(servico_id: int, body: ServicoUpdate, user=Depends(get_current_user)):
     db = await get_db_pool()
     updates = {k: v for k, v in body.dict().items() if v is not None}
@@ -161,7 +162,7 @@ async def api_atualizar_servico(servico_id: int, body: ServicoUpdate, user=Depen
     )
     return {"ok": True}
 
-@router.delete("/servicos/{servico_id}")
+@router.delete("/servicos/{servico_id}", dependencies=[Depends(require_feature("servicos"))])
 async def api_desativar_servico(servico_id: int, user=Depends(get_current_user)):
     db = await get_db_pool()
     await db.execute(
@@ -175,7 +176,7 @@ async def api_desativar_servico(servico_id: int, user=Depends(get_current_user))
 #  HORÁRIOS DISPONÍVEIS
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/horarios/{barbeiro_id}")
+@router.get("/horarios/{barbeiro_id}", dependencies=[Depends(require_feature("agenda"))])
 async def api_listar_horarios(barbeiro_id: int, user=Depends(get_current_user)):
     db = await get_db_pool()
     rows = await db.fetch(
@@ -184,7 +185,7 @@ async def api_listar_horarios(barbeiro_id: int, user=Depends(get_current_user)):
     )
     return [dict(r) for r in rows]
 
-@router.post("/horarios")
+@router.post("/horarios", dependencies=[Depends(require_feature("agenda"))])
 async def api_criar_horario(body: HorarioCreate, user=Depends(get_current_user)):
     db = await get_db_pool()
     from datetime import time as dt_time
@@ -197,7 +198,7 @@ async def api_criar_horario(body: HorarioCreate, user=Depends(get_current_user))
     """, body.barbeiro_id, user['empresa_id'], body.dia_semana, h_inicio, h_fim, body.intervalo_minutos)
     return dict(row)
 
-@router.delete("/horarios/{horario_id}")
+@router.delete("/horarios/{horario_id}", dependencies=[Depends(require_feature("agenda"))])
 async def api_deletar_horario(horario_id: int, user=Depends(get_current_user)):
     db = await get_db_pool()
     await db.execute(
@@ -211,7 +212,7 @@ async def api_deletar_horario(horario_id: int, user=Depends(get_current_user)):
 #  BLOQUEIOS
 # ═══════════════════════════════════════════════════════════
 
-@router.post("/bloqueios")
+@router.post("/bloqueios", dependencies=[Depends(require_feature("agenda"))])
 async def api_criar_bloqueio(body: BloqueioCreate, user=Depends(get_current_user)):
     db = await get_db_pool()
     row = await db.fetchrow("""
@@ -224,7 +225,7 @@ async def api_criar_bloqueio(body: BloqueioCreate, user=Depends(get_current_user
         body.motivo)
     return dict(row)
 
-@router.get("/bloqueios/{barbeiro_id}")
+@router.get("/bloqueios/{barbeiro_id}", dependencies=[Depends(require_feature("agenda"))])
 async def api_listar_bloqueios(barbeiro_id: int, user=Depends(get_current_user)):
     db = await get_db_pool()
     rows = await db.fetch(
@@ -233,7 +234,7 @@ async def api_listar_bloqueios(barbeiro_id: int, user=Depends(get_current_user))
     )
     return [dict(r) for r in rows]
 
-@router.delete("/bloqueios/{bloqueio_id}")
+@router.delete("/bloqueios/{bloqueio_id}", dependencies=[Depends(require_feature("agenda"))])
 async def api_deletar_bloqueio(bloqueio_id: int, user=Depends(get_current_user)):
     db = await get_db_pool()
     await db.execute(
@@ -247,7 +248,7 @@ async def api_deletar_bloqueio(bloqueio_id: int, user=Depends(get_current_user))
 #  DISPONIBILIDADE (consulta pública para IA)
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/disponibilidade")
+@router.get("/disponibilidade", dependencies=[Depends(require_feature("agenda"))])
 async def api_disponibilidade(
     data: Optional[str] = None,
     barbeiro_id: Optional[int] = None,
@@ -262,7 +263,7 @@ async def api_disponibilidade(
     slots = await obter_slots_disponiveis(db, user['empresa_id'], dt, barbeiro_id)
     return {"data": dt.strftime("%Y-%m-%d"), "slots": slots}
 
-@router.get("/disponibilidade/resumo")
+@router.get("/disponibilidade/resumo", dependencies=[Depends(require_feature("agenda"))])
 async def api_disponibilidade_resumo(
     barbeiro_id: Optional[int] = None,
     dias: int = 7,
@@ -277,7 +278,7 @@ async def api_disponibilidade_resumo(
 #  AGENDAMENTOS
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/agendamentos")
+@router.get("/agendamentos", dependencies=[Depends(require_feature("agenda"))])
 async def api_listar_agendamentos(
     data: Optional[str] = None,
     barbeiro_id: Optional[int] = None,
@@ -313,7 +314,7 @@ async def api_listar_agendamentos(
     rows = await db.fetch(query, *params)
     return [dict(r) for r in rows]
 
-@router.post("/agendamentos")
+@router.post("/agendamentos", dependencies=[Depends(require_feature("agenda"))])
 async def api_criar_agendamento(body: AgendamentoCreate, user=Depends(get_current_user)):
     db = await get_db_pool()
     data_hora = datetime.fromisoformat(body.data_hora)
@@ -326,7 +327,7 @@ async def api_criar_agendamento(body: AgendamentoCreate, user=Depends(get_curren
         raise HTTPException(409, "Horário já ocupado")
     return result
 
-@router.patch("/agendamentos/{agendamento_id}/cancelar")
+@router.patch("/agendamentos/{agendamento_id}/cancelar", dependencies=[Depends(require_feature("agenda"))])
 async def api_cancelar_agendamento(agendamento_id: int, user=Depends(get_current_user)):
     db = await get_db_pool()
     ok = await cancelar_agendamento(db, agendamento_id)
@@ -334,7 +335,7 @@ async def api_cancelar_agendamento(agendamento_id: int, user=Depends(get_current
         raise HTTPException(404, "Agendamento não encontrado ou já cancelado")
     return {"ok": True}
 
-@router.patch("/agendamentos/{agendamento_id}/concluir")
+@router.patch("/agendamentos/{agendamento_id}/concluir", dependencies=[Depends(require_feature("agenda"))])
 async def api_concluir_agendamento(agendamento_id: int, user=Depends(get_current_user)):
     """Marca corte como feito — dispara avaliação automática via WhatsApp."""
     db = await get_db_pool()
@@ -387,7 +388,7 @@ async def api_concluir_agendamento(agendamento_id: int, user=Depends(get_current
 #  AVALIAÇÕES
 # ═══════════════════════════════════════════════════════════
 
-@router.post("/agendamentos/{agendamento_id}/avaliar")
+@router.post("/agendamentos/{agendamento_id}/avaliar", dependencies=[Depends(require_feature("avaliacoes"))])
 async def api_avaliar(agendamento_id: int, body: AvaliacaoCreate, user=Depends(get_current_user)):
     db = await get_db_pool()
     ag = await db.fetchrow("SELECT * FROM agendamentos WHERE id = $1 AND empresa_id = $2", agendamento_id, user['empresa_id'])
@@ -399,7 +400,7 @@ async def api_avaliar(agendamento_id: int, body: AvaliacaoCreate, user=Depends(g
     )
     return result
 
-@router.get("/avaliacoes/{barbeiro_id}")
+@router.get("/avaliacoes/{barbeiro_id}", dependencies=[Depends(require_feature("avaliacoes"))])
 async def api_avaliacoes_barbeiro(barbeiro_id: int, user=Depends(get_current_user)):
     db = await get_db_pool()
     media = await media_avaliacoes_barbeiro(db, barbeiro_id)
@@ -417,7 +418,7 @@ async def api_avaliacoes_barbeiro(barbeiro_id: int, user=Depends(get_current_use
 #  CLIENTES (lista única a partir de agendamentos + memoria)
 # ═══════════════════════════════════════════════════════════
 
-@router.get("/clientes")
+@router.get("/clientes", dependencies=[Depends(require_feature("clientes"))])
 async def api_listar_clientes(
     busca: Optional[str] = None,
     user=Depends(get_current_user),
@@ -472,7 +473,7 @@ class PersonaClienteUpdate(BaseModel):
     relevancia: Optional[float] = None
 
 
-@router.get("/clientes/{telefone}/persona")
+@router.get("/clientes/{telefone}/persona", dependencies=[Depends(require_feature("clientes"))])
 async def get_persona_cliente(telefone: str, user=Depends(get_current_user)):
     """Lista persona/notas de um cliente pelo telefone."""
     db = await get_db_pool()
@@ -488,7 +489,7 @@ async def get_persona_cliente(telefone: str, user=Depends(get_current_user)):
     return [dict(r) for r in rows]
 
 
-@router.post("/clientes/persona", status_code=201)
+@router.post("/clientes/persona", status_code=201, dependencies=[Depends(require_feature("clientes"))])
 async def criar_persona_cliente(body: PersonaClienteCreate, user=Depends(get_current_user)):
     """Barbeiro adiciona nota/persona sobre um cliente."""
     db = await get_db_pool()
@@ -506,7 +507,7 @@ async def criar_persona_cliente(body: PersonaClienteCreate, user=Depends(get_cur
     return {"id": row["id"], "status": "created"}
 
 
-@router.put("/clientes/persona/{nota_id}")
+@router.put("/clientes/persona/{nota_id}", dependencies=[Depends(require_feature("clientes"))])
 async def atualizar_persona_cliente(nota_id: int, body: PersonaClienteUpdate, user=Depends(get_current_user)):
     """Atualiza uma nota/persona de cliente."""
     db = await get_db_pool()
@@ -537,7 +538,7 @@ async def atualizar_persona_cliente(nota_id: int, body: PersonaClienteUpdate, us
     return {"status": "updated"}
 
 
-@router.delete("/clientes/persona/{nota_id}")
+@router.delete("/clientes/persona/{nota_id}", dependencies=[Depends(require_feature("clientes"))])
 async def deletar_persona_cliente(nota_id: int, user=Depends(get_current_user)):
     """Remove uma nota/persona de cliente."""
     db = await get_db_pool()

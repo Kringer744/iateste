@@ -1,6 +1,7 @@
 import re
 from typing import Optional, List, Dict, Any
 from src.utils.text_helpers import normalizar, limpar_nome
+from src.utils.preset_vocab import regex_modalidades
 
 SAUDACOES = {
     # Abertura
@@ -39,8 +40,13 @@ def eh_confirmacao_curta(texto: str) -> bool:
     return bool(re.search(r"^(sim|quero sim|quero|pode|pode sim|pode mandar|manda|me passa|pode passar|ok|beleza|blz|claro)$", t))
 
 
-def classificar_intencao(texto: str) -> str:
-    """Classifica intenção principal com foco operacional (factual antes de LLM)."""
+def classificar_intencao(texto: str, preset: Optional[str] = None) -> str:
+    """Classifica intenção principal com foco operacional (factual antes de LLM).
+
+    O parametro opcional `preset` troca o vocabulario de "modalidades" pelo
+    conjunto do nicho (barbearia, hotel, clinica). Quando omitido, mantem a
+    regex historica de barbearia — backward compatible.
+    """
     t = normalizar(texto or "")
     if not t.strip():
         return "neutro"
@@ -56,8 +62,13 @@ def classificar_intencao(texto: str) -> str:
         return "unidades"
     if re.search(r"(preco|preço|valor|mensalidade|quanto custa|plano|planos|promo|promocao|promoção)", t):
         return "planos"
-    if re.search(r"(corte|barba|barbeiro|navalha|degradê|degrade|pigmentacao|pigmentação|sobrancelha|lazer|servicos|serviços|comodidades|estrutura|atividades)", t):
-        return "modalidades"
+    # Vocabulario de modalidades por preset (fallback: barbearia hardcoded).
+    if preset:
+        if regex_modalidades(preset).search(t):
+            return "modalidades"
+    else:
+        if re.search(r"(corte|barba|barbeiro|navalha|degradê|degrade|pigmentacao|pigmentação|sobrancelha|lazer|servicos|serviços|comodidades|estrutura|atividades)", t):
+            return "modalidades"
     if re.search(r"(convenio|convênio|parceria|beneficio corporativo)", t):
         return "convenio"
     return "llm"
