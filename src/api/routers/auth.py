@@ -67,6 +67,14 @@ class RegisterRequest(BaseModel):
     senha: str
 
 
+class CriarUsuarioRequest(BaseModel):
+    nome: str
+    email: str
+    senha: str
+    empresa_id: int
+    perfil: Optional[str] = "admin"
+
+
 # ---------- helpers ----------
 
 async def _buscar_empresa(empresa_id: int):
@@ -326,6 +334,41 @@ async def register(body: RegisterRequest):
 
     logger.info(f"✅ Usuário registrado: {body.email} (empresa_id={convite['empresa_id']})")
     return {"message": "Conta criada com sucesso. Faça login."}
+
+
+@router.post("/usuarios", status_code=201)
+async def criar_usuario_direto(
+    body: CriarUsuarioRequest,
+    token_payload: dict = Depends(get_current_user_token),
+):
+    """Cria um usuário direto (email + senha), sem fluxo de convite. Apenas admin_master."""
+    if token_payload.get("perfil") != "admin_master":
+        raise HTTPException(status_code=403, detail="Apenas admin_master pode criar usuários")
+
+    if len(body.senha) < 6:
+        raise HTTPException(status_code=400, detail="Senha deve ter ao menos 6 caracteres")
+
+    empresa = await _buscar_empresa(body.empresa_id)
+    if not empresa:
+        raise HTTPException(status_code=404, detail="Empresa não encontrada")
+
+    existente = await buscar_usuario_por_email(body.email)
+    if existente:
+        raise HTTPException(status_code=409, detail="E-mail já cadastrado")
+
+    senha_hash = get_password_hash(body.senha)
+    ok = await criar_usuario(
+        nome=body.nome,
+        email=body.email,
+        senha_hash=senha_hash,
+        empresa_id=body.empresa_id,
+        perfil=body.perfil or "admin",
+    )
+    if not ok:
+        raise HTTPException(status_code=500, detail="Erro ao criar usuário")
+
+    logger.info(f"✅ Usuário criado direto: {body.email} (empresa_id={body.empresa_id}, perfil={body.perfil})")
+    return {"message": f"Usuário {body.email} criado com sucesso", "email": body.email}
 
 
 @router.get("/usuarios")

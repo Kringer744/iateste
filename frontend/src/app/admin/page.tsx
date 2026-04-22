@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import {
-  Building2, Mail, Plus, Send, LogOut, LayoutDashboard,
+  Building2, Mail, Plus, LogOut, LayoutDashboard,
   Loader2, CheckCircle, AlertCircle, Users,
   Pencil, Trash2, X, UserCheck, UserX, ShieldCheck,
   Settings, Sparkles, RefreshCw
@@ -52,11 +52,10 @@ export default function AdminPage() {
   const [excluindoId, setExcluindoId] = useState<number | null>(null);
   const [msgEdit, setMsgEdit] = useState<{ ok: boolean; text: string } | null>(null);
 
-  // Enviar convite
-  const [convite, setConvite] = useState({ email: "", empresa_id: "" });
-  const [enviandoConvite, setEnviandoConvite] = useState(false);
-  const [msgConvite, setMsgConvite] = useState<{ ok: boolean; text: string } | null>(null);
-  const [linkConvite, setLinkConvite] = useState<string | null>(null);
+  // Criar usuário direto
+  const [novoUsuario, setNovoUsuario] = useState({ nome: "", email: "", senha: "", empresa_id: "", perfil: "admin" });
+  const [criandoUsuario, setCriandoUsuario] = useState(false);
+  const [msgUsuario, setMsgUsuario] = useState<{ ok: boolean; text: string } | null>(null);
 
   const getConfig = () => ({
     headers: { Authorization: `Bearer ${typeof window !== "undefined" ? localStorage.getItem("token") : ""}` },
@@ -164,32 +163,37 @@ export default function AdminPage() {
     }
   };
 
-  const handleEnviarConvite = async (e: React.FormEvent) => {
+  const handleCriarUsuario = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!convite.empresa_id) {
-      setMsgConvite({ ok: false, text: "Selecione uma empresa." });
+    if (!novoUsuario.empresa_id) {
+      setMsgUsuario({ ok: false, text: "Selecione uma empresa." });
       return;
     }
-    setEnviandoConvite(true);
-    setMsgConvite(null);
-    setLinkConvite(null);
+    if (novoUsuario.senha.length < 6) {
+      setMsgUsuario({ ok: false, text: "Senha deve ter ao menos 6 caracteres." });
+      return;
+    }
+    setCriandoUsuario(true);
+    setMsgUsuario(null);
     try {
-      const res = await axios.post(
-        "/api-backend/auth/invite",
-        { email: convite.email, empresa_id: Number(convite.empresa_id) },
+      await axios.post(
+        "/api-backend/auth/usuarios",
+        {
+          nome: novoUsuario.nome,
+          email: novoUsuario.email,
+          senha: novoUsuario.senha,
+          empresa_id: Number(novoUsuario.empresa_id),
+          perfil: novoUsuario.perfil,
+        },
         getConfig()
       );
-      if (res.data.email_enviado) {
-        setMsgConvite({ ok: true, text: `Usuário ${convite.email} criado. Link de cadastro enviado por e-mail.` });
-      } else {
-        setMsgConvite({ ok: true, text: `Usuário criado. E-mail não enviado (SMTP). Copie o link de cadastro abaixo:` });
-        setLinkConvite(res.data.link);
-      }
-      setConvite({ email: "", empresa_id: "" });
+      setMsgUsuario({ ok: true, text: `Usuário ${novoUsuario.email} criado. Já pode fazer login.` });
+      setNovoUsuario({ nome: "", email: "", senha: "", empresa_id: "", perfil: "admin" });
+      await fetchData();
     } catch (err: any) {
-      setMsgConvite({ ok: false, text: err.response?.data?.detail || "Erro ao criar usuário." });
+      setMsgUsuario({ ok: false, text: err.response?.data?.detail || "Erro ao criar usuário." });
     } finally {
-      setEnviandoConvite(false);
+      setCriandoUsuario(false);
     }
   };
 
@@ -387,21 +391,21 @@ export default function AdminPage() {
               </form>
             </div>
 
-            {/* Criar usuário (via convite) */}
+            {/* Criar usuário direto (email + senha) */}
             <div className={cardCls}>
               <h2 className="text-sm font-semibold mb-5 flex items-center gap-2 text-white tracking-tight">
                 <UserCheck className="w-4 h-4 text-zinc-400" strokeWidth={1.75} />
                 Criar Usuário
               </h2>
               <p className="text-xs text-zinc-500 mb-4 -mt-3">
-                Gera um link de cadastro para o novo usuário definir senha e entrar.
+                Define e-mail e senha direto — o usuário já consegue acessar a empresa.
               </p>
-              <form onSubmit={handleEnviarConvite} className="space-y-3">
+              <form onSubmit={handleCriarUsuario} className="space-y-3">
                 <div>
                   <label className={labelCls}>Empresa *</label>
                   <select
-                    value={convite.empresa_id}
-                    onChange={(e) => setConvite({ ...convite, empresa_id: e.target.value })}
+                    value={novoUsuario.empresa_id}
+                    onChange={(e) => setNovoUsuario({ ...novoUsuario, empresa_id: e.target.value })}
                     className={inputCls}
                     required
                   >
@@ -412,58 +416,72 @@ export default function AdminPage() {
                   </select>
                 </div>
                 <div>
-                  <label className={labelCls}>E-mail do usuário *</label>
+                  <label className={labelCls}>Nome *</label>
+                  <input
+                    type="text"
+                    value={novoUsuario.nome}
+                    onChange={(e) => setNovoUsuario({ ...novoUsuario, nome: e.target.value })}
+                    placeholder="Nome do usuário"
+                    className={inputCls}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>E-mail *</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" strokeWidth={1.75} />
                     <input
                       type="email"
-                      value={convite.email}
-                      onChange={(e) => setConvite({ ...convite, email: e.target.value })}
+                      value={novoUsuario.email}
+                      onChange={(e) => setNovoUsuario({ ...novoUsuario, email: e.target.value })}
                       placeholder="gestor@empresa.com"
                       className={`${inputCls} pl-10`}
                       required
                     />
                   </div>
                 </div>
-                {msgConvite && (
+                <div>
+                  <label className={labelCls}>Senha * <span className="text-zinc-600">(mínimo 6 caracteres)</span></label>
+                  <input
+                    type="password"
+                    value={novoUsuario.senha}
+                    onChange={(e) => setNovoUsuario({ ...novoUsuario, senha: e.target.value })}
+                    placeholder="••••••••"
+                    className={inputCls}
+                    minLength={6}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Perfil</label>
+                  <select
+                    value={novoUsuario.perfil}
+                    onChange={(e) => setNovoUsuario({ ...novoUsuario, perfil: e.target.value })}
+                    className={inputCls}
+                  >
+                    <option value="admin">admin (gestor da empresa)</option>
+                    <option value="atendente">atendente</option>
+                    <option value="admin_master">admin_master (acesso total)</option>
+                  </select>
+                </div>
+                {msgUsuario && (
                   <div
                     className={`flex items-start gap-2 text-xs p-3 rounded-lg border ${
-                      msgConvite.ok
+                      msgUsuario.ok
                         ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-300"
                         : "bg-red-500/5 border-red-500/20 text-red-300"
                     }`}
                   >
-                    {msgConvite.ok ? <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
-                    <span>{msgConvite.text}</span>
-                  </div>
-                )}
-                {linkConvite && (
-                  <div className="space-y-1.5">
-                    <label className={labelCls}>Link de cadastro</label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        readOnly
-                        value={linkConvite}
-                        className="flex-1 bg-[#1A1A1A] border border-white/[0.06] rounded-xl py-2 px-3 text-xs text-zinc-300 font-mono"
-                        onClick={(e) => (e.target as HTMLInputElement).select()}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => navigator.clipboard.writeText(linkConvite)}
-                        className="px-3 py-2 rounded-xl bg-white hover:bg-zinc-100 text-black text-xs font-medium transition-colors"
-                      >
-                        Copiar
-                      </button>
-                    </div>
+                    {msgUsuario.ok ? <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
+                    <span>{msgUsuario.text}</span>
                   </div>
                 )}
                 <button
                   type="submit"
-                  disabled={enviandoConvite || empresas.length === 0}
+                  disabled={criandoUsuario || empresas.length === 0}
                   className={`w-full ${primaryBtn}`}
                 >
-                  {enviandoConvite ? <Loader2 className="w-4 h-4 animate-spin" /> : <><UserCheck className="w-4 h-4" strokeWidth={2} /> Criar Usuário</>}
+                  {criandoUsuario ? <Loader2 className="w-4 h-4 animate-spin" /> : <><UserCheck className="w-4 h-4" strokeWidth={2} /> Criar Usuário</>}
                 </button>
                 {empresas.length === 0 && (
                   <p className="text-xs text-zinc-500 text-center">Crie uma empresa primeiro para poder adicionar usuários.</p>
