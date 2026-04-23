@@ -147,6 +147,18 @@ async def chatwoot_webhook(
     _unidade_obj = (await carregar_unidade(slug, empresa_id) or {}) if slug else {}
     unidade_id: int = _unidade_obj.get('id') or 0
 
+    # 🛡️ Sanitiza slug stale: se o slug em cache não pertence à empresa atual
+    # (ex.: integração foi trocada de tenant, ou label antiga do Chatwoot),
+    # descarta pra não vazar contexto entre empresas.
+    if slug and not _unidade_obj:
+        logger.warning(
+            f"🧹 Slug stale '{slug}' não pertence a empresa={empresa_id} — limpando cache "
+            f"(conv={id_conv}). Fallback para dados da empresa."
+        )
+        await delete_tenant_cache(empresa_id, f"unidade_escolhida:{id_conv}")
+        slug = None
+        unidade_id = 0
+
     contato = payload.get("sender", {})
     nome_contato_raw = contato.get("name")
     nome_contato_limpo = limpar_nome(nome_contato_raw)

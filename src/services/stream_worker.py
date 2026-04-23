@@ -9,7 +9,7 @@ from src.core.config import (
 )
 import src.core.database as _database
 from src.core.redis_client import redis_client
-from src.services.db_queries import carregar_integracao, buscar_conversa_por_fone, bd_iniciar_conversa
+from src.services.db_queries import carregar_integracao, buscar_conversa_por_fone, bd_iniciar_conversa, listar_unidades_ativas
 from src.services.bot_core import processar_ia_e_responder
 
 STREAM_NAME = "ia:webhook:stream"
@@ -256,6 +256,20 @@ async def _process_job(msg_id: str, payload: dict):
                 logger.error(f"❌ Falha ao carregar integração {source} para empresa {empresa_id}. Job abortado.")
                 await redis_client.xack(STREAM_NAME, CONSUMER_GROUP, msg_id)
                 return
+
+            # 🛡️ Sanitiza slug stale: garante que pertence à empresa atual.
+            # Sem isso, labels/atributos vindos de outro tenant vazam pra prompt.
+            if slug and slug != "uazapi":
+                try:
+                    _valid_slugs = {u.get("slug") for u in (await listar_unidades_ativas(empresa_id) or [])}
+                    if slug not in _valid_slugs:
+                        logger.warning(
+                            f"🧹 Worker: slug stale '{slug}' não pertence a empresa={empresa_id} — descartando "
+                            f"(conv={conversation_id}). Fallback para dados da empresa."
+                        )
+                        slug = None
+                except Exception as _e_slug:
+                    logger.warning(f"Erro validando slug stale: {_e_slug}")
 
             logger.info(f"⚙️ Integração {source} carregada com sucesso. Iniciando processamento IA.")
             lock_val = str(uuid.uuid4())
