@@ -28,6 +28,8 @@ from src.services.ia_processor import (
 )
 from src.services.rag_service import buscar_conhecimento, formatar_rag_para_prompt
 from src.services.ab_testing import aplicar_teste_ab
+from src.api.routers.quartos import listar_quartos_ativos, formatar_quartos_para_prompt
+from src.api.deps.features import has_feature
 
 
 def filtrar_planos_por_contexto(texto_cliente: str, planos: List[Dict]) -> List[Dict]:
@@ -386,6 +388,16 @@ REGRAS:
 
 [CONTEXTO DA REDE]
 {contexto_rede_unidades}""")
+
+    # 7.5. Quartos/Acomodações (hotelaria) — se a feature estiver ativa
+    try:
+        if await has_feature(empresa_id, "quartos"):
+            _quartos = await listar_quartos_ativos(empresa_id)
+            _bloco_quartos = formatar_quartos_para_prompt(_quartos)
+            if _bloco_quartos:
+                blocos_prompt.append(_bloco_quartos)
+    except Exception as _q_err:
+        logger.debug(f"Injeção de quartos falhou (não crítico): {_q_err}")
 
     # 8. FAQ e Mídia
     if faq:
