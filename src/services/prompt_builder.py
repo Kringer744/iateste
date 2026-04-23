@@ -29,7 +29,7 @@ from src.services.ia_processor import (
 from src.services.rag_service import buscar_conhecimento, formatar_rag_para_prompt
 from src.services.ab_testing import aplicar_teste_ab
 from src.api.routers.quartos import listar_quartos_ativos, formatar_quartos_para_prompt
-from src.api.deps.features import has_feature
+from src.api.deps.features import has_feature, get_feature_config
 
 
 def filtrar_planos_por_contexto(texto_cliente: str, planos: List[Dict]) -> List[Dict]:
@@ -398,6 +398,40 @@ REGRAS:
                 blocos_prompt.append(_bloco_quartos)
     except Exception as _q_err:
         logger.debug(f"Injeção de quartos falhou (não crítico): {_q_err}")
+
+    # 7.6. Link de Reserva (hotelaria) — template + instrucoes para a IA
+    try:
+        if await has_feature(empresa_id, "reservas"):
+            _cfg_reservas = await get_feature_config(empresa_id, "reservas")
+            _template = (_cfg_reservas or {}).get("link_template", "").strip()
+            if _template:
+                _adultos_default = (_cfg_reservas or {}).get("adultos_default", 1)
+                _criancas_default = (_cfg_reservas or {}).get("criancas_default", 0)
+                _obs = (_cfg_reservas or {}).get("observacoes", "").strip()
+                _bloco_reserva = f"""[LINK DE RESERVA — COMO USAR]
+Template configurado:
+{_template}
+
+FLUXO OBRIGATÓRIO quando o hóspede quiser reservar:
+1. COLETE NA CONVERSA (se ainda não tiver): data de check-in, data de check-out, número de adultos e de crianças.
+2. Se alguma dessas informações faltar, PERGUNTE antes de enviar o link. Uma pergunta por vez, de forma natural.
+3. Quando tiver os 4 dados, SUBSTITUA as variáveis no template:
+   - {{checkin}} → data de entrada no formato ddmmyyyy (ex: 15062026 para 15/jun/2026)
+   - {{checkout}} → data de saída no formato ddmmyyyy
+   - {{adultos}} → número de adultos (padrão {_adultos_default} se hóspede não especificar)
+   - {{criancas}} → número de crianças (padrão {_criancas_default} se hóspede não especificar)
+4. Envie o link COMPLETO já substituído (sem chaves/placeholders sobrando).
+5. Diga ao hóspede que no link ele finaliza a reserva com disponibilidade em tempo real.
+
+IMPORTANTE:
+- NUNCA invente datas ou envie o link com as variáveis {{checkin}}, {{checkout}} etc sem substituir.
+- NUNCA envie o link antes de ter check-in E check-out definidos.
+- Confirme as datas com o hóspede ("então seria check-in dia 15 e saída dia 18, 2 adultos, certo?") antes de montar o link."""
+                if _obs:
+                    _bloco_reserva += f"\n\nOBSERVAÇÕES DO HOTEL (mencione quando fizer sentido):\n{_obs}"
+                blocos_prompt.append(_bloco_reserva)
+    except Exception as _r_err:
+        logger.debug(f"Injeção de link de reserva falhou (não crítico): {_r_err}")
 
     # 8. FAQ e Mídia
     if faq:
