@@ -42,8 +42,6 @@ export default function IntegrationsPage() {
     axios.get("/api-backend/auth/me", getToken()).then(r => {
       if (r.data.perfil === "admin_master") {
         setIsAdminMaster(true);
-        setLoading(false);
-        return;
       }
       axios.get("/api-backend/management/integrations", getToken())
         .then(res => {
@@ -155,7 +153,7 @@ export default function IntegrationsPage() {
               <h1 className="text-2xl font-semibold tracking-tight text-white">Conexões de conta</h1>
               <p className="text-sm text-zinc-500 mt-1">Gerencie as pontes entre seus canais de atendimento.</p>
             </div>
-            {!isAdminMaster && (
+            {(
               <button
                 onClick={handleSave}
                 disabled={saving}
@@ -197,15 +195,7 @@ export default function IntegrationsPage() {
             })}
           </div>
 
-          {isAdminMaster ? (
-            <div className="flex flex-col items-center justify-center py-28 rounded-2xl border border-white/[0.06] bg-[#141414]">
-              <Network className="w-8 h-8 text-zinc-700 mb-3" strokeWidth={1.5} />
-              <p className="text-sm font-medium text-white">Acesso restrito</p>
-              <p className="text-xs text-zinc-500 mt-1 text-center max-w-xs">
-                As integrações são gerenciadas pelo administrador de cada empresa.
-              </p>
-            </div>
-          ) : loading ? (
+          {loading ? (
             <div className="flex items-center justify-center py-40">
               <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
             </div>
