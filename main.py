@@ -4375,6 +4375,52 @@ NÃO ofereça mais de uma vez.
                         # Hóspede/Parceiro: modo reativo independente da estratégia
                         prompt_sistema += "\n[TOUR VIRTUAL]: Esta propriedade tem tour virtual. Se o cliente pedir para ver, adicione <SEND_VIDEO> no final da resposta.\n"
 
+            # ----- LINK DE RESERVA (hotelaria) — feature 'reservas' ativa -----
+            # Injetado diretamente aqui no main.py monolitico porque o prompt
+            # eh montado inline neste arquivo, nao via src/services/prompt_builder.py.
+            try:
+                from src.api.deps.features import has_feature as _has_feat, get_feature_config as _get_feat_cfg
+                if await _has_feat(empresa_id, "reservas"):
+                    _cfg_res = await _get_feat_cfg(empresa_id, "reservas")
+                    _tpl_res = ((_cfg_res or {}).get("link_template") or "").strip()
+                    logger.info(
+                        f"🔗 Feature 'reservas' ativa para empresa={empresa_id}. "
+                        f"link_template={'PRESENTE' if _tpl_res else 'VAZIO'} (len={len(_tpl_res)})"
+                    )
+                    if _tpl_res:
+                        _ad_def = (_cfg_res or {}).get("adultos_default", 1)
+                        _ch_def = (_cfg_res or {}).get("criancas_default", 0)
+                        _obs_res = ((_cfg_res or {}).get("observacoes") or "").strip()
+                        prompt_sistema += f"""
+[LINK DE RESERVA — VOCÊ TEM ESTE LINK, USE-O]
+⚠️ ATENÇÃO: VOCÊ (IA) POSSUI SIM um link oficial de reservas deste hotel. Está logo abaixo.
+NUNCA diga ao hóspede "não temos link de reserva", "não possuo o link", "link indisponível" — isso é MENTIRA.
+Se o hóspede pedir reserva, seu trabalho é COLETAR as datas e ENVIAR o link preenchido.
+
+Template oficial de reserva:
+{_tpl_res}
+
+FLUXO OBRIGATÓRIO quando o hóspede demonstrar intenção de reserva ("reservar", "reserva", "disponibilidade", "tem vaga", "quero ficar", "quanto fica", "link", "booking"):
+1. COLETE: data de check-in, data de check-out, número de adultos e de crianças.
+2. Se faltar algum dado, PERGUNTE antes de enviar o link. Uma pergunta por vez, natural.
+3. Quando tiver os 4 dados, SUBSTITUA as variáveis no template:
+   - {{checkin}} → ddmmyyyy (ex: 15062026 para 15/jun/2026)
+   - {{checkout}} → ddmmyyyy
+   - {{adultos}} → número (padrão {_ad_def})
+   - {{criancas}} → número (padrão {_ch_def})
+4. Envie o link COMPLETO já substituído (sem chaves sobrando).
+5. Diga ao hóspede que no link ele finaliza a reserva com disponibilidade e preço em tempo real.
+
+PROIBIDO:
+- NUNCA diga "não temos link", "não possuo o link", "não tenho acesso ao link" — O LINK EXISTE ACIMA.
+- NUNCA envie o link com placeholders tipo {{checkin}} sem substituir.
+- NUNCA envie o link antes de ter check-in E check-out definidos.
+"""
+                        if _obs_res:
+                            prompt_sistema += f"\nOBSERVAÇÕES DO HOTEL (mencione quando fizer sentido):\n{_obs_res}\n"
+            except Exception as _e_res:
+                logger.debug(f"Injecao de link de reserva falhou (nao critico): {_e_res}")
+
             prompt_sistema += f"""
 PERSONALIDADE
 {pers.get('personalidade', 'Atendente prestativo, simpático e focado em ajudar.')}
@@ -4413,7 +4459,8 @@ REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO (OBRIGATÓRIO):
 - NUNCA diga que a empresa tem "apenas uma unidade" — você não tem essa informação completa.
 - Se a pergunta do cliente bater com algum item do FAQ acima, USE aquela resposta como base.
 - Se "Link de Matrícula / LP" estiver disponível com URL (http), ENVIE O LINK IMEDIATAMENTE na resposta. NÃO peça dados pessoais antes. NÃO diga "vou buscar" ou "estou validando". Exemplo: "Dá uma olhada nos nossos planos aqui: [link]"
-- Se "Link de Matrícula / LP" estiver como "não disponível", NÃO invente link — diga que o cliente pode entrar em contato diretamente com a unidade.
+- Se "Link de Matrícula / LP" estiver como "não disponível" E não houver bloco [LINK DE RESERVA] acima, NÃO invente link — diga que o cliente pode entrar em contato diretamente com a unidade.
+- EXCEÇÃO — LINK DE RESERVA: se o bloco [LINK DE RESERVA — VOCÊ TEM ESTE LINK, USE-O] aparecer acima, VOCÊ TEM o link de reserva. NUNCA diga que não tem. Colete check-in, check-out, adultos, crianças e envie o link preenchido conforme as instruções do bloco.
 - NUNCA diga "vou buscar o link", "estou validando", "vou enviar em instantes" — se tem o link, ENVIE. Se não tem, diga que não tem.
 - Você está atendendo a unidade indicada em "INFORMAÇÕES DA UNIDADE". Se o cliente perguntar sobre outra unidade, use os dados que tiver sobre ela (na lista de unidades) ou ofereça buscar.
 - Você PODE perguntar o primeiro nome do cliente de forma natural (ex: "E qual seu nome?" ou "Com quem eu falo?"). Mas NUNCA peça outros dados pessoais (CPF, email, endereço, telefone, RG, data de nascimento). Você é um vendedor, NÃO um formulário.
