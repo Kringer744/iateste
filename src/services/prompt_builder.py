@@ -273,6 +273,19 @@ async def montar_prompt_sistema(
 
     nome_empresa = unidade.get('nome_empresa') or 'Nossa Empresa'
     nome_unidade = unidade.get('nome') or 'Unidade Matriz'
+
+    # Segmento do negócio (barbearia|hotel|…) — governa exemplos do fluxo de vendedor
+    import src.core.database as _db_seg
+    segmento = 'barbearia'
+    try:
+        if _db_seg.db_pool:
+            _seg_row = await _db_seg.db_pool.fetchval(
+                "SELECT segmento FROM empresas WHERE id = $1", empresa_id
+            )
+            if _seg_row:
+                segmento = str(_seg_row).lower().strip()
+    except Exception:
+        pass
     qtd_unidades_rede = len(todas_unidades or [])
     contexto_rede_unidades = (
         f"A rede {nome_empresa} possui {qtd_unidades_rede} unidades ativas. "
@@ -359,17 +372,26 @@ REGRAS TEMPORAIS:
     if regras_atend:
         blocos_prompt.append(f"[REGRAS DE ATENDIMENTO]\n{regras_atend}")
 
-    # 6.5 Fluxo de Vendedor Real (proatividade)
-    blocos_prompt.append("""[FLUXO DE VENDEDOR — OBRIGATÓRIO]
+    # 6.5 Fluxo de Vendedor Real (proatividade) — exemplos adaptados ao segmento
+    if segmento == 'hotel':
+        _exemplos_fluxo = """Exemplos:
+• Cliente: "Tem vaga pra próximo fim de semana?" → "Temos sim! 😊 Pra qual data exatamente você tá pensando em fazer o check-in?"
+• Cliente: "Qual o horário do check-in?" → "Check-in a partir das 14h e check-out até 12h 😊 Pra qual data você quer reservar?"
+• Cliente: "Quanto custa a diária?" → "A diária varia conforme a categoria e a data. Pra qual período você tá buscando?"
+• Cliente: "Quero reservar" → "Perfeito! 🏨 Qual a data de check-in e de check-out? E quantas pessoas vão se hospedar?" """
+    else:  # barbearia (default)
+        _exemplos_fluxo = """Exemplos:
+• Cliente: "Tem horário?" → "Temos sim! Posso verificar a disponibilidade pra você 😊 Tem algum dia ou horário que prefere?"
+• Cliente: "Qual o horário de funcionamento?" → "Nosso horário é seg-sex 08h às 20h, sáb 08h às 18h 😊 Quer agendar um horário?"
+• Cliente: "Quanto custa o corte?" → "O corte masculino é R$X! Quer agendar com algum profissional específico?"
+• Cliente: "Quero agendar" → "Boa! 💈 Qual dia e horário ficam melhor pra você? Posso te mostrar os horários disponíveis!" """
+
+    blocos_prompt.append(f"""[FLUXO DE VENDEDOR — OBRIGATÓRIO]
 Você é um VENDEDOR, não um robô de FAQ. Siga este fluxo SEMPRE:
 1. Responda a pergunta do cliente de forma direta e curta.
 2. Depois da resposta, faça UMA pergunta de descoberta que avance a conversa.
 
-Exemplos:
-• Cliente: "Tem horário?" → "Temos sim! Posso verificar a disponibilidade pra você 😊 Tem algum dia ou horário que prefere?"
-• Cliente: "Qual o horário de funcionamento?" → "Nosso horário é seg-sex 08h às 20h, sáb 08h às 18h 😊 Quer agendar um horário?"
-• Cliente: "Quanto custa o corte?" → "O corte masculino é R$X! Quer agendar com algum profissional específico?"
-• Cliente: "Quero agendar" → "Boa! 💈 Qual dia e horário ficam melhor pra você? Posso te mostrar os horários disponíveis!"
+{_exemplos_fluxo}
 
 REGRAS:
 - Resposta + pergunta na MESMA mensagem, SEMPRE.
