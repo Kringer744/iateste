@@ -338,22 +338,62 @@ async def limpar_memoria_conversa(
     except Exception as e:
         logger.warning(f"Aviso ao limpar memoria_cliente da conversa {conversation_id}: {e}")
 
-    # Deleta todas as chaves Redis da conversa (formato padronizado: {empresa_id}:{chave}:{conversation_id})
+    # Descobre o slug da conversa ANTES de limpar (pra poder limpar caches por slug)
+    _slug_conv = None
+    try:
+        _slug_conv = await redis_client.get(f"{empresa_id}:unidade_escolhida:{conversation_id}")
+        if not _slug_conv:
+            _slug_conv = await redis_client.get(f"unidade_escolhida:{conversation_id}")
+    except Exception:
+        pass
+
+    # Deleta todas as chaves Redis da conversa
+    # IMPORTANTE: inclui os formatos REAIS usados pelo bot (buffet:{conv_id}, lock:{conv_id}, etc)
+    # e NÃO só os formatos {empresa_id}:...:{conv_id} do namespace padronizado.
     await redis_client.delete(
+        # formato padronizado {empresa_id}:{chave}:{conv_id}
         f"{empresa_id}:estado:{conversation_id}",
         f"{empresa_id}:unidade_escolhida:{conversation_id}",
         f"{empresa_id}:esperando_unidade:{conversation_id}",
         f"{empresa_id}:buffet:{conversation_id}",
         f"{empresa_id}:buffet_drain:{conversation_id}",
         f"{empresa_id}:prompt_unidade_enviado:{conversation_id}",
+        # formatos REAIS usados no main.py (sem namespace de empresa)
+        f"buffet:{conversation_id}",
+        f"buffet_drain:{conversation_id}",
+        f"lock:{conversation_id}",
+        f"atend_manual:{empresa_id}:{conversation_id}",
+        f"unidade_escolhida:{conversation_id}",
         # formatos legados (cleanup)
         f"estado:{empresa_id}:{conversation_id}",
-        f"unidade_escolhida:{conversation_id}",
         f"esperando_unidade:{empresa_id}:{conversation_id}",
         f"buffet:{empresa_id}:{conversation_id}",
         f"buffet_drain:{empresa_id}:{conversation_id}",
         f"prompt_unidade_enviado:{empresa_id}:{conversation_id}",
     )
+
+    # Limpa caches de resposta da IA por slug (cache:intent:{slug}:*, cache:ia:{slug}:*, semcache:{slug}:*)
+    # Sem isso a IA "lembra" respostas antigas mesmo após limpar o historico.
+    try:
+        if _slug_conv:
+            for _pattern in (f"cache:intent:{_slug_conv}:*",
+                             f"cache:ia:{_slug_conv}:*",
+                             f"semcache:{_slug_conv}:*"):
+                _cur = 0
+                while True:
+                    _cur, _keys = await redis_client.scan(_cur, match=_pattern, count=200)
+                    if _keys:
+                        await redis_client.delete(*_keys)
+                    if _cur == 0:
+                        break
+            logger.info(f"🧹 Caches de IA por slug={_slug_conv} limpos (conv={conversation_id})")
+        else:
+            logger.info(
+                f"ℹ️ Slug da conv={conversation_id} não identificado — "
+                f"caches por slug não foram limpos."
+            )
+    except Exception as _e_cache:
+        logger.warning(f"Falha ao limpar caches de IA por slug: {_e_cache}")
 
     return {"status": "ok", "mensagem": "Memória da IA limpa com sucesso"}
 
