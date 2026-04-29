@@ -91,27 +91,40 @@ async def chatwoot_webhook(
         await set_tenant_cache(empresa_id, f"atend_manual:{id_conv}", is_manual, 86400)
 
     if event == "conversation_created":
+        # MULTI-TENANT: padrao canonico das chaves desta sessao = "{tipo}:{empresa_id}:{id_conv}".
+        # Apaga ambos formatos (canonico + legado sem empresa_id) por seguranca durante migracao.
+        _keys_canonicas = [
+            f"pause_ia:{empresa_id}:{id_conv}", f"estado:{empresa_id}:{id_conv}",
+            f"unidade_escolhida:{empresa_id}:{id_conv}", f"esperando_unidade:{empresa_id}:{id_conv}",
+            f"prompt_unidade_enviado:{empresa_id}:{id_conv}", f"nome_cliente:{empresa_id}:{id_conv}",
+            f"aguardando_nome:{empresa_id}:{id_conv}", f"atend_manual:{empresa_id}:{id_conv}",
+            f"lock:{empresa_id}:{id_conv}", f"buffet:{empresa_id}:{id_conv}",
+            f"fone_cliente:{empresa_id}:{id_conv}",
+        ]
+        await redis_client.delete(*_keys_canonicas)
+        # legado: chaves antigas sem empresa_id no namespace (limpeza progressiva)
         for k in [
             f"pause_ia:{id_conv}", f"estado:{id_conv}", f"unidade_escolhida:{id_conv}",
             f"esperando_unidade:{id_conv}", f"prompt_unidade_enviado:{id_conv}",
             f"nome_cliente:{id_conv}", f"aguardando_nome:{id_conv}",
-            f"atend_manual:{id_conv}", f"lock:{id_conv}", f"buffet:{id_conv}"
+            f"atend_manual:{id_conv}", f"lock:{id_conv}", f"buffet:{id_conv}",
+            f"fone_cliente:{id_conv}",
         ]:
             await delete_tenant_cache(empresa_id, k)
-        logger.info(f"🆕 Nova conversa {id_conv} — Redis limpo")
+        logger.info(f"🆕 Nova conversa {id_conv} (empresa={empresa_id}) — Redis limpo")
         return {"status": "conversa_criada"}
 
     if event == "conversation_updated":
         status_conv = conv_obj.get("status") or payload.get("status")
         if status_conv in {"resolved", "closed"}:
             await bd_finalizar_conversa(id_conv, empresa_id)
-            for k in [
-                f"pause_ia:{id_conv}", f"estado:{id_conv}", f"unidade_escolhida:{id_conv}",
-                f"esperando_unidade:{id_conv}", f"prompt_unidade_enviado:{id_conv}",
-                f"nome_cliente:{id_conv}", f"aguardando_nome:{id_conv}",
-                f"atend_manual:{id_conv}"
-            ]:
-                await delete_tenant_cache(empresa_id, k)
+            _keys_close = [
+                f"pause_ia:{empresa_id}:{id_conv}", f"estado:{empresa_id}:{id_conv}",
+                f"unidade_escolhida:{empresa_id}:{id_conv}", f"esperando_unidade:{empresa_id}:{id_conv}",
+                f"prompt_unidade_enviado:{empresa_id}:{id_conv}", f"nome_cliente:{empresa_id}:{id_conv}",
+                f"aguardando_nome:{empresa_id}:{id_conv}", f"atend_manual:{empresa_id}:{id_conv}",
+            ]
+            await redis_client.delete(*_keys_close)
             return {"status": "conversa_encerrada"}
         return {"status": "conversa_atualizada"}
 
@@ -203,11 +216,11 @@ async def chatwoot_webhook(
             return {"status": "ia_global_pausada"}
 
         if nome_contato_valido:
-            await set_tenant_cache(empresa_id, f"nome_cliente:{id_conv}", nome_contato_limpo, 86400)
+            await redis_client.setex(f"nome_cliente:{empresa_id}:{id_conv}", 86400, nome_contato_limpo)
         else:
             _nome_informado = extrair_nome_do_texto(conteudo_texto or "")
             if _nome_informado:
-                await set_tenant_cache(empresa_id, f"nome_cliente:{id_conv}", _nome_informado, 86400)
+                await redis_client.setex(f"nome_cliente:{empresa_id}:{id_conv}", 86400, _nome_informado)
                 await delete_tenant_cache(empresa_id, f"aguardando_nome:{id_conv}")
                 await atualizar_nome_contato_chatwoot(account_id, contato.get("id"), _nome_informado, integracao)
             else:
@@ -369,7 +382,7 @@ async def chatwoot_webhook(
         # Verifica se é mensagem da IA ou echo do UazAPI
         _is_uaz_echo_wh = await exists_tenant_cache(empresa_id, f"uaz_bot_sent_conv:{id_conv}")
         if not _is_uaz_echo_wh:
-            _fone_echo_wh = await get_tenant_cache(empresa_id, f"fone_cliente:{id_conv}")
+            _fone_echo_wh = await redis_client.get(f"fone_cliente:{empresa_id}:{id_conv}")
             if _fone_echo_wh:
                 _is_uaz_echo_wh = bool(await redis_client.exists(f"uaz_bot_sent:{empresa_id}:{_fone_echo_wh}"))
             if not _is_uaz_echo_wh:
@@ -393,7 +406,7 @@ async def chatwoot_webhook(
         return {"status": "ignorado"}
 
     contato = payload.get("sender", {})
-    _nome_para_bd = nome_contato_limpo if nome_eh_valido(nome_contato_limpo) else (await get_tenant_cache(empresa_id, f"nome_cliente:{id_conv}")) or "Cliente"
+    _nome_para_bd = nome_contato_limpo if nome_eh_valido(nome_contato_limpo) else (await redis_client.get(f"nome_cliente:{empresa_id}:{id_conv}")) or "Cliente"
     
     lock_key = f"agendar_lock:{id_conv}"
     if await redis_client.set(f"{empresa_id}:{lock_key}", "1", nx=True, ex=5):
@@ -464,10 +477,11 @@ async def chatwoot_webhook(
         tipo = "image" if ft.startswith("image") else "audio" if ft.startswith("audio") else "documento"
         arquivos.append({"url": a.get("data_url"), "type": tipo})
 
-    # Adiciona ao buffet (fila de rajada)
-    buffet_key = f"buffet:{id_conv}"
-    await redis_client.rpush(get_tenant_key(empresa_id, buffet_key), json.dumps({"text": conteudo_texto, "files": arquivos}))
-    await redis_client.expire(get_tenant_key(empresa_id, buffet_key), 60)
+    # Adiciona ao buffet (fila de rajada).
+    # MULTI-TENANT: chave canonica "buffet:{empresa_id}:{id_conv}" — mesmo formato lido pelo main.py.
+    buffet_key = f"buffet:{empresa_id}:{id_conv}"
+    await redis_client.rpush(buffet_key, json.dumps({"text": conteudo_texto, "files": arquivos}))
+    await redis_client.expire(buffet_key, 60)
 
     # Publicar job no Redis Streams para processamento assíncrono (Arquitetura guiada por eventos)
     try:

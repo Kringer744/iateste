@@ -159,7 +159,9 @@ async def enviar_mensagem_chatwoot(
 
     # Personalização com nome
     if not evitar_prefixo_nome:
-        _nome_salvo = await get_tenant_cache(empresa_id, f"nome_cliente:{conversation_id}")
+        # MULTI-TENANT: chave canonica "nome_cliente:{empresa_id}:{conversation_id}"
+        from src.core.redis_client import redis_client as _rc
+        _nome_salvo = await _rc.get(f"nome_cliente:{empresa_id}:{conversation_id}")
         content = suavizar_personalizacao_nome(content, _nome_salvo)
 
     payload = {

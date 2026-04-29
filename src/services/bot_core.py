@@ -942,7 +942,7 @@ async def despachar_resposta(
                 if _uaz_integ:
                     _fone = contato_fone
                     if not _fone:
-                        _fone = await redis_client.get(f"fone_cliente:{conversation_id}")
+                        _fone = await redis_client.get(f"fone_cliente:{empresa_id}:{conversation_id}")
                     if not _fone:
                         _row = await _database.db_pool.fetchrow(
                             "SELECT COALESCE(contato_fone, contato_telefone) AS fone FROM conversas WHERE conversation_id = $1",
@@ -2397,17 +2397,16 @@ async def chatwoot_webhook(
 
     if event == "conversation_created":
         # Nova conversa — garante que não há estado antigo no Redis (ex: conversas reutilizadas em testes)
-        await delete_tenant_cache(empresa_id, f"pause_ia:{id_conv}")
-        await delete_tenant_cache(empresa_id, f"estado:{id_conv}")
-        await delete_tenant_cache(empresa_id, f"unidade_escolhida:{id_conv}")
-        await delete_tenant_cache(empresa_id, f"esperando_unidade:{id_conv}")
-        await delete_tenant_cache(empresa_id, f"prompt_unidade_enviado:{id_conv}")
-        await delete_tenant_cache(empresa_id, f"nome_cliente:{id_conv}")
-        await delete_tenant_cache(empresa_id, f"aguardando_nome:{id_conv}")
-        await delete_tenant_cache(empresa_id, f"atend_manual:{id_conv}")
-        await delete_tenant_cache(empresa_id, f"lock:{id_conv}")
-        await delete_tenant_cache(empresa_id, f"buffet:{id_conv}")
-        logger.info(f"🆕 Nova conversa {id_conv} — Redis limpo")
+        # MULTI-TENANT: chaves canonicas no formato "{tipo}:{empresa_id}:{id_conv}"
+        await redis_client.delete(
+            f"pause_ia:{empresa_id}:{id_conv}", f"estado:{empresa_id}:{id_conv}",
+            f"unidade_escolhida:{empresa_id}:{id_conv}", f"esperando_unidade:{empresa_id}:{id_conv}",
+            f"prompt_unidade_enviado:{empresa_id}:{id_conv}", f"nome_cliente:{empresa_id}:{id_conv}",
+            f"aguardando_nome:{empresa_id}:{id_conv}", f"atend_manual:{empresa_id}:{id_conv}",
+            f"lock:{empresa_id}:{id_conv}", f"buffet:{empresa_id}:{id_conv}",
+            f"fone_cliente:{empresa_id}:{id_conv}",
+        )
+        logger.info(f"🆕 Nova conversa {id_conv} (empresa={empresa_id}) — Redis limpo")
         return {"status": "conversa_criada"}
 
     if event == "conversation_updated":
@@ -2450,7 +2449,7 @@ async def chatwoot_webhook(
     )
 
     # Echo UazAPI: verifica se o bot enviou recentemente via UazAPI
-    _fone_echo = await get_tenant_cache(empresa_id, f"fone_cliente:{id_conv}")
+    _fone_echo = await redis_client.get(f"fone_cliente:{empresa_id}:{id_conv}")
     is_uaz_echo = False
     if _fone_echo:
         is_uaz_echo = bool(await redis_client.exists(f"uaz_bot_sent:{empresa_id}:{_fone_echo}"))

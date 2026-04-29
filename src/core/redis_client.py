@@ -75,29 +75,43 @@ async def redis_set_json(key: str, value: Any, ttl: int):
         _LOCAL_REDIS_FALLBACK[key] = (time.time() + max(1, ttl), payload)
 
 
-async def invalidar_cache_ia_por_slug(slug: str) -> int:
-    """Apaga todos os caches de resposta da IA para um slug.
+async def invalidar_cache_ia_por_slug(slug: str, empresa_id: int) -> int:
+    """Apaga todos os caches de resposta da IA para um slug de uma empresa.
 
     Necessário sempre que dados que afetam o prompt são alterados (unidade,
     personalidade IA, FAQ, planos, etc). Sem isso a IA continua respondendo
     com base em respostas antigas em cache (e.g. nome do hotel antigo).
 
-    Patterns apagados:
-      - cache:intent:{slug}:*  (cache por intenção factual)
-      - cache:ia:{slug}:*      (cache por hash da pergunta)
-      - semcache:{slug}:*      (cache semântico/embedding)
+    MULTI-TENANT: TODAS as chaves DEVEM incluir empresa_id pra evitar leak entre
+    clientes. Padroes apagados (formato canonico atual + legado):
+      - cache:intent:{empresa_id}:{slug}:*  (canonico)
+      - cache:ia:{empresa_id}:{slug}:*      (canonico)
+      - semcache:{empresa_id}:{slug}:*      (canonico)
+      - cache:intent:{slug}:*               (legado, sem empresa_id)
+      - cache:ia:{slug}:*                   (legado)
+      - semcache:{slug}:*                   (legado)
+
+    Os patterns legado existem porque ate ha pouco a chave nao tinha
+    empresa_id no namespace. Apagar ambos garante limpeza completa
+    durante a migracao.
 
     Retorna a quantidade total de chaves apagadas.
     """
-    if not slug:
+    if not slug or not empresa_id:
         return 0
     total = 0
     try:
-        for pattern in (
+        patterns = [
+            # Formato canonico (com empresa_id) — PRIMARY
+            f"cache:intent:{empresa_id}:{slug}:*",
+            f"cache:ia:{empresa_id}:{slug}:*",
+            f"semcache:{empresa_id}:{slug}:*",
+            # Formato legado (sem empresa_id) — limpeza durante migracao
             f"cache:intent:{slug}:*",
             f"cache:ia:{slug}:*",
             f"semcache:{slug}:*",
-        ):
+        ]
+        for pattern in patterns:
             cursor = 0
             while True:
                 cursor, keys = await redis_client.scan(cursor, match=pattern, count=200)
@@ -106,9 +120,12 @@ async def invalidar_cache_ia_por_slug(slug: str) -> int:
                 if cursor == 0:
                     break
         if total:
-            logger.info(f"🧹 invalidar_cache_ia_por_slug(slug={slug}) apagou {total} chaves")
+            logger.info(
+                f"🧹 invalidar_cache_ia_por_slug(empresa={empresa_id} slug={slug}) "
+                f"apagou {total} chaves"
+            )
     except Exception as e:
-        logger.warning(f"Falha ao invalidar cache IA por slug={slug}: {e}")
+        logger.warning(f"Falha ao invalidar cache IA por slug={slug} empresa={empresa_id}: {e}")
     return total
 
 
@@ -131,7 +148,7 @@ async def invalidar_cache_ia_por_empresa(empresa_id: int) -> int:
         )
         total = 0
         for r in rows:
-            total += await invalidar_cache_ia_por_slug(r["slug"])
+            total += await invalidar_cache_ia_por_slug(r["slug"], empresa_id)
         return total
     except Exception as e:
         logger.warning(f"Falha ao invalidar cache IA por empresa={empresa_id}: {e}")

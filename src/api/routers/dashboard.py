@@ -338,58 +338,80 @@ async def limpar_memoria_conversa(
     except Exception as e:
         logger.warning(f"Aviso ao limpar memoria_cliente da conversa {conversation_id}: {e}")
 
-    # Descobre o slug da conversa ANTES de limpar (pra poder limpar caches por slug)
+    # Descobre o slug da conversa ANTES de limpar (pra poder limpar caches por slug).
+    # Tenta primeiro o formato canonico; depois um legado.
     _slug_conv = None
     try:
-        _slug_conv = await redis_client.get(f"{empresa_id}:unidade_escolhida:{conversation_id}")
+        _slug_conv = await redis_client.get(f"unidade_escolhida:{empresa_id}:{conversation_id}")
+        if not _slug_conv:
+            _slug_conv = await redis_client.get(f"{empresa_id}:unidade_escolhida:{conversation_id}")
         if not _slug_conv:
             _slug_conv = await redis_client.get(f"unidade_escolhida:{conversation_id}")
     except Exception:
         pass
+    # Fallback: pega o slug da conversa direto do banco (tabela conversas + unidades).
+    if not _slug_conv:
+        try:
+            _slug_conv = await _database.db_pool.fetchval(
+                """
+                SELECT u.slug
+                FROM conversas c
+                JOIN unidades u ON u.id = c.unidade_id
+                WHERE c.conversation_id = $1 AND c.empresa_id = $2
+                LIMIT 1
+                """,
+                conversation_id, empresa_id,
+            )
+        except Exception:
+            pass
 
-    # Deleta todas as chaves Redis da conversa
-    # IMPORTANTE: inclui os formatos REAIS usados pelo bot (buffet:{conv_id}, lock:{conv_id}, etc)
-    # e NÃO só os formatos {empresa_id}:...:{conv_id} do namespace padronizado.
+    # Deleta TODAS as chaves Redis associadas a essa conversa.
+    # Padrao canonico atual: "{tipo}:{empresa_id}:{conv_id}"
+    # Tambem apaga formatos legados durante a migracao multi-tenant.
     await redis_client.delete(
-        # formato padronizado {empresa_id}:{chave}:{conv_id}
+        # formato canonico {tipo}:{empresa_id}:{conv_id} — PRIMARY
+        f"estado:{empresa_id}:{conversation_id}",
+        f"unidade_escolhida:{empresa_id}:{conversation_id}",
+        f"esperando_unidade:{empresa_id}:{conversation_id}",
+        f"prompt_unidade_enviado:{empresa_id}:{conversation_id}",
+        f"nome_cliente:{empresa_id}:{conversation_id}",
+        f"aguardando_nome:{empresa_id}:{conversation_id}",
+        f"fone_cliente:{empresa_id}:{conversation_id}",
+        f"buffet:{empresa_id}:{conversation_id}",
+        f"buffet_drain:{empresa_id}:{conversation_id}",
+        f"lock:{empresa_id}:{conversation_id}",
+        f"atend_manual:{empresa_id}:{conversation_id}",
+        f"pause_ia:{empresa_id}:{conversation_id}",
+        # formato {empresa_id}:{tipo}:{conv_id} (helper get_tenant_key, ainda em uso)
         f"{empresa_id}:estado:{conversation_id}",
         f"{empresa_id}:unidade_escolhida:{conversation_id}",
         f"{empresa_id}:esperando_unidade:{conversation_id}",
         f"{empresa_id}:buffet:{conversation_id}",
         f"{empresa_id}:buffet_drain:{conversation_id}",
         f"{empresa_id}:prompt_unidade_enviado:{conversation_id}",
-        # formatos REAIS usados no main.py (sem namespace de empresa)
+        # formatos LEGADO (sem empresa_id no namespace) — limpeza progressiva
         f"buffet:{conversation_id}",
         f"buffet_drain:{conversation_id}",
         f"lock:{conversation_id}",
-        f"atend_manual:{empresa_id}:{conversation_id}",
         f"unidade_escolhida:{conversation_id}",
-        # formatos legados (cleanup)
-        f"estado:{empresa_id}:{conversation_id}",
-        f"esperando_unidade:{empresa_id}:{conversation_id}",
-        f"buffet:{empresa_id}:{conversation_id}",
-        f"buffet_drain:{empresa_id}:{conversation_id}",
-        f"prompt_unidade_enviado:{empresa_id}:{conversation_id}",
+        f"nome_cliente:{conversation_id}",
+        f"fone_cliente:{conversation_id}",
+        f"estado:{conversation_id}",
     )
 
-    # Limpa caches de resposta da IA por slug (cache:intent:{slug}:*, cache:ia:{slug}:*, semcache:{slug}:*)
-    # Sem isso a IA "lembra" respostas antigas mesmo após limpar o historico.
+    # Limpa caches de resposta da IA por slug (canonicos + legados).
+    # invalidar_cache_ia_por_slug ja apaga ambos formatos (com e sem empresa_id).
     try:
         if _slug_conv:
-            for _pattern in (f"cache:intent:{_slug_conv}:*",
-                             f"cache:ia:{_slug_conv}:*",
-                             f"semcache:{_slug_conv}:*"):
-                _cur = 0
-                while True:
-                    _cur, _keys = await redis_client.scan(_cur, match=_pattern, count=200)
-                    if _keys:
-                        await redis_client.delete(*_keys)
-                    if _cur == 0:
-                        break
-            logger.info(f"🧹 Caches de IA por slug={_slug_conv} limpos (conv={conversation_id})")
+            from src.core.redis_client import invalidar_cache_ia_por_slug
+            n = await invalidar_cache_ia_por_slug(_slug_conv, empresa_id)
+            logger.info(
+                f"🧹 Caches de IA limpos: slug={_slug_conv} empresa={empresa_id} "
+                f"conv={conversation_id} ({n} chaves)"
+            )
         else:
             logger.info(
-                f"ℹ️ Slug da conv={conversation_id} não identificado — "
+                f"ℹ️ Slug da conv={conversation_id} empresa={empresa_id} não identificado — "
                 f"caches por slug não foram limpos."
             )
     except Exception as _e_cache:
@@ -868,7 +890,7 @@ async def atualizar_unidade(
             # Invalida caches de RESPOSTA da IA (cache:intent, cache:ia, semcache).
             # Sem isso, depois de mudar nome/dados da unidade, a IA continuava
             # respondendo com o nome/dados antigos.
-            await invalidar_cache_ia_por_slug(_row_slug)
+            await invalidar_cache_ia_por_slug(_row_slug, empresa_id)
         return {"status": "success", "message": "Unidade atualizada"}
     except Exception as e:
         logger.error(f"Erro ao atualizar unidade: {e}")
