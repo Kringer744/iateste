@@ -158,6 +158,94 @@ async def get_current_user_token(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise credentials_exception
 
+
+# --- API TOKEN POR EMPRESA (uso externo, multi-tenant) ---
+
+import hashlib
+import secrets as _secrets
+from fastapi import Request
+
+_API_TOKEN_PREFIX = "sk_emp_"
+_LAST_USED_TASKS: set = set()  # guarda refs pra background tasks não serem GC'd
+
+def gerar_api_token() -> tuple[str, str, str]:
+    """
+    Gera um novo API token de empresa.
+    Retorna (token_em_claro, sha256_hash, prefixo_visivel).
+    O claro só existe nesta chamada — só guardamos o hash no banco.
+    """
+    raw = _secrets.token_urlsafe(32)
+    token = f"{_API_TOKEN_PREFIX}{raw}"
+    h = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    prefix = token[: len(_API_TOKEN_PREFIX) + 4]  # ex: "sk_emp_abcd"
+    return token, h, prefix
+
+
+def hash_api_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+async def get_empresa_from_api_token(request: Request) -> dict:
+    """
+    Dependência alternativa ao JWT: autentica via API token de empresa.
+    Espera header `Authorization: Bearer sk_emp_...`.
+    Retorna {empresa_id, token_id, nome}.
+    Atualiza last_used_at de forma fire-and-forget.
+    """
+    import src.core.database as _database
+
+    auth = request.headers.get("authorization") or request.headers.get("Authorization") or ""
+    if not auth.lower().startswith("bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail="Token de API ausente. Use header Authorization: Bearer sk_emp_...",
+        )
+    token = auth.split(" ", 1)[1].strip()
+    if not token.startswith(_API_TOKEN_PREFIX):
+        raise HTTPException(status_code=401, detail="Formato de token inválido")
+
+    if not _database.db_pool:
+        raise HTTPException(status_code=503, detail="Banco indisponível")
+
+    h = hash_api_token(token)
+    row = await _database.db_pool.fetchrow(
+        """
+        SELECT t.id, t.empresa_id, t.nome, t.ativo, e.status AS empresa_status
+        FROM empresa_api_tokens t
+        JOIN empresas e ON e.id = t.empresa_id
+        WHERE t.token_hash = $1
+        """,
+        h,
+    )
+    if not row or not row["ativo"]:
+        raise HTTPException(status_code=401, detail="Token inválido ou revogado")
+    if row["empresa_status"] not in (None, "active"):
+        raise HTTPException(status_code=403, detail="Empresa inativa")
+
+    # Atualiza last_used_at em background (best-effort).
+    # asyncio.create_task pode ser GC'd se não guardarmos a ref; usamos um set global.
+    import asyncio as _asyncio
+    async def _bump_last_used(tid: int):
+        try:
+            await _database.db_pool.execute(
+                "UPDATE empresa_api_tokens SET last_used_at = NOW() WHERE id = $1",
+                tid,
+            )
+        except Exception as _e:
+            logger.debug(f"falha atualizando last_used_at token={tid}: {_e}")
+    try:
+        _task = _asyncio.create_task(_bump_last_used(row["id"]))
+        _LAST_USED_TASKS.add(_task)
+        _task.add_done_callback(_LAST_USED_TASKS.discard)
+    except Exception:
+        pass
+
+    return {
+        "empresa_id": int(row["empresa_id"]),
+        "token_id": int(row["id"]),
+        "nome": row["nome"],
+    }
+
 # Instância Global do Circuit Breaker para a IA
 cb_llm = CircuitBreaker(
     name="LLM_GLOBAL",

@@ -70,3 +70,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ path
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   return proxy(req, params);
 }
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  return proxy(req, params);
+}

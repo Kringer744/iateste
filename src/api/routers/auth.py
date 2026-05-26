@@ -81,6 +81,17 @@ class CriarUsuarioRequest(BaseModel):
     perfil: Optional[str] = "admin"
 
 
+class CriarClienteRequest(BaseModel):
+    """Wizard: cria empresa + 1º usuário admin em uma transação."""
+    empresa_nome: str
+    empresa_cnpj: Optional[str] = None
+    empresa_email: Optional[str] = None
+    empresa_telefone: Optional[str] = None
+    usuario_nome: str
+    usuario_email: str
+    usuario_senha: str
+
+
 # ---------- helpers ----------
 
 async def _buscar_empresa(empresa_id: int):
@@ -544,3 +555,70 @@ async def excluir_usuario(
     await _database.db_pool.execute("DELETE FROM usuarios WHERE id = $1", usuario_id)
     logger.info(f"🗑️ Usuário '{row['nome']}' (id={usuario_id}) excluído")
     return {"message": "Usuário excluído com sucesso"}
+
+
+@router.post("/create-cliente", status_code=201)
+async def create_cliente(
+    body: CriarClienteRequest,
+    token_payload: dict = Depends(get_current_user_token),
+):
+    """
+    Cria empresa + primeiro usuário admin em UMA transação.
+    Se qualquer passo falhar, nada é persistido — evita empresas órfãs.
+    Apenas admin_master.
+    """
+    if token_payload.get("perfil") != "admin_master":
+        raise HTTPException(status_code=403, detail="Apenas admin_master pode criar clientes")
+
+    if len(body.usuario_senha) < 6:
+        raise HTTPException(status_code=400, detail="Senha deve ter ao menos 6 caracteres")
+    if not body.empresa_nome.strip():
+        raise HTTPException(status_code=400, detail="Nome da empresa obrigatório")
+    if not body.usuario_email or "@" not in body.usuario_email:
+        raise HTTPException(status_code=400, detail="E-mail do usuário inválido")
+
+    # Checa duplicata de e-mail antes da transação (mensagem mais clara)
+    existente = await buscar_usuario_por_email(body.usuario_email)
+    if existente:
+        raise HTTPException(status_code=409, detail="E-mail de usuário já cadastrado")
+
+    import src.core.database as _database
+    import uuid as _uuid
+    senha_hash = get_password_hash(body.usuario_senha)
+
+    async with _database.db_pool.acquire() as conn:
+        async with conn.transaction():
+            empresa_row = await conn.fetchrow(
+                """
+                INSERT INTO empresas (uuid, nome, cnpj, email, telefone, status, created_at)
+                VALUES ($1, $2, $3, $4, $5, 'active', NOW())
+                RETURNING id
+                """,
+                str(_uuid.uuid4()),
+                body.empresa_nome.strip(),
+                body.empresa_cnpj,
+                body.empresa_email,
+                body.empresa_telefone,
+            )
+            empresa_id = empresa_row["id"]
+
+            await conn.execute(
+                """
+                INSERT INTO usuarios (nome, email, senha_hash, empresa_id, perfil, ativo, created_at)
+                VALUES ($1, $2, $3, $4, 'admin', TRUE, NOW())
+                """,
+                body.usuario_nome.strip(),
+                body.usuario_email.strip().lower(),
+                senha_hash,
+                empresa_id,
+            )
+
+    logger.info(
+        f"✅ Cliente criado: empresa='{body.empresa_nome}' (id={empresa_id}) "
+        f"admin={body.usuario_email} by={token_payload.get('sub')}"
+    )
+    return {
+        "empresa_id": empresa_id,
+        "empresa_nome": body.empresa_nome,
+        "usuario_email": body.usuario_email,
+    }

@@ -1063,8 +1063,29 @@ async def personality_playground(
 # ─── Playground helpers ──────────────────────────────────────────────────────
 
 async def _load_playground_context(personality_id: Optional[int], empresa_id: int):
-    """Carrega personalidade + FAQ + unidades + planos + configs LLM. Reutilizado por todos os endpoints de playground."""
+    """Carrega personalidade + FAQ + unidades + planos + configs LLM. Reutilizado por todos os endpoints de playground.
+
+    Isolamento multi-tenant: TODAS as queries internas filtram por empresa_id.
+    Se personality_id for passado mas pertencer a outra empresa, recusa com 404
+    (não revela existência) e loga o vazamento tentado.
+    """
+    if not empresa_id:
+        raise HTTPException(status_code=400, detail="empresa_id ausente — token inválido")
+
     if personality_id:
+        # Checa primeiro se o personality_id existe em qualquer empresa para
+        # detectar tentativa de acesso cross-tenant nos logs.
+        owner = await _database.db_pool.fetchval(
+            "SELECT empresa_id FROM personalidade_ia WHERE id = $1",
+            personality_id
+        )
+        if owner is not None and int(owner) != int(empresa_id):
+            logger.warning(
+                f"🛑 Cross-tenant blocked: personality_id={personality_id} "
+                f"pertence a empresa={owner}, requisitada por empresa={empresa_id}"
+            )
+            raise HTTPException(status_code=404, detail="Personalidade não encontrada")
+
         row = await _database.db_pool.fetchrow(
             "SELECT * FROM personalidade_ia WHERE id = $1 AND empresa_id = $2",
             personality_id, empresa_id
