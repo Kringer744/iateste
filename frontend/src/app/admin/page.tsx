@@ -12,6 +12,7 @@ import {
   Search, MessageSquare, TrendingUp, Star, ArrowRight,
   MoreVertical, ArrowUpRight,
 } from "lucide-react";
+import { formatErr } from "@/lib/errors";
 
 // ─── tipos ───────────────────────────────────────────────────────────────────
 
@@ -165,7 +166,7 @@ export default function AdminPage() {
       setNovoClienteOpen(false);
       await fetchData();
     } catch (err: any) {
-      setMsgCliente({ ok: false, text: err.response?.data?.detail || "Erro ao criar cliente." });
+      setMsgCliente({ ok: false, text: formatErr(err, "Erro ao criar cliente.") });
     } finally {
       setCriandoCliente(false);
     }
@@ -180,7 +181,7 @@ export default function AdminPage() {
       localStorage.setItem("token", res.data.access_token);
       router.push("/dashboard");
     } catch (err: any) {
-      alert(err.response?.data?.detail || "Erro ao entrar como cliente.");
+      alert(formatErr(err, "Erro ao entrar como cliente."));
       setEntrando(null);
     }
   };
@@ -195,7 +196,7 @@ export default function AdminPage() {
       setEditandoEmpresa(null);
       await fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.detail || "Erro ao atualizar empresa.");
+      alert(formatErr(err, "Erro ao atualizar empresa."));
     } finally {
       setSalvandoEmpresa(false);
     }
@@ -208,7 +209,7 @@ export default function AdminPage() {
       setGerenciandoEmpresa(null);
       await fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.detail || "Erro ao excluir empresa.");
+      alert(formatErr(err, "Erro ao excluir empresa."));
     }
   };
 
@@ -225,7 +226,7 @@ export default function AdminPage() {
       setNovoUsuarioExtra({ nome: "", email: "", senha: "", perfil: "admin" });
       await fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.detail || "Erro ao criar usuário.");
+      alert(formatErr(err, "Erro ao criar usuário."));
     } finally {
       setCriandoUsuarioExtra(false);
     }
@@ -236,7 +237,7 @@ export default function AdminPage() {
       await axios.patch(`/api-backend/auth/usuarios/${id}`, {}, getConfig());
       await fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.detail || "Erro ao alterar usuário.");
+      alert(formatErr(err, "Erro ao alterar usuário."));
     }
   };
 
@@ -246,7 +247,7 @@ export default function AdminPage() {
       await axios.delete(`/api-backend/auth/usuarios/${id}`, getConfig());
       await fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.detail || "Erro ao excluir.");
+      alert(formatErr(err, "Erro ao excluir."));
     }
   };
 
@@ -263,7 +264,7 @@ export default function AdminPage() {
       setNomeNovoToken("");
       await fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.detail || "Erro ao criar token.");
+      alert(formatErr(err, "Erro ao criar token."));
     } finally {
       setCriandoToken(false);
     }
@@ -275,7 +276,7 @@ export default function AdminPage() {
       await axios.delete(`/api-backend/api-tokens/${id}`, getConfig());
       await fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.detail || "Erro ao revogar.");
+      alert(formatErr(err, "Erro ao revogar."));
     }
   };
 

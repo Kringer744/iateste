@@ -14,6 +14,8 @@ lib/
 lib64/
 include/
 pyvenv.cfg
+# Exceção: o /lib/ acima é pro venv Python — o lib/ do frontend é codigo fonte
+!frontend/src/lib/
 __pycache__/
 *.pyc
 *.pyo

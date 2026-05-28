@@ -5,6 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Eye, LogOut, Loader2 } from "lucide-react";
 import { useFeatures } from "@/contexts/FeaturesContext";
+import { formatErr } from "@/lib/errors";
 
 /**
  * Aparece no topo do dashboard quando o admin_master esta "vendo como" um
@@ -30,7 +31,7 @@ export default function ImpersonationBanner() {
       await reload();
       router.push("/admin");
     } catch (err: any) {
-      alert(err.response?.data?.detail || "Erro ao voltar pro painel.");
+      alert(formatErr(err, "Erro ao voltar pro painel."));
       setVoltando(false);
     }
   };
