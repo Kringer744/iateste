@@ -164,11 +164,30 @@ async def set_feature_config(empresa_id: int, feature_key: str, config: dict) ->
 
 
 async def apply_preset(empresa_id: int, preset: str) -> Set[str]:
-    """Habilita todas as features do preset e desativa as demais conhecidas."""
+    """Habilita todas as features do preset, desativa as demais conhecidas E
+    aplica os templates de mensagem (msg_*) daquele nicho na personalidade_ia.
+
+    A escrita dos templates SOBRESCREVE qualquer texto custom anterior — isso
+    e intencional: clicar num preset reseta para os defaults do nicho. Se o
+    operador ja editou e quer preservar, NAO deve reclicar o preset.
+    """
     if preset not in PRESETS:
         raise ValueError(f"Preset desconhecido: {preset}")
     desired = PRESETS[preset]
     all_known = set().union(*PRESETS.values())
     payload = {k: (k in desired) for k in all_known}
     await set_features_for_empresa(empresa_id, payload)
+
+    # Escreve templates de mensagem do nicho. Best-effort: se falhar (ex:
+    # coluna nao existe em ambiente antigo), o preset ainda foi aplicado.
+    try:
+        from src.services.message_templates import aplicar_templates_no_personalidade
+        await aplicar_templates_no_personalidade(empresa_id, preset)
+    except Exception as e:
+        import logging
+        logging.getLogger("motor-saas-ia").warning(
+            f"Preset aplicado mas falhou ao escrever templates msg_* "
+            f"empresa_id={empresa_id} preset={preset}: {e}"
+        )
+
     return desired
