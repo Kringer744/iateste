@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import {
   Save, Loader2, CheckCircle2, Eye, EyeOff, RotateCcw, AlertCircle,
@@ -8,19 +8,28 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
+import { useFeatures } from "@/contexts/FeaturesContext";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const textareaClass =
   "w-full bg-slate-900/60 border border-white/8 rounded-2xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-[#FFFFFF]/40 focus:ring-1 focus:ring-[#FFFFFF]/20 focus:bg-slate-900/80 transition-all font-medium text-sm resize-none leading-relaxed";
 
-// ─── Sample data for previews ───────────────────────────────────────────────
-const SAMPLE_DATA: Record<string, string> = {
-  dia: "Sexta-feira",
-  data: "11/04/2026",
-  horario: "14:30",
-  barbeiro: "Sulivan",
-  servico: "Corte + Barba",
-  estrelas: "⭐⭐⭐⭐⭐",
+// ─── Sample data for previews (por preset) ──────────────────────────────────
+type PresetKey = "barbearia" | "hotel" | "clinica";
+
+const SAMPLE_DATA_BY_PRESET: Record<PresetKey, Record<string, string>> = {
+  barbearia: {
+    dia: "Sexta-feira", data: "11/04/2026", horario: "14:30",
+    barbeiro: "Sulivan", servico: "Corte + Barba", estrelas: "⭐⭐⭐⭐⭐",
+  },
+  hotel: {
+    dia: "Sexta-feira", data: "11/04/2026", horario: "14:00",
+    barbeiro: "Ana (Recepção)", servico: "Suíte Master", estrelas: "⭐⭐⭐⭐⭐",
+  },
+  clinica: {
+    dia: "Sexta-feira", data: "11/04/2026", horario: "14:30",
+    barbeiro: "Dr. Carlos", servico: "Consulta de Rotina", estrelas: "⭐⭐⭐⭐⭐",
+  },
 };
 
 // ─── Message field config ───────────────────────────────────────────────────
@@ -35,68 +44,181 @@ interface MsgField {
   color: string;
 }
 
-const MSG_FIELDS: MsgField[] = [
-  {
-    key: "msg_confirmacao_agendamento",
-    label: "Confirmação de Agendamento",
-    icon: CalendarCheck,
-    description: "Enviada ao cliente quando um agendamento é confirmado.",
-    variables: ["dia", "data", "horario", "barbeiro", "servico"],
-    rows: 7,
-    color: "#10b981",
-    defaultValue:
-      "✅ *Agendamento Confirmado!*\n\n📅 {dia}, {data}\n🕐 {horario}\n💈 {barbeiro}\n✂️ {servico}\n\nTe esperamos! Se precisar remarcar ou cancelar, é só me avisar 😊",
-  },
-  {
-    key: "msg_lembrete_1d",
-    label: "Lembrete — 1 Dia Antes",
-    icon: Bell,
-    description: "Enviada 24 horas antes do horário marcado.",
-    variables: ["dia", "data", "horario", "barbeiro"],
-    rows: 6,
-    color: "#f59e0b",
-    defaultValue:
-      "👋 Oi! Lembrando que *amanhã* você tem horário marcado:\n\n📅 {dia}, {data} às {horario}\n💈 Com {barbeiro}\n\nVocê confirma? Responde *sim* ou *não* 😊",
-  },
-  {
-    key: "msg_lembrete_1h",
-    label: "Lembrete — 1 Hora Antes",
-    icon: Clock,
-    description: "Enviada 1 hora antes do horário marcado.",
-    variables: ["dia", "data", "horario", "barbeiro"],
-    rows: 6,
-    color: "#f97316",
-    defaultValue:
-      "⏰ Falta *1 hora* pro seu horário:\n\n📅 {dia}, {data} às {horario}\n💈 Com {barbeiro}\n\nVocê confirma? Responde *sim* ou *não* 😊",
-  },
-  {
-    key: "msg_avaliacao",
-    label: "Pedido de Avaliação",
-    icon: Star,
-    description: "Enviada após a conclusão do serviço para pedir avaliação.",
-    variables: ["barbeiro"],
-    rows: 9,
-    color: "#8b5cf6",
-    defaultValue:
-      "✂️ Corte finalizado! Como foi seu atendimento com *{barbeiro}*?\n\nDá uma nota de *1 a 5* ⭐\n\n1 ⭐ - Ruim\n2 ⭐⭐ - Regular\n3 ⭐⭐⭐ - Bom\n4 ⭐⭐⭐⭐ - Muito bom\n5 ⭐⭐⭐⭐⭐ - Excelente\n\nSó mandar o número! 😊",
-  },
-  {
-    key: "msg_avaliacao_obrigado",
-    label: "Agradecimento de Avaliação",
-    icon: ThumbsUp,
-    description: "Enviada após o cliente enviar a nota de avaliação.",
-    variables: ["estrelas"],
-    rows: 3,
-    color: "#06b6d4",
-    defaultValue:
-      "Obrigado pela avaliação! {estrelas}\n\nSua opinião é muito importante pra gente! 😊",
-  },
-];
+// Os defaults variam por preset; a estrutura de campos (chave + variaveis +
+// ordem da cadencia) e sempre a mesma, so o TEXTO + os emojis mudam pra
+// combinar com o nicho do cliente.
+const MSG_FIELDS_BY_PRESET: Record<PresetKey, MsgField[]> = {
+  barbearia: [
+    {
+      key: "msg_confirmacao_agendamento",
+      label: "Confirmação de Agendamento",
+      icon: CalendarCheck,
+      description: "Enviada ao cliente quando um agendamento é confirmado.",
+      variables: ["dia", "data", "horario", "barbeiro", "servico"],
+      rows: 7, color: "#10b981",
+      defaultValue:
+        "✅ *Agendamento Confirmado!*\n\n📅 {dia}, {data}\n🕐 {horario}\n💈 {barbeiro}\n✂️ {servico}\n\nTe esperamos! Se precisar remarcar ou cancelar, é só me avisar 😊",
+    },
+    {
+      key: "msg_lembrete_1d",
+      label: "Lembrete — 1 Dia Antes",
+      icon: Bell,
+      description: "Enviada 24 horas antes do horário marcado.",
+      variables: ["dia", "data", "horario", "barbeiro"],
+      rows: 6, color: "#f59e0b",
+      defaultValue:
+        "👋 Oi! Lembrando que *amanhã* você tem horário marcado:\n\n📅 {dia}, {data} às {horario}\n💈 Com {barbeiro}\n\nVocê confirma? Responde *sim* ou *não* 😊",
+    },
+    {
+      key: "msg_lembrete_1h",
+      label: "Lembrete — 1 Hora Antes",
+      icon: Clock,
+      description: "Enviada 1 hora antes do horário marcado.",
+      variables: ["dia", "data", "horario", "barbeiro"],
+      rows: 6, color: "#f97316",
+      defaultValue:
+        "⏰ Falta *1 hora* pro seu horário:\n\n📅 {dia}, {data} às {horario}\n💈 Com {barbeiro}\n\nVocê confirma? Responde *sim* ou *não* 😊",
+    },
+    {
+      key: "msg_avaliacao",
+      label: "Pedido de Avaliação",
+      icon: Star,
+      description: "Enviada após a conclusão do serviço para pedir avaliação.",
+      variables: ["barbeiro"],
+      rows: 9, color: "#8b5cf6",
+      defaultValue:
+        "✂️ Corte finalizado! Como foi seu atendimento com *{barbeiro}*?\n\nDá uma nota de *1 a 5* ⭐\n\n1 ⭐ - Ruim\n2 ⭐⭐ - Regular\n3 ⭐⭐⭐ - Bom\n4 ⭐⭐⭐⭐ - Muito bom\n5 ⭐⭐⭐⭐⭐ - Excelente\n\nSó mandar o número! 😊",
+    },
+    {
+      key: "msg_avaliacao_obrigado",
+      label: "Agradecimento de Avaliação",
+      icon: ThumbsUp,
+      description: "Enviada após o cliente enviar a nota de avaliação.",
+      variables: ["estrelas"],
+      rows: 3, color: "#06b6d4",
+      defaultValue:
+        "Obrigado pela avaliação! {estrelas}\n\nSua opinião é muito importante pra gente! 😊",
+    },
+  ],
+
+  hotel: [
+    {
+      key: "msg_confirmacao_agendamento",
+      label: "Confirmação de Reserva",
+      icon: CalendarCheck,
+      description: "Enviada ao hóspede quando a reserva é confirmada.",
+      variables: ["dia", "data", "horario", "barbeiro", "servico"],
+      rows: 7, color: "#10b981",
+      defaultValue:
+        "✅ *Reserva Confirmada!*\n\n📅 Check-in: {dia}, {data}\n🕐 A partir das {horario}\n🛏️ {servico}\n👤 Atendimento: {barbeiro}\n\nMal podemos esperar pra te receber! Qualquer dúvida, é só chamar 😊",
+    },
+    {
+      key: "msg_lembrete_1d",
+      label: "Lembrete — 1 Dia Antes",
+      icon: Bell,
+      description: "Enviada 24 horas antes do check-in.",
+      variables: ["dia", "data", "horario", "barbeiro"],
+      rows: 6, color: "#f59e0b",
+      defaultValue:
+        "👋 Oi! Lembrando que *amanhã* é seu check-in conosco:\n\n📅 {dia}, {data} a partir das {horario}\n🛎️ {barbeiro} já vai te recepcionar\n\nPrecisa de algo extra antes da chegada? Só me avisar 😊",
+    },
+    {
+      key: "msg_lembrete_1h",
+      label: "Lembrete — Chegada Próxima",
+      icon: Clock,
+      description: "Enviada 1 hora antes do horário previsto de check-in.",
+      variables: ["dia", "data", "horario", "barbeiro"],
+      rows: 6, color: "#f97316",
+      defaultValue:
+        "🛬 Falta *1 hora* pro seu check-in:\n\n📅 {dia}, {data} às {horario}\n🛎️ {barbeiro} te aguarda na recepção\n\nBoa viagem! Qualquer coisa, é só chamar 😊",
+    },
+    {
+      key: "msg_avaliacao",
+      label: "Pedido de Avaliação",
+      icon: Star,
+      description: "Enviada após o check-out para pedir avaliação da estadia.",
+      variables: ["barbeiro"],
+      rows: 9, color: "#8b5cf6",
+      defaultValue:
+        "🛏️ Esperamos que tenha curtido sua estadia! Como foi seu atendimento com *{barbeiro}*?\n\nDá uma nota de *1 a 5* ⭐\n\n1 ⭐ - Ruim\n2 ⭐⭐ - Regular\n3 ⭐⭐⭐ - Bom\n4 ⭐⭐⭐⭐ - Muito bom\n5 ⭐⭐⭐⭐⭐ - Excelente\n\nSó mandar o número! 😊",
+    },
+    {
+      key: "msg_avaliacao_obrigado",
+      label: "Agradecimento de Avaliação",
+      icon: ThumbsUp,
+      description: "Enviada após o hóspede enviar a nota.",
+      variables: ["estrelas"],
+      rows: 3, color: "#06b6d4",
+      defaultValue:
+        "Obrigado pela avaliação! {estrelas}\n\nVolta sempre! Sua opinião nos ajuda a melhorar 😊",
+    },
+  ],
+
+  clinica: [
+    {
+      key: "msg_confirmacao_agendamento",
+      label: "Confirmação de Consulta",
+      icon: CalendarCheck,
+      description: "Enviada ao paciente quando a consulta é confirmada.",
+      variables: ["dia", "data", "horario", "barbeiro", "servico"],
+      rows: 7, color: "#10b981",
+      defaultValue:
+        "✅ *Consulta Confirmada!*\n\n📅 {dia}, {data}\n🕐 {horario}\n👨‍⚕️ {barbeiro}\n🩺 {servico}\n\nChegue 10 minutos antes. Pra remarcar ou cancelar, é só me avisar 😊",
+    },
+    {
+      key: "msg_lembrete_1d",
+      label: "Lembrete — 1 Dia Antes",
+      icon: Bell,
+      description: "Enviada 24 horas antes da consulta.",
+      variables: ["dia", "data", "horario", "barbeiro"],
+      rows: 6, color: "#f59e0b",
+      defaultValue:
+        "👋 Oi! Lembrando que *amanhã* você tem consulta marcada:\n\n📅 {dia}, {data} às {horario}\n👨‍⚕️ Com {barbeiro}\n\nVocê confirma a presença? Responde *sim* ou *não* 😊",
+    },
+    {
+      key: "msg_lembrete_1h",
+      label: "Lembrete — 1 Hora Antes",
+      icon: Clock,
+      description: "Enviada 1 hora antes da consulta.",
+      variables: ["dia", "data", "horario", "barbeiro"],
+      rows: 6, color: "#f97316",
+      defaultValue:
+        "⏰ Falta *1 hora* pra sua consulta:\n\n📅 {dia}, {data} às {horario}\n👨‍⚕️ Com {barbeiro}\n\nNos vemos em breve! 😊",
+    },
+    {
+      key: "msg_avaliacao",
+      label: "Pedido de Avaliação",
+      icon: Star,
+      description: "Enviada após o atendimento para pedir avaliação.",
+      variables: ["barbeiro"],
+      rows: 9, color: "#8b5cf6",
+      defaultValue:
+        "🩺 Consulta finalizada! Como foi seu atendimento com *{barbeiro}*?\n\nDá uma nota de *1 a 5* ⭐\n\n1 ⭐ - Ruim\n2 ⭐⭐ - Regular\n3 ⭐⭐⭐ - Bom\n4 ⭐⭐⭐⭐ - Muito bom\n5 ⭐⭐⭐⭐⭐ - Excelente\n\nSó mandar o número! 😊",
+    },
+    {
+      key: "msg_avaliacao_obrigado",
+      label: "Agradecimento de Avaliação",
+      icon: ThumbsUp,
+      description: "Enviada após o paciente enviar a nota.",
+      variables: ["estrelas"],
+      rows: 3, color: "#06b6d4",
+      defaultValue:
+        "Obrigado pela avaliação! {estrelas}\n\nSua opinião é muito importante pra gente! 😊",
+    },
+  ],
+};
+
+function getMsgFields(preset: string): MsgField[] {
+  return MSG_FIELDS_BY_PRESET[(preset as PresetKey)] || MSG_FIELDS_BY_PRESET.barbearia;
+}
+function getSampleData(preset: string): Record<string, string> {
+  return SAMPLE_DATA_BY_PRESET[(preset as PresetKey)] || SAMPLE_DATA_BY_PRESET.barbearia;
+}
 
 // ─── WhatsApp-style preview renderer ─────────────────────────────────────────
-function WhatsAppPreview({ template }: { template: string }) {
+function WhatsAppPreview({ template, sample }: { template: string; sample: Record<string, string> }) {
   let result = template;
-  for (const [key, value] of Object.entries(SAMPLE_DATA)) {
+  for (const [key, value] of Object.entries(sample)) {
     result = result.replaceAll(`{${key}}`, value);
   }
 
@@ -147,6 +269,10 @@ function WhatsAppPreview({ template }: { template: string }) {
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function MensagensPage() {
+  const { preset, ready: featuresReady } = useFeatures();
+  const MSG_FIELDS = useMemo(() => getMsgFields(preset), [preset]);
+  const SAMPLE_DATA = useMemo(() => getSampleData(preset), [preset]);
+
   const [fullPersonality, setFullPersonality] = useState<Record<string, any> | null>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [originalData, setOriginalData] = useState<Record<string, string>>({});
@@ -196,11 +322,14 @@ export default function MensagensPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [MSG_FIELDS]);
 
   useEffect(() => {
+    // Espera o preset estar resolvido antes de aplicar defaults — assim hotel
+    // nao vai ver "Corte finalizado" piscando enquanto o /auth/me carrega.
+    if (!featuresReady) return;
     fetchMessages();
-  }, [fetchMessages]);
+  }, [fetchMessages, featuresReady]);
 
   const hasChanges = Object.keys(formData).some(
     (k) => formData[k] !== originalData[k]
@@ -511,7 +640,7 @@ export default function MensagensPage() {
                             exit={{ opacity: 0, scale: 0.98 }}
                             transition={{ duration: 0.15 }}
                           >
-                            <WhatsAppPreview template={formData[field.key] || field.defaultValue} />
+                            <WhatsAppPreview template={formData[field.key] || field.defaultValue} sample={SAMPLE_DATA} />
                           </motion.div>
                         ) : (
                           <motion.div
