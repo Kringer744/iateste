@@ -134,20 +134,6 @@ export default function DashboardSidebar({ activePage = "dashboard" }: SidebarPr
         )}
       </nav>
 
-      {/* Upgrade CTA — Lunor-style */}
-      <div className="relative p-4 rounded-xl bg-[#141414] border border-white/[0.06]">
-        <div className="w-9 h-9 rounded-lg bg-[#1E1E1E] border border-white/[0.08] flex items-center justify-center mb-3">
-          <Sparkles className="w-4 h-4 text-white" strokeWidth={1.75} />
-        </div>
-        <p className="text-sm font-semibold text-white tracking-tight mb-1">Ativar Premium</p>
-        <p className="text-xs text-zinc-500 leading-snug mb-3">
-          Agendamentos ilimitados e personalização total da marca.
-        </p>
-        <button className="w-full py-2 text-xs font-medium text-white bg-[#232323] hover:bg-[#2A2A2A] border border-white/[0.08] rounded-lg transition-colors">
-          Fazer upgrade
-        </button>
-      </div>
-
       {/* User Footer */}
       {user && (
         <div className="flex items-center gap-2.5 px-2 py-2 rounded-xl border-t border-white/[0.04] pt-3">
