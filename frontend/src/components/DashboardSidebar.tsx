@@ -46,11 +46,18 @@ const NAV_CATALOG: NavItem[] = [
 
 export default function DashboardSidebar({ activePage = "dashboard" }: SidebarProps) {
   const [open, setOpen] = useState(false);
-  const { me: user, features, preset } = useFeatures();
+  const { me: user, features, preset, ready } = useFeatures();
 
   // Filtra itens conforme features da empresa e aplica label do preset.
+  // IMPORTANTE: enquanto `ready=false` (carregando /auth/me), só mostramos
+  // itens SEM feature requerida — assim evitamos o "pisca rápido" de itens
+  // que aparecem com DEFAULT_FEATURES e somem quando as features reais chegam.
   const navItems = NAV_CATALOG
-    .filter((item) => !item.feature || hasFeature(features, item.feature))
+    .filter((item) => {
+      if (!item.feature) return true;
+      if (!ready) return false;
+      return hasFeature(features, item.feature);
+    })
     .map((item) => ({
       ...item,
       label: item.labelsByPreset?.[preset] ?? item.label,

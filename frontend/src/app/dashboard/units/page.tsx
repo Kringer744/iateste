@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
+import { formatErr } from "@/lib/errors";
 
 // ─── Componentes auxiliares fora do componente principal ───────────────────────
 // IMPORTANTE: devem ficar FORA para evitar remount a cada keystroke
@@ -182,8 +183,7 @@ export default function UnitsPage() {
       setTimeout(() => { setSuccess(false); setIsModalOpen(false); fetchUnits(); }, 1500);
     } catch (e: any) {
       console.error("Erro ao salvar:", e);
-      const detail = e?.response?.data?.detail || "Erro desconhecido";
-      alert(`Erro ao salvar: ${detail}`);
+      alert(`Erro ao salvar: ${formatErr(e, "Erro desconhecido")}`);
     } finally {
       setSaving(false);
     }
@@ -194,7 +194,9 @@ export default function UnitsPage() {
     try {
       await axios.delete(`/api-backend/dashboard/unidades/${id}`, getConfig());
       fetchUnits();
-      } catch (e) { alert("Erro ao desativar unidade."); }
+    } catch (e: any) {
+      alert(formatErr(e, "Erro ao desativar unidade."));
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: "foto_grade" | "link_tour_virtual") => {
