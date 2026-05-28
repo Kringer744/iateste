@@ -18,6 +18,8 @@ type MeResponse = {
   perfil: string;
   empresa_id: number;
   features?: string[];
+  impersonating?: boolean;
+  empresa_nome?: string;
 };
 
 type FeaturesContextValue = {

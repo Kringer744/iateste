@@ -191,15 +191,31 @@ async def read_users_me(token_payload: dict = Depends(get_current_user_token)):
     user = await buscar_usuario_por_email(token_payload.get("sub"))
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    features = sorted(await get_features_for_empresa(user['empresa_id']))
-    return {
+
+    # Se o token está em modo impersonation, empresa_id do TOKEN ganha sobre o do user,
+    # e features são da empresa alvo (sem isso o dashboard mostraria features erradas).
+    impersonating = bool(token_payload.get("impersonating"))
+    empresa_id = int(token_payload.get("empresa_id") or user['empresa_id'])
+
+    features = sorted(await get_features_for_empresa(empresa_id))
+
+    payload = {
         "id": user['id'],
         "nome": user['nome'],
         "email": user['email'],
         "perfil": user['perfil'],
-        "empresa_id": user['empresa_id'],
+        "empresa_id": empresa_id,
         "features": features,
+        "impersonating": impersonating,
     }
+    if impersonating:
+        # Anexa nome da empresa alvo pra UI mostrar no banner
+        import src.core.database as _database
+        emp = await _database.db_pool.fetchrow(
+            "SELECT nome FROM empresas WHERE id = $1", empresa_id
+        )
+        payload["empresa_nome"] = emp["nome"] if emp else None
+    return payload
 
 
 @router.get("/empresas")
