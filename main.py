@@ -4003,9 +4003,18 @@ async def processar_ia_e_responder(
             intencao_motor = detectar_intencao(texto_cliente_unificado)
 
         # ── AGENDAMENTO: injeta barbeiros + disponibilidade real do banco ──
-        # Sempre injeta quando há db_pool (dados são leves) — garante que a IA
-        # nunca diga "não tenho os nomes dos barbeiros" independente da intenção.
+        # Só injeta quando a empresa USA agendamento por profissionais (feature
+        # "profissionais" — preset barbearia/clínica). Empresas de hotel/evento
+        # NÃO recebem barbeiros/serviços, evitando contaminar o prompt com
+        # "Profissionais disponíveis: ..." e a IA se achar uma barbearia.
+        _usa_profissionais = False
         if db_pool:
+            try:
+                from src.api.deps.features import has_feature as _has_feat_prof
+                _usa_profissionais = await _has_feat_prof(empresa_id, "profissionais")
+            except Exception as _e_feat_prof:
+                logger.warning(f"⚠️ Erro ao checar feature 'profissionais' (empresa {empresa_id}): {_e_feat_prof}")
+        if db_pool and _usa_profissionais:
             try:
                 from src.services.agendamento_service import (
                     listar_barbeiros, listar_servicos,
@@ -4202,11 +4211,15 @@ Tour Virtual: {'vídeo disponível' if unidade.get('link_tour_virtual') else 'n�
             _hoje_dia_semana = _dias_semana_pt[_agora_sp.weekday()]
 
             # ── Campos conhecidos da personalidade_ia ──────────────────────────
-            tom_voz          = pers.get('tom_voz') or 'Descontraído, próximo e profissional — como um barbeiro experiente falando com um cliente'
-            estilo           = pers.get('estilo_comunicacao') or 'Direto ao ponto, usa gírias leves, nunca formal demais. Fala como um cara da barbearia.'
-            saudacao         = pers.get('saudacao_personalizada') or f"E aí! Sou o {nome_ia}, da barbearia. Vai querer corte, barba ou combo? 😎"
-            instrucoes_base  = pers.get('instrucoes_base') or "Você é o atendente da barbearia. Seu objetivo é agendar o cliente com um barbeiro. Mostre os horários disponíveis, sugira barbeiros, e quando o cliente confirmar, SEMPRE use a tag <AGENDAR:barbeiro|servico|data|hora> para salvar no sistema."
-            regras_atend     = pers.get('regras_atendimento') or "Seja breve e objetivo. Guie o cliente para agendar. Quando ele confirmar horário, SEMPRE inclua a tag <AGENDAR>. Ofereça upsell se houver horário vago depois."
+            # Defaults NEUTROS (vertical-agnósticos). Antes eram hardcoded de
+            # barbearia, o que vazava "sou da barbearia" para empresas de
+            # hotel/evento/clínica quando o campo ficava vazio. Empresas que
+            # preenchem esses campos (ex: Barbershiq) usam os próprios valores.
+            tom_voz          = pers.get('tom_voz') or 'Profissional, simpático e prestativo.'
+            estilo           = pers.get('estilo_comunicacao') or 'Claro, objetivo e cordial. Adapte-se ao contexto do cliente.'
+            saudacao         = pers.get('saudacao_personalizada') or f"Olá! Sou o {nome_ia}, assistente virtual de {nome_empresa}. Como posso ajudar? 😊"
+            instrucoes_base  = pers.get('instrucoes_base') or f"Você é o assistente virtual de {nome_empresa}. Ajude o cliente de forma clara e cordial, respondendo às dúvidas com base nas informações disponíveis. Se não souber algo, oriente o cliente a falar com a equipe."
+            regras_atend     = pers.get('regras_atendimento') or "Seja breve, objetivo e cordial. Responda apenas com base nas informações que você tem — não invente dados."
 
             # ── Campos extras da personalidade_ia (consumidos dinamicamente) ──
             # Qualquer coluna presente na tabela mas não listada acima é injetada
