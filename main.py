@@ -3951,58 +3951,47 @@ Avenida Portugal, Nº 997, Qd. J15 LT. 03 — St. Marista, Goiânia - GO, 74150-
 
 ---
 
-## O QUE FAZER EM VITÓRIA E VILA VELHA 🌊
+## O QUE FAZER EM GOIÂNIA 🌆
 
-### 🎶 SHOWS
+> 📍 O **Setor Marista** — onde fica o hotel — é o coração da boemia de Goiânia: concentra os melhores bares, restaurantes e baladas, a maioria a poucos minutos a pé.
 
-**Sexta-feira, 27/06:**
-- 🎉 **Arraiá com Falamansa** — Boulevard Shopping Vila Velha
-- 🎸 **Arraiá do Rock** — Correria Music Bar (Vila Velha)
-- 🕺 **Remember Black Horse** (anos 70 e 80) — Oasis Beach Club (Vitória)
-
-**Sábado, 28/06:**
-- 🎵 **Violada Junina** — Na Vista (Vitória)
-
----
+### 🎶 BALADAS & MÚSICA AO VIVO
+Goiânia é a capital do sertanejo! 🎸 Casas e baladas conhecidas:
+- 🎤 **Villa Mix Goiânia** — casa de shows referência do sertanejo
+- 🕺 **Jamaica Club** — uma das baladas mais tradicionais da cidade
+- 🍻 **Adamastor (Setor Marista)** — boteco famoso, sempre animado
+- 🎸 **Bolshoi Pub** — pub com música ao vivo e clima descontraído
+- 🍺 **Confraria Tap House** — cervejas artesanais e shows
 
 ### 🍽️ RESTAURANTES IMPERDÍVEIS
 
-**Em Vitória:**
-- O Quintal Parrilla Bar
-- Tero Brasa e Vinho
-- Tetto Rooftop
-- Mahai Praia do Canto
-- Balthazar
-- Tantravitória
-- Alas
-- Camarada Camarão
-- Ilha do Caranguejo
-- Pirão
-- Caranguejo do Assis
-- Partido Alto
+**Comida goiana típica:**
+- Ô de Casa
+- Vaca Atolada
+- Frigideira
 
-**Em Vila Velha:**
-- Mahai Praia da Costa
-- Terra à Vista
-- Vila Rusticana
-- Coco Bambu Vila Velha
-- Bontà Pizzaria
-- Outback Shopping Vila Velha
-- Gol Burger
-- La Cuchilla
-- Ilha do Caranguejo
-- Atlantica
-- Caranguejo do Assis
+**Variados / contemporâneo:**
+- Dona Carô (Setor Marista)
+- Origem Bistrô (Setor Marista)
+- Cantina Di Fiori
+- Coco Bambu Goiânia
+- Outback (Shopping Flamboyant)
+- Spettus Steakhouse
 
----
+### 🍺 BARES & BOTECOS (Setor Marista e região)
+- Adamastor
+- Empório Marista
+- Bar do Edgar
+- Beer Point
+- Goialager (cervejaria artesanal)
 
-### 🍺 BARES & QUIOSQUES (Vitória)
-- Barlavento Beach Bar & Lounge
-- Épico Beach Bar
-- Recanto Gastrobar
-- Repique Samba Lounge
-- Mangalô Café Bar
-- Triângulo das Bermudas
+### 🌳 PASSEIOS & ATRAÇÕES
+- **Parque Flamboyant** (Jardim Goiás) — lindo pra caminhar ao fim de tarde
+- **Parque Vaca Brava** (Setor Bueno) — lago e pista de caminhada
+- **Bosque dos Buritis** — área verde no centro, com museu e lago
+- **Feira Hippie** — uma das maiores feiras da América Latina (madrugada/manhã de domingo)
+- **Mercado Central de Goiânia** — gastronomia, artesanato e cultura local
+- **Lago das Rosas** — parque tradicional com zoológico ao lado
 
 ---
 
@@ -4053,11 +4042,13 @@ O traje oficial do evento é **Esporte Fino**.
 - Responda com local, data e horário de forma clara.
 - Se perguntarem "tem festa?", "tem happy hour?" ou similar, mencione todos os 3 eventos sociais.
 
-### Sobre o que fazer em Vitória/Vila Velha:
-- Se perguntarem sobre restaurantes, mostre as listas organizadas por cidade.
-- Se perguntarem sobre shows ou baladas, mostre a programação de shows com datas.
-- Se perguntarem sobre bares, mostre a lista de bares e quiosques.
-- Se a pergunta for genérica ("o que fazer?", "tem dica?", "onde ir?"), apresente um resumo com todas as categorias: shows, restaurantes e bares.
+### Sobre o que fazer em Goiânia:
+- Se perguntarem sobre restaurantes, mostre as listas (comida goiana típica e variados).
+- Se perguntarem sobre shows, baladas ou música ao vivo, mostre as casas/baladas conhecidas.
+- Se perguntarem sobre bares, mostre a lista de bares e botecos do Setor Marista e região.
+- Se perguntarem sobre passeios, mostre as atrações (parques, Feira Hippie, Mercado Central).
+- Se a pergunta for genérica ("o que fazer?", "tem dica?", "onde ir?"), apresente um resumo com todas as categorias: baladas, restaurantes, bares e passeios.
+- Lembre o participante que o Setor Marista (onde fica o hotel) concentra a maioria das opções, a pé.
 
 ### O que NÃO fazer:
 - Não invente informações que não estão neste prompt.
@@ -4077,11 +4068,11 @@ O traje oficial do evento é **Esporte Fino**.
 
 "Tem algum evento à noite?" → Mencionar os 3 eventos sociais: Welcome Drink (15/06), Coquetel de Abertura (16/06) e Jantar Externo (18/06).
 
-"Onde jantar em Vitória?" → Listar os restaurantes de Vitória.
+"Onde jantar em Goiânia?" → Listar os restaurantes (comida goiana típica e variados).
 
-"Tem show no fim de semana?" → Apresentar a programação de shows de 27 e 28/06.
+"Tem balada / o que rola à noite?" → Apresentar as casas de show e baladas (Villa Mix, Jamaica, Adamastor) e lembrar que o Setor Marista concentra a vida noturna.
 
-"O que fazer em Vila Velha?" → Apresentar restaurantes de Vila Velha + mencionar show no Boulevard Shopping (Falamansa, 27/06).
+"O que fazer em Goiânia?" → Apresentar um resumo: baladas/música ao vivo, restaurantes, bares do Setor Marista e passeios (Parque Flamboyant, Feira Hippie, Mercado Central).
 
 "Qual o tema do Dia 3?" → "O Dia 03 é dedicado à Reforma Tributária! Acontece em 10/06 para a Região 1 e 17/06 para a Região 2."
 
