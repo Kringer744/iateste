@@ -5726,6 +5726,10 @@ async def chatwoot_webhook(
 
     # Ignora mensagens enviadas pela própria IA (via Chatwoot)
     if is_ai_message or sender_type == "bot":
+        logger.info(
+            f"🚪 Saída: ignorado_msg_propria conv={id_conv} empresa={empresa_id} "
+            f"(is_ai_message={is_ai_message}, sender_type={sender_type}, is_private={is_private})"
+        )
         return {"status": "ignorado_msg_propria"}
 
     contato = payload.get("sender", {})
@@ -5824,6 +5828,11 @@ async def chatwoot_webhook(
     if not slug and message_type == "incoming":
         unidades_ativas = await listar_unidades_ativas(empresa_id)
         if not unidades_ativas:
+            logger.warning(
+                f"🚪 Saída: sem_unidades_ativas conv={id_conv} empresa={empresa_id} — "
+                f"NENHUMA unidade com ativa=true para esta empresa. A IA não responde sem unidade ativa. "
+                f"Verifique: SELECT id,nome,ativa,empresa_id FROM unidades WHERE empresa_id={empresa_id};"
+            )
             return {"status": "sem_unidades_ativas"}
 
         elif len(unidades_ativas) == 1:
@@ -5973,6 +5982,7 @@ async def chatwoot_webhook(
     await bd_atualizar_msg_cliente(id_conv)
 
     if await redis_client.exists(f"pause_ia:{empresa_id}:{id_conv}"):
+        logger.info(f"🚪 Saída: pause_ia ativo conv={id_conv} empresa={empresa_id} — IA pausada, ignorando")
         return {"status": "ignorado"}
 
     anexos = payload.get("attachments") or payload.get("message", {}).get("attachments", [])
@@ -5990,6 +6000,7 @@ async def chatwoot_webhook(
 
     lock_val = str(uuid.uuid4())
     if await redis_client.set(f"lock:{empresa_id}:{id_conv}", lock_val, nx=True, ex=180):
+        logger.info(f"✅ IA acionada (background) conv={id_conv} empresa={empresa_id} slug={slug}")
         background_tasks.add_task(
             processar_ia_e_responder,
             account_id, id_conv, contato.get("id"), slug,
@@ -5997,6 +6008,7 @@ async def chatwoot_webhook(
         )
         return {"status": "processando"}
 
+    logger.info(f"🚪 Saída: acumulando_no_buffet conv={id_conv} empresa={empresa_id} — lock já existe, mensagem agregada")
     return {"status": "acumulando_no_buffet"}
 
 
