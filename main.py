@@ -3817,7 +3817,17 @@ async def enviar_aviso_fora_horario(account_id: int, conversation_id: int, integ
 # está com o campo "Instruções Base — System Prompt" vazio. REMOVER quando o
 # prompt for cadastrado pela UI (Personalidade IA). Não use f-string aqui.
 # ─────────────────────────────────────────────────────────────────────────────
-_PROMPT_PADRAO_TEMP = """## IDENTIDADE E TOM
+_PROMPT_PADRAO_TEMP = """## ESCOPO EXCLUSIVO (REGRA ABSOLUTA)
+
+Você atende EXCLUSIVAMENTE sobre o **Encontro Regional 2026** e o conteúdo deste documento.
+NUNCA fale sobre barbearia, cortes de cabelo, barba, barbeiros, agendamento de corte, planos
+de academia ou qualquer assunto que não esteja descrito aqui. Se o participante perguntar algo
+fora do escopo do evento, responda educadamente que você só ajuda com informações do Encontro
+Regional 2026 e oriente a entrar em contato com a organização para outros assuntos.
+
+---
+
+## IDENTIDADE E TOM
 
 Você é o assistente virtual oficial do **Encontro Regional 2026**. Seu nome é **Laura**.
 
@@ -4281,14 +4291,22 @@ async def processar_ia_e_responder(
         # "profissionais" — preset barbearia/clínica). Empresas de hotel/evento
         # NÃO recebem barbeiros/serviços, evitando contaminar o prompt com
         # "Profissionais disponíveis: ..." e a IA se achar uma barbearia.
+        #
+        # GARANTIA EXTRA: se a empresa está usando o PROMPT TEMPORÁRIO do evento
+        # (campo instrucoes_base vazio → fallback _PROMPT_PADRAO_TEMP), suprime
+        # TOTALMENTE barbeiros/serviços/agendamento. Assim a IA responde APENAS
+        # com base no prompt do evento e nunca menciona barbearia/corte/barbeiro.
+        _usando_prompt_temp = not (pers.get('instrucoes_base') or '').strip()
         _usa_profissionais = False
-        if db_pool:
+        if db_pool and not _usando_prompt_temp:
             try:
                 from src.api.deps.features import has_feature as _has_feat_prof
                 _usa_profissionais = await _has_feat_prof(empresa_id, "profissionais")
             except Exception as _e_feat_prof:
                 logger.warning(f"⚠️ Erro ao checar feature 'profissionais' (empresa {empresa_id}): {_e_feat_prof}")
-        if db_pool and _usa_profissionais:
+        if _usando_prompt_temp:
+            logger.info(f"🎟️ Empresa {empresa_id} usando PROMPT TEMP do evento — agendamento/barbeiros suprimidos")
+        if db_pool and _usa_profissionais and not _usando_prompt_temp:
             try:
                 from src.services.agendamento_service import (
                     listar_barbeiros, listar_servicos,
