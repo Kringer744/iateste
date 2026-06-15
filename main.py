@@ -3846,6 +3846,16 @@ Se não souber a resposta para algo, diga honestamente que não tem essa informa
 
 ---
 
+## ENDEREÇOS IMPORTANTES 📍
+
+### 🏨 Hotel
+Av. Portugal, Quadra L-29, Lote 0, 1148 — Setor Marista, Goiânia - GO
+
+### 🍺 Bar
+Avenida Portugal, Nº 997, Qd. J15 LT. 03 — St. Marista, Goiânia - GO, 74150-030
+
+---
+
 ## AGENDA COMPLETA
 
 ### 📅 DIA 01
