@@ -28,3 +28,6 @@ __pycache__/
 
 # Claude
 .claude/
+
+# Temporary Venv
+.venv_temp/
