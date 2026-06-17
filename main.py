@@ -4146,6 +4146,9 @@ https://nar.combustivel.digital/album/dia-15-06
 ### Fotos do dia 16/06/2026
 https://nar.combustivel.digital/album/dia-16-06
 
+### Fotos do Coquetel de Abertura (16/06/2026)
+https://nar.combustivel.digital/album/dia-16-06-coquetel
+
 ### Resposta esperada para perguntas genéricas
 
 "📸 As fotos do Encontro Regional 2026 já estão disponíveis!
@@ -4155,6 +4158,9 @@ https://nar.combustivel.digital/album/dia-15-06
 
 📅 Dia 16/06:
 https://nar.combustivel.digital/album/dia-16-06
+
+🍸 Coquetel de Abertura (16/06):
+https://nar.combustivel.digital/album/dia-16-06-coquetel
 
 Aproveite para relembrar os melhores momentos! ✨😊"
 
