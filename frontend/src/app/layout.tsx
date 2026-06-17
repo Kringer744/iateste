@@ -26,6 +26,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
+      <head>
+        {/* MODO SEM LOGIN (teste): por padrão LIGADO. Semeia um token falso pra UI
+            nunca redirecionar pro /login. O backend ignora o valor quando
+            AUTH_DISABLED=true. Para religar o login: NEXT_PUBLIC_AUTH_DISABLED=false. */}
+        {process.env.NEXT_PUBLIC_AUTH_DISABLED !== "false" && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html:
+                "try{if(!localStorage.getItem('token')){localStorage.setItem('token','auth-disabled')}}catch(e){}",
+            }}
+          />
+        )}
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-mesh min-h-screen text-foreground`}>
         <ErrorBoundary>
           <FeaturesProvider>

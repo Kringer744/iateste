@@ -1,11 +1,14 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Lock, Mail, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+
+// Modo sem login (teste): por padrão ligado. Para religar o login: NEXT_PUBLIC_AUTH_DISABLED=false.
+const AUTH_DISABLED = process.env.NEXT_PUBLIC_AUTH_DISABLED !== "false";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -13,6 +16,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+
+  // Sem login: nunca mostra a tela, entra direto no painel.
+  useEffect(() => {
+    if (AUTH_DISABLED) {
+      try { localStorage.setItem("token", "auth-disabled"); } catch {}
+      router.replace("/dashboard");
+    }
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

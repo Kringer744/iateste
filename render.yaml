@@ -5,6 +5,10 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn main:app --host 0.0.0.0 --port 10000"
     envVars:
+      # MODO SEM LOGIN (apenas teste!) — true desliga toda a autenticação.
+      # Mude para "false" para voltar a exigir login.
+      - key: AUTH_DISABLED
+        value: "true"
       - key: OPENROUTER_API_KEY
         sync: false
       - key: CHATWOOT_URL

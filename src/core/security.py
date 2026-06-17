@@ -118,11 +118,13 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
-from src.core.config import JWT_SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from src.core.config import JWT_SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, AUTH_DISABLED, DEV_ADMIN_EMAIL
 
 # Contexto para hashing de senhas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+# auto_error=False: quando AUTH_DISABLED, requisições sem header Authorization
+# não podem ser barradas pelo próprio scheme — o tratamento fica na dependência.
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=not AUTH_DISABLED)
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -140,10 +142,18 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user_token(token: str = Depends(oauth2_scheme)):
+async def get_current_user_token(token: Optional[str] = Depends(oauth2_scheme)):
     """
     Dependência para validar o token JWT e retornar os dados do payload.
     """
+    # Modo sem login (ambiente de teste): trata qualquer requisição como admin_master.
+    if AUTH_DISABLED:
+        return {
+            "sub": DEV_ADMIN_EMAIL,
+            "perfil": "admin_master",
+            "empresa_id": 1,
+            "auth_disabled": True,
+        }
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

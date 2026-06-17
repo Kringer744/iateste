@@ -92,6 +92,19 @@ if not JWT_SECRET_KEY:
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 1440)) # 24h
 
+# --- MODO SEM LOGIN (apenas ambiente de teste!) ---
+# Quando AUTH_DISABLED=true, TODA a autenticação é ignorada e qualquer
+# requisição é tratada como admin_master. NÃO use em produção: expõe
+# todos os dados de todas as empresas para qualquer um com a URL.
+# Padrão = "true" (login DESLIGADO). Para religar o login: AUTH_DISABLED=false.
+AUTH_DISABLED = os.getenv("AUTH_DISABLED", "true").strip().lower() in ("1", "true", "yes", "on")
+DEV_ADMIN_EMAIL = os.getenv("DEV_ADMIN_EMAIL", "admin@barber.com")
+if AUTH_DISABLED:
+    logger.warning(
+        "⚠️  AUTH_DISABLED=true — login DESATIVADO. Todos são admin_master. "
+        "NUNCA use isso com dados reais em produção."
+    )
+
 EMPRESA_ID_PADRAO = 1
 APP_VERSION = "2.5.0"
 

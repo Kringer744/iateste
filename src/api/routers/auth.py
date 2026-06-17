@@ -190,6 +190,19 @@ async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequ
 async def read_users_me(token_payload: dict = Depends(get_current_user_token)):
     user = await buscar_usuario_por_email(token_payload.get("sub"))
     if not user:
+        # Modo sem login: devolve um admin sintético pra UI carregar mesmo
+        # sem o usuário existir no banco.
+        if token_payload.get("auth_disabled"):
+            empresa_id = int(token_payload.get("empresa_id") or 1)
+            return {
+                "id": 0,
+                "nome": "Admin (sem login)",
+                "email": token_payload.get("sub"),
+                "perfil": "admin_master",
+                "empresa_id": empresa_id,
+                "features": sorted(await get_features_for_empresa(empresa_id)),
+                "impersonating": False,
+            }
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
     # Se o token está em modo impersonation, empresa_id do TOKEN ganha sobre o do user,
