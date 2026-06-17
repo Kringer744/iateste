@@ -3854,7 +3854,7 @@ Nunca responda apenas "no restaurante do hotel" — a orientação por pulseira 
 | Evento | Data | Horário | Local |
 |--------|------|---------|-------|
 | 🥂 Coquetel de Abertura | 16/06 (ter) | 19h30 às 22h | 15º andar do Transamerica Collection Goiânia |
-| 🍽️ Jantar Externo | 17/06 (qua) | 20h às 23h | SALVE — Av. Portugal, 997, St. Marista |
+| 🍽️ Jantar Externo | 17/06 (qua) | 19h às 23h | SALVE — Av. Portugal, 997, St. Marista |
 
 > Os coquetéis noturnos acontecem em locais abertos. Sempre recomende levar casaco.
 
@@ -4040,7 +4040,7 @@ Use estes exemplos como referência de tom e formato para suas respostas.
 → "Sim! Temos ainda dois eventos sociais:
 
 🥂 *Coquetel de Abertura* — 16/06, das 19h30 às 22h, no 15º andar do Transamerica Collection Goiânia
-🍽️ *Jantar Externo* — 17/06, das 20h às 23h, no SALVE (Av. Portugal, 997, St. Marista)
+🍽️ *Jantar Externo* — 17/06, das 19h às 23h, no SALVE (Av. Portugal, 997, St. Marista)
 
 Os eventos noturnos são ao ar livre — não esqueça o casaco! 🧥"
 
