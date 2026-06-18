@@ -4149,6 +4149,12 @@ https://nar.combustivel.digital/album/dia-16-06
 ### Fotos do Coquetel de Abertura (16/06/2026)
 https://nar.combustivel.digital/album/dia-16-06-coquetel
 
+### Fotos do dia 17/06/2026
+https://nar.combustivel.digital/album/dia-17-06
+
+### Fotos do Jantar Externo / Happy Hour (17/06/2026)
+https://nar.combustivel.digital/album/dia-17-06-jantar
+
 ### Resposta esperada para perguntas genéricas
 
 "📸 As fotos do Encontro Regional 2026 já estão disponíveis!
@@ -4162,14 +4168,21 @@ https://nar.combustivel.digital/album/dia-16-06
 🍸 Coquetel de Abertura (16/06):
 https://nar.combustivel.digital/album/dia-16-06-coquetel
 
+📅 Dia 17/06:
+https://nar.combustivel.digital/album/dia-17-06
+
+🍽️ Happy Hour / Jantar Externo (17/06):
+https://nar.combustivel.digital/album/dia-17-06-jantar
+
 Aproveite para relembrar os melhores momentos! ✨😊"
 
 ### Regra para datas relativas
 
 - "Fotos de hoje" → álbum da data atual.
-- "Fotos de ontem" → álbum do dia anterior.
+- "Fotos de ontem" → álbum do dia anterior à data atual.
 - "Fotos do primeiro dia" → álbum de 15/06/2026.
 - "Fotos do segundo dia" → álbum de 16/06/2026.
+- "Fotos do terceiro dia" → álbum de 17/06/2026.
 
 ### Regras obrigatórias
 
@@ -4186,7 +4199,10 @@ Se o participante perguntar "Tem foto minha?" ou similar, oriente-o a acessar o 
 
 ## AVATARES PERSONALIZADOS
 
-Quando os participantes perguntarem sobre seus avatares personalizados, mascotes, caricaturas ou ilustrações personalizadas, informe que eles estão em produção e serão disponibilizados até quinta-feira, antes do encerramento do Encontro Regional 2026.
+Quando os participantes perguntarem sobre seus avatares personalizados, mascotes, caricaturas ou ilustrações personalizadas, informe que eles estão em produção, que todos serão disponibilizados até o final do Encontro Regional 2026, e que alguns já estão disponíveis no álbum de avatares.
+
+### Link do álbum de avatares
+https://nar.combustivel.digital/album/avatar
 
 Exemplos de perguntas
 
@@ -4205,14 +4221,18 @@ Exemplos de perguntas
 
 Resposta esperada
 
-“🎨 Seu avatar personalizado está sendo preparado e será disponibilizado até quinta-feira, antes do encerramento do Encontro Regional 2026. 😊✨”
+“🎨 Os avatares personalizados estão sendo produzidos e todos serão disponibilizados até o final do Encontro Regional 2026. 😊✨
+
+Alguns avatares já estão disponíveis em:
+https://nar.combustivel.digital/album/avatar”
 
 Regras
 
 * Considere avatar, mascote, caricatura e ilustração personalizada como sinônimos e utilize sempre a mesma resposta.
-* Não informe datas diferentes de quinta-feira.
-* Não invente prazos adicionais.
-* Não diga que o avatar ou mascote está pronto, a menos que exista uma informação específica para isso.
+* Informe que todos serão disponibilizados até o final do evento.
+* Sempre compartilhe o link do álbum de avatares em toda resposta sobre o tema, mesmo que o participante não peça o link diretamente.
+* Não afirme que um avatar específico (de uma pessoa em particular) já está pronto.
+* Não invente prazos adicionais ou datas diferentes de "até o final do evento".
 * Mantenha um tom positivo, acolhedor e entusiasmado.
 """
 async def processar_ia_e_responder(
@@ -5109,6 +5129,7 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                         timeout=extra_timeout
                     )
 
+                _finish = None  # finish_reason; só vira 'length' se o modelo estourou tokens
                 async with llm_semaphore:
                     try:
                         response = await _chamar_llm(modelo_escolhido, extra_timeout=25)
@@ -5200,8 +5221,19 @@ RESPONDA com a mensagem diretamente — texto puro, sem JSON, sem ```código```,
                     if not txt:
                         return txt
                     txt = txt.strip()
+                    if not txt:
+                        return txt
+                    # Se a resposta só foi cortada de verdade quando o modelo estourou
+                    # o limite de tokens (finish_reason == 'length'). Se terminou
+                    # naturalmente, NUNCA mexe — o texto já está completo.
+                    if _finish != 'length':
+                        return txt
                     # Se termina com pontuação ou emoji, está OK
                     if txt[-1] in '.!?😊💪✅🏋🎯':
+                        return txt
+                    # Se contém um link, não corta — links fecham a mensagem sem
+                    # pontuação e seriam descartados indevidamente (ex.: álbum de fotos/avatar).
+                    if 'http://' in txt or 'https://' in txt:
                         return txt
                     # Procura último ponto de corte seguro
                     for _sep in ['. ', '! ', '? ', '!\n', '?\n', '.\n', '\n']:
